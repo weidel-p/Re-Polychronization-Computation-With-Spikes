@@ -1,18 +1,31 @@
 import sys
-sys.path.insert(0, '../Kumar_Model/')
 #import helper as hf
 import numpy as np
+import os
 import nest
 import matplotlib.pyplot as plt
-import os
 from params import *
 
-
+def write_weights(ex_neuron,interval):
+    conn=nest.GetConnections(ex_neuron)
+    outarray=np.zeros((len(conn),4))
+    source=nest.GetStatus(conn,'source')
+    target=nest.GetStatus(conn,'target')
+    weight=nest.GetStatus(conn,'weight')
+    delay=nest.GetStatus(conn,'delay')
+    outarray[:,0]=source
+    outarray[:, 1] = target
+    outarray[:, 2] = weight
+    outarray[:, 3] = delay
+    #gets rid of connections to spike detectors
+    outarray=outarray[np.array(target)<=1000,:]
+    np.savetxt('weights_{:02}'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
 
 nest.ResetKernel()
 nest.SetKernelStatus({'resolution':dt,
 			'print_time':True,
-			'grng_seed':1})
+			'grng_seed':1,
+            'overwrite_files':True})
 
 
 
@@ -59,14 +72,28 @@ nest.SetStatus(random_input,params={'rate':1.0})
 nest.Connect(random_input,neurons,'all_to_all',{'weight':20.0})
 
 measure_intervals = int(T/T_measure)+1
-spikedetector=nest.Create("spike_detector",measure_intervals-1,params={'withgid':True,'withtime':True,'to_memory':True,'to_file':False,'label':'spike_15'})
+spikedetector=nest.Create("spike_detector",measure_intervals-1,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'spikes'})
 nest.SetStatus(spikedetector,'start',[T_measure*(j-1) for j in range(1,measure_intervals)])
 nest.SetStatus(spikedetector,'stop',[T_measure*j for j in range(1,measure_intervals)])
 nest.Connect(ex_neuron,spikedetector,'all_to_all')
-#path=os.path.listdir()
-#for files in path:
-#    if '.gdf' in files
-	
-nest.Simulate(T_measure)
+
+for interval in range(measure_intervals):
+    nest.Simulate(T_measure)
+    write_weights(ex_neuron,interval)
 
 
+
+path=os.listdir('.')
+i=0
+for files in path:
+    if '.gdf' in files:
+        gdffile=np.array(np.loadtxt(files))
+        idx=gdffile[:,1]<(np.min(gdffile[:,1])+1000.)
+        plt.plot(gdffile[idx,1],gdffile[idx,0],'b.')
+        name=files.split('-')
+        name=name[1]
+        plt.savefig('raster{}.png'.format(name))
+        plt.close()
+        i+=1
+    else:
+        pass
