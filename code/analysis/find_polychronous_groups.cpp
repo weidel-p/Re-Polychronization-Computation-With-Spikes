@@ -248,7 +248,7 @@ void polychronous(int nnum)
 
 //--------------------------------------------------------------
 
-void all_polychronous()
+void all_polychronous(char *argv[])
 {
   int i;
 
@@ -256,7 +256,7 @@ void all_polychronous()
   for ( i=0; i<polylenmax; i++ )
     N_postspikes[i] = 0;
 
-  fpoly = fopen("polyall_final_stwd_izh.dat","w");
+  fpoly = fopen(argv[2],"w");
   for ( i=0; i<Ne; i++ )
     polychronous(i);
   std::cout << "\nN_polychronous=" << N_polychronous << "\n";
@@ -265,7 +265,7 @@ void all_polychronous()
 
 //--------------------------------------------------------------
 
-int main()
+int main(int argc, char *argv[])
 {
   // initialize neuron variables and counters
   for ( int i=0; i<N; i++ )
@@ -301,10 +301,11 @@ int main()
   // gids of inh. neurons 801, .., 1000
   // delays 1, .., 20
   std::ifstream fp_in;
-  fp_in.open("final_stwd_izh.dat", std::ios::in);
+  fp_in.open(argv[1], std::ios::in);
 
   while ( !fp_in.eof() )
   {
+    std::cout << "\nsource=" <<source << "\n";
     fp_in >> source;
     fp_in >> target;
     fp_in >> weight;
@@ -337,5 +338,5 @@ int main()
   }
   fp_in.close();
 
-  all_polychronous();
+  all_polychronous(argv);
 }
