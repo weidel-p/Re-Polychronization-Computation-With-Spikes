@@ -17,9 +17,11 @@ def write_weights(ex_neuron,interval):
     outarray[:, 1] = target
     outarray[:, 2] = weight
     outarray[:, 3] = delay
-    #gets rid of connections to spike detectors
-    outarray=outarray[np.array(target)<=1000,:]
-    np.savetxt('weights_{:02}'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
+    #gets rid of connections to spike detectors and inhibitory connections
+
+    idx=np.array(target)<=800
+    outarray=outarray[idx,:]
+    np.savetxt('../analysis/weights_{:02}.dat'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
 
 nest.ResetKernel()
 nest.SetKernelStatus({'resolution':dt,
@@ -48,8 +50,8 @@ nest.CopyModel("static_synapse","II",{'weight':-5.0,'delay':1.0})
 nest.CopyModel("stdp_izh_synapse","EX",{'weight':6.})
 
 
-conn_dict_inh = {'rule': 'fixed_outdegree', 'outdegree': N_syn}
-conn_dict_ex = {'rule': 'fixed_outdegree', 'outdegree': N_syn}
+conn_dict_inh = {'rule': 'fixed_outdegree', 'outdegree': N_syn,'multapses':True}
+conn_dict_ex = {'rule': 'fixed_outdegree', 'outdegree': N_syn,'multapses':True}
 
 
 ex_neuron=nest.Create('ex_Izhi',N_ex)
@@ -71,29 +73,20 @@ nest.SetStatus(random_input,params={'rate':1.0})
 
 nest.Connect(random_input,neurons,'all_to_all',{'weight':20.0})
 
-measure_intervals = int(T/T_measure)+1
-spikedetector=nest.Create("spike_detector",measure_intervals-1,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'spikes'})
-nest.SetStatus(spikedetector,'start',[T_measure*(j-1) for j in range(1,measure_intervals)])
-nest.SetStatus(spikedetector,'stop',[T_measure*j for j in range(1,measure_intervals)])
-nest.Connect(ex_neuron,spikedetector,'all_to_all')
+spikedetector=nest.Create("spike_detector",N_measure,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'../data/spikes'})
 
-for interval in range(measure_intervals):
+nest.SetStatus([spikedetector[0]],'start',0.)
+nest.SetStatus([spikedetector[0]],'stop',200000.)
+
+nest.SetStatus(spikedetector[1:],'start',[T_measure*(j) -100.000+T_warmup for j in range(1,N_measure)])
+nest.SetStatus(spikedetector[1:],'stop',[T_measure*j+100.000+T_warmup for j in range(1,N_measure)])
+
+nest.Connect(neurons,spikedetector,'all_to_all')
+
+nest.Simulate(T_warmup)
+
+for interval in range(N_measure):
     nest.Simulate(T_measure)
-    write_weights(ex_neuron,interval)
+    write_weights(neurons,interval)
 
 
-
-path=os.listdir('.')
-i=0
-for files in path:
-    if '.gdf' in files:
-        gdffile=np.array(np.loadtxt(files))
-        idx=gdffile[:,1]<(np.min(gdffile[:,1])+1000.)
-        plt.plot(gdffile[idx,1],gdffile[idx,0],'b.')
-        name=files.split('-')
-        name=name[1]
-        plt.savefig('raster{}.png'.format(name))
-        plt.close()
-        i+=1
-    else:
-        pass
