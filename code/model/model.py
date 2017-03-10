@@ -1,10 +1,10 @@
 import sys
-#import helper as hf
 import numpy as np
 import os
 import nest
 import matplotlib.pyplot as plt
 from params import *
+import subprocess
 
 def write_weights(ex_neuron,interval):
     conn=nest.GetConnections(ex_neuron)
@@ -19,9 +19,10 @@ def write_weights(ex_neuron,interval):
     outarray[:, 3] = delay
     #gets rid of connections to spike detectors and inhibitory connections
 
-    idx=np.array(target)<=800
+    idx=(np.array(source)<=800)&(np.array(target)<1001)
+
     outarray=outarray[idx,:]
-    np.savetxt('../analysis/weights_{:02}.dat'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
+    np.savetxt('../data/weights_{:02}.dat'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
 
 nest.ResetKernel()
 nest.SetKernelStatus({'resolution':dt,
@@ -76,17 +77,17 @@ nest.Connect(random_input,neurons,'all_to_all',{'weight':20.0})
 spikedetector=nest.Create("spike_detector",N_measure,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'../data/spikes'})
 
 nest.SetStatus([spikedetector[0]],'start',0.)
-nest.SetStatus([spikedetector[0]],'stop',200000.)
+nest.SetStatus([spikedetector[0]],'stop',T_warmup)
 
-nest.SetStatus(spikedetector[1:],'start',[T_measure*(j) -100.000+T_warmup for j in range(1,N_measure)])
-nest.SetStatus(spikedetector[1:],'stop',[T_measure*j+100.000+T_warmup for j in range(1,N_measure)])
+nest.SetStatus(spikedetector[1:],'start',[T_measure*(j-0.5)+T_warmup for j in range(1,N_measure)])
+nest.SetStatus(spikedetector[1:],'stop',[T_measure*(j+0.5)+T_warmup for j in range(1,N_measure)])
 
 nest.Connect(neurons,spikedetector,'all_to_all')
 
 nest.Simulate(T_warmup)
+write_weights(neurons, 0)
 
-for interval in range(N_measure):
+for interval in range(1,N_measure+1):
     nest.Simulate(T_measure)
     write_weights(neurons,interval)
-
 
