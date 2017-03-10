@@ -19,7 +19,7 @@ def fire_times(line):
 	for i in range(N_fired):
 		senders.append(int(line[2+2*i].split()[2])-1)
 		times.append(int(line[3+2*i].split()[2]))
-	return times,senders
+	return np.array(times),np.array(senders)
 
 def links(line):
 	N_fired=int(line.split(',')[0].split()[2])
@@ -67,6 +67,7 @@ def bin_pop_rate(times, senders, binwidth=1.):
 	rate, bin_edges = np.histogram(times, np.arange(t_min, t_max, binwidth))
 	return rate * 1000 / (N_senders * binwidth), bin_edges[:-1]
 
-
-
+def calc_specgram(time,rate,NFFT=1024,noverlap=900):
+	Pxx, freqs, bins, im = plt.specgram(rate, NFFT=NFFT, Fs=1000./(time[2]-time[1]), noverlap=noverlap)
+	return freqs,Pxx,bins
 
