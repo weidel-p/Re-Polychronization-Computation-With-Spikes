@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
 
   while ( !fp_in.eof() )
   {
-    std::cout << "\nsource=" <<source << "\n";
+
     fp_in >> source;
     fp_in >> target;
     fp_in >> weight;
