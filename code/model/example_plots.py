@@ -105,7 +105,7 @@ def plot_8( graph,ax1,ax2,ax3):
     ax3.set_title('length of longest path')
 
 
-def plot_6(folder,timestep):
+def plot_6(folder,timestep,matching=0.4):
 
     spikes = np.loadtxt(os.path.join(folder,'spikes-{}-0.gdf'.format(timestep+1003)))
 
@@ -132,7 +132,7 @@ def plot_6(folder,timestep):
                     idx_t = (times > t - 5.) & (times < t+np.max(group['times']) + 5.0)
                     sub_times=times[idx_t]
                     sub_senders=senders[idx_t]
-                    found,count= match_pattern(sub_times,sub_senders,t,group,0.4)
+                    found,count= match_pattern(sub_times,sub_senders,t,group,matching)
                     if found:
                         gr_senders =np.in1d(sub_senders,group['senders'])
                         sub_sub_senders=sub_senders[gr_senders]
@@ -146,7 +146,7 @@ def plot_6(folder,timestep):
                         #plt.xlim(t-2.0,t+group['times'][-1]+5.0)
                         plt.title('{},{}'.format(t,s))
 
-                        plt.savefig('../figures/{}_{}_{}.png'.format(timestep,n,t))
+                        plt.savefig('../../figures/{}_{}_{}.png'.format(timestep,n,t))
                         plt.close()
                     else:
                         if maximum< count and count > 0.1:
@@ -173,7 +173,7 @@ def plot_5(folder,t1,t2,t3):
         ax.set_ylabel('#Neuron')
         ax.set_title('sec = {}'.format(int(np.min(times)/1000.)),loc='left')
     ax3.set_xlabel('Time[ms]')
-    plt.savefig('../figures/plot_5.png')
+    plt.savefig('../../figures/plot_5.png')
     plt.close()
 
 def plot_specgram(folder,timestep):
@@ -226,23 +226,26 @@ def plot_specgram(folder,timestep):
     ax2.set_ylabel('normed count')
 
     ax3.pcolormesh(bins,freqs,Pxx)
-    ax3.set_xlabel('Frequency [Hz]')
-    ax3.set_ylabel('Time [s]')
-    plt.savefig('../figures/{}th_timestep.png'.format(timestep))
+    ax3.set_ylabel('Frequency [Hz]')
+    ax3.set_xlabel('Time [s]')
+    plt.savefig('../../figures/{}th_timestep.png'.format(timestep))
     plt.close()
 
 
 
-#
-# for i in range(N_measure):
-#     plot_specgram('../data', i)
-plot_5('../data/', 0, 1, 36)
+
+#for i in range(N_measure):
+
+
+plot_specgram('../../data', 20)
+plot_5('../../data/', 0, 1, 36)
+plot_6('../../data/',20,0.4)
 
 
 timestep=30
 
 
-f=open('../data/target_{:02d}.txt'.format(timestep))
+f=open('../../data/target_{:02d}.txt'.format(timestep))
 graph=f.readlines()
 fig = plt.figure()
 ax0 = fig.add_subplot(221)
@@ -258,7 +261,7 @@ for i,line in enumerate(graph):
     if cond:
         plot_7(line,ax0,LP=True,numbers=False)
         break
-plt.savefig('../figures/plot_8.png')
+plt.savefig('../../figures/plot_8.png')
 plt.close()
 
 
@@ -269,7 +272,7 @@ for i,line in enumerate(graph):
     cond=(N<20) & (len(senders)==np.unique(senders).size)
 
     if cond:
-        fname='../figures/{}_plot_7_{:04d}.png'.format(timestep,i)
+        fname='../../figures/{}_plot_7_{:04d}.png'.format(timestep,i)
         fig = plt.figure()
         ax = fig.add_subplot(111)
         plot_7(line,ax,LP=False,numbers=True)
@@ -292,10 +295,9 @@ for i,line in enumerate(graph):
     if cond:
         plot_7(line,ax0,LP=True)
         break
-plt.savefig('../figures/plot_8.png')
+plt.savefig('../../figures/plot_8.png')
 plt.close()
 
-plot_6('../data/',timestep)
 
 
 

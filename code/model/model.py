@@ -1,10 +1,5 @@
-import sys
-import numpy as np
-import os
 import nest
-import matplotlib.pyplot as plt
 from params import *
-import subprocess
 
 def write_weights(ex_neuron,interval):
     conn=nest.GetConnections(ex_neuron)
@@ -22,12 +17,12 @@ def write_weights(ex_neuron,interval):
     idx=(np.array(source)<=800)&(np.array(target)<1001)
 
     outarray=outarray[idx,:]
-    np.savetxt('../data/weights_{:02}.dat'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
+    np.savetxt('../../data/weights_{:02}.dat'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
 
 nest.ResetKernel()
 nest.SetKernelStatus({'resolution':dt,
 			'print_time':True,
-			'grng_seed':1,
+			'grng_seed':2,
             'overwrite_files':True})
 
 
@@ -74,7 +69,7 @@ nest.SetStatus(random_input,params={'rate':1.0})
 
 nest.Connect(random_input,neurons,'all_to_all',{'weight':20.0})
 
-spikedetector=nest.Create("spike_detector",N_measure,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'../data/spikes'})
+spikedetector=nest.Create("spike_detector",N_measure,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'../../data/spikes'})
 
 nest.SetStatus([spikedetector[0]],'start',0.)
 nest.SetStatus([spikedetector[0]],'stop',T_warmup)
