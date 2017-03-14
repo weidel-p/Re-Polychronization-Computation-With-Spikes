@@ -231,18 +231,42 @@ def plot_specgram(folder,timestep):
     plt.savefig('../../figures/{}th_timestep.png'.format(timestep))
     plt.close()
 
+def weight_convergence(folder):
+    weight_stack=np.zeros((N_measure,20))
+
+    for timestep in range(N_measure):
+
+        weights = np.loadtxt(os.path.join(folder, 'weights_{:02d}.dat'.format(timestep)))
+        weights = weights[:, 2]
+        weight_hist, bin_edges = np.histogram(weights, np.linspace(0, 10,num=21,endpoint=True),normed=True)
+        weight_stack[timestep,:]=weight_hist
+        plt.plot(bin_edges[:-1]+0.5*(bin_edges[1]-bin_edges[0]),weight_hist)
+
+    plt.savefig('../../figures/weight_stack.png')
+    plt.close()
+    c=np.corrcoef(weight_stack)
+    plt.subplot(211)
+    plt.imshow(c)
+
+    plt.subplot(212)
+    plt.plot(c[-1,:])
+    plt.savefig('../../figures/weight_corr.png')
+    plt.close()
+
+    print ''
 
 
+weight_convergence('../../data')
 
-#for i in range(N_measure):
+for timestep in range(N_measure):
+    plot_specgram('../../data', timestep)
 
+for timestep in range(N_measure):
+    plot_6('../../data/', timestep, 0.4)
 
-plot_specgram('../../data', 20)
 plot_5('../../data/', 0, 1, 36)
-plot_6('../../data/',20,0.4)
 
 
-timestep=30
 
 
 f=open('../../data/target_{:02d}.txt'.format(timestep))

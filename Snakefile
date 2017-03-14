@@ -23,7 +23,7 @@ rule create_pdf:
 
 rule move_to_manuscript:
     output:
-         expand("{folder}/{file}",folder=MAN_FOLDER,file=PLOT_FILES)
+         expand("{folder}/figures/{file}",folder=MAN_FOLDER,file=PLOT_FILES)
     input:
          expand("figures/{file}",file=PLOT_FILES)
     run:
