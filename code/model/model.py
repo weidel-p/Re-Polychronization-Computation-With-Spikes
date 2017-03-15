@@ -1,23 +1,29 @@
 import nest
 from params import *
-
-def write_weights(ex_neuron,interval):
+import json
+def write_weights(ex_neuron,fname):
     conn=nest.GetConnections(ex_neuron)
     outarray=np.zeros((len(conn),4))
-    source=nest.GetStatus(conn,'source')
-    target=nest.GetStatus(conn,'target')
-    weight=nest.GetStatus(conn,'weight')
-    delay=nest.GetStatus(conn,'delay')
-    outarray[:,0]=source
-    outarray[:, 1] = target
-    outarray[:, 2] = weight
-    outarray[:, 3] = delay
+    source=np.array(nest.GetStatus(conn,'source'))
+    target=np.array(nest.GetStatus(conn,'target'))
+    weight=np.array(nest.GetStatus(conn,'weight'))
+    delay=np.array(nest.GetStatus(conn,'delay'))
     #gets rid of connections to spike detectors and inhibitory connections
 
-    idx=(np.array(source)<=800)&(np.array(target)<1001)
+    idx=(source<=800)&(target<1001)
+    out_dict=dict(
+        source=source[idx].tolist(),
+        target=target[idx].tolist(),
+        weight=weight[idx].tolist(),
+        delay=delay[idx].tolist()
+    )
+    f=open(fname,'w')
+    json.dump(out_dict,f)
 
-    outarray=outarray[idx,:]
-    np.savetxt('../../data/weights_{:02}.dat'.format(interval),outarray,fmt='%d\t%d\t%f\t%d')
+
+
+
+
 
 nest.ResetKernel()
 nest.SetKernelStatus({'resolution':dt,
@@ -69,20 +75,20 @@ nest.SetStatus(random_input,params={'rate':1.0})
 
 nest.Connect(random_input,neurons,'all_to_all',{'weight':20.0})
 
-spikedetector=nest.Create("spike_detector",N_measure,params={'withgid':True,'withtime':True,'to_memory':False,'to_file':True,'label':'../../data/spikes'})
+spikedetector=nest.Create("spike_detector",params={
+    'withgid':True,
+    'withtime':True,
+    'to_memory':False,
+    'to_file':True,
+    'label':'../../data/spikes'})
 
-nest.SetStatus([spikedetector[0]],'start',0.)
-nest.SetStatus([spikedetector[0]],'stop',T_warmup)
 
-nest.SetStatus(spikedetector[1:],'start',[T_measure*(j-0.5)+T_warmup for j in range(1,N_measure)])
-nest.SetStatus(spikedetector[1:],'stop',[T_measure*(j+0.5)+T_warmup for j in range(1,N_measure)])
 
 nest.Connect(neurons,spikedetector,'all_to_all')
 
-nest.Simulate(T_warmup)
-write_weights(neurons, 0)
-
+write_weights(neurons, '../../data/all_{}.json'.format(0))
+T_interval=T_measure/N_measure
 for interval in range(1,N_measure+1):
-    nest.Simulate(T_measure)
-    write_weights(neurons,interval)
+    nest.Simulate(T_interval)
+    write_weights(neurons,'../../data/all_{}.json'.format(interval))
 

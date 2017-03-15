@@ -10,7 +10,7 @@ tau_plus=20
 tau_minus=20
 Aplus=0.1
 Aminus=0.12
-T_warmup=50000.0
-T_measure=100000.0
-N_measure=50
+T_measure=180000.0
+N_measure=2
 dt=1.0
+
