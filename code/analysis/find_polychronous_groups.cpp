@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <string>
 
+#include "jsoncpp/json/json.h"
+
 const int Ne = 800;
 const int Ni = 200;
 const int N  = Ne+Ni;
@@ -59,6 +61,9 @@ int N_my_pre;
 int N_fired;
 FILE *fpoly;
 
+Json::FastWriter writer;
+Json::Value json_data(Json::arrayValue);
+
 //--------------------------------------------------------------
 // The new (default) algorithm to find polychronous groups
 
@@ -74,6 +79,7 @@ void polychronous(int nnum)
   int used[W], discard;
 
   double v[N], u[N], I[N];
+
 
   N_my_pre = 0;
   for ( i=0; i<N_pre[nnum]; i++ )
@@ -212,19 +218,54 @@ void polychronous(int nnum)
 
       if ( (discard == 0) & (L_max >= min_group_path) )
       {
-	for ( i=0; i<W; i++ )
-	{
-	  gr3[i]=group[i];
-	  tf3[i]=t_fired[i];
-	};
+	    for ( i=0; i<W; i++ )
+	    {
+	      gr3[i]=group[i];
+	      tf3[i]=t_fired[i];
+	    };
 
-	N_polychronous++;
-        fprintf(fpoly, "N_fired = %d, L_max = %d, ", N_fired, L_max);
-	for ( i=0; i<N_fired; i++ )
-	  fprintf(fpoly, "group[%d] = %d, t_fired[%d] = %d, ", i, group[i], i, t_fired[i]);
-	for ( j=0; j<N_links; j++)
-	  fprintf(fpoly, "links[%d] = [%d, %d, %d, %d], ", j, links[j][0], links[j][1], links[j][2], links[j][3]);
-	fprintf(fpoly, "\n");
+	    N_polychronous++;
+        std::cout << " group found " << json.data.size() << std::endl;
+        
+        // save group in JSON format
+        Json::Value json_group;
+        json_group["N_fired"] = N_fired; 
+        json_group["L_max"] = L_max; 
+
+        Json::Value json_fired(Json::arrayValue);
+	    for ( i=0; i<N_fired; i++ )
+        {
+            Json::Value json_fire;
+            json_fire["id"] = i;
+            json_fire["group"] = group[i];
+            json_fire["t_fired"] = t_fired[i];
+            json_fired.append(json_fire);
+        }
+        json_group["fired"] = json_fired;
+
+        Json::Value json_links(Json::arrayValue);
+	    for ( j=0; j<N_links; j++)
+        {
+            Json::Value json_link;
+            json_link["id"] = j;
+            json_link["pre"] = links[j][0];
+            json_link["post"] = links[j][1];
+            json_link["delay"] = links[j][2];
+            json_link["layer"] = links[j][3];
+            
+            json_links.append(json_link);
+        }
+        json_group["links"] = json_links;
+        json_data.append(json_group);
+
+        //fprintf(fpoly, "N_fired = %d, L_max = %d, ", N_fired, L_max);
+
+	    //for ( i=0; i<N_fired; i++ )
+	    //  fprintf(fpoly, "group[%d] = %d, t_fired[%d] = %d, ", i, group[i], i, t_fired[i]);
+        //
+	    //for ( j=0; j<N_links; j++)
+	    //  fprintf(fpoly, "links[%d] = [%d, %d, %d, %d], ", j, links[j][0], links[j][1], links[j][2], links[j][3]);
+	    //fprintf(fpoly, "\n");
       }
     }
 
@@ -259,6 +300,10 @@ void all_polychronous(char *argv[])
   fpoly = fopen(argv[2],"w");
   for ( i=0; i<Ne; i++ )
     polychronous(i);
+
+  //std::cout << writer.write(json_data).c_str() << std::endl;
+  fprintf(fpoly, writer.write(json_data).c_str());
+
   std::cout << "\nN_polychronous=" << N_polychronous << "\n";
   fclose(fpoly);
 }
@@ -303,20 +348,27 @@ int main(int argc, char *argv[])
   std::ifstream fp_in;
   fp_in.open(argv[1], std::ios::in);
 
-  while ( !fp_in.eof() )
-  {
+  Json::Value json_in_data(Json::arrayValue);
 
-    fp_in >> source;
-    fp_in >> target;
-    fp_in >> weight;
-    fp_in >> delay;
+  fp_in >> json_in_data;
+
+  for (int c = 0; c < json_in_data.size(); ++c)
+  {
+    
+    source = json_in_data[c]["pre"].asInt();
+    target = json_in_data[c]["post"].asInt();
+    delay = json_in_data[c]["delay"].asInt();
+    weight = json_in_data[c]["weight"].asDouble();
 
     // map to index
     // gids 0, .., 1000
     // delays 0, .., 19
+    
     source--;
     target--;
     delay--;
+
+    std::cout << source << " " << target << " " << delay << " " << weight << std::endl;
 
     post[source][N_post[source]] = target;
     s[source][N_post[source]] = weight;
