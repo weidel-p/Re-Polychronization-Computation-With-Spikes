@@ -225,7 +225,7 @@ void polychronous(int nnum)
 	    };
 
 	    N_polychronous++;
-        std::cout << " group found " << json.data.size() << std::endl;
+        std::cout << " group found " << json_data.size() << std::endl;
         
         // save group in JSON format
         Json::Value json_group;

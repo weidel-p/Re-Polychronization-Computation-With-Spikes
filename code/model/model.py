@@ -1,27 +1,22 @@
 import nest
 from params import *
 import json
+
 def write_weights(ex_neuron,fname):
-    conn=nest.GetConnections(ex_neuron)
-    outarray=np.zeros((len(conn),4))
-    source=np.array(nest.GetStatus(conn,'source'))
-    target=np.array(nest.GetStatus(conn,'target'))
-    weight=np.array(nest.GetStatus(conn,'weight'))
-    delay=np.array(nest.GetStatus(conn,'delay'))
-    #gets rid of connections to spike detectors and inhibitory connections
+    json_data = []
+    for n_ex in ex_neuron:
+        conns = nest.GetConnections([n_ex], ex_neuron + inh_neuron)
 
-    idx=(source<=800)&(target<1001)
-    out_dict=dict(
-        source=source[idx].tolist(),
-        target=target[idx].tolist(),
-        weight=weight[idx].tolist(),
-        delay=delay[idx].tolist()
-    )
-    f=open(fname,'w')
-    json.dump(out_dict,f)
+        for c in conns:
+            json_conn = {}
+            json_conn["pre"] = nest.GetStatus([c], "source")[0]
+            json_conn["post"] = nest.GetStatus([c], "target")[0]
+            json_conn["delay"] = nest.GetStatus([c], "delay")[0]
+            json_conn["weight"] = nest.GetStatus([c], "weight")[0]
+            json_data.append(json_conn)
 
-
-
+    with open(fname, "w") as f:
+        json.dump(json_data, f)
 
 
 
