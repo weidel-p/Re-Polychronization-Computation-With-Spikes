@@ -225,7 +225,7 @@ void polychronous(int nnum)
 	    };
 
 	    N_polychronous++;
-        std::cout << " group found " << json_data.size() << std::endl;
+        std::cout << "group found " << json_data.size() << std::endl;
         
         // save group in JSON format
         Json::Value json_group;
@@ -236,8 +236,7 @@ void polychronous(int nnum)
 	    for ( i=0; i<N_fired; i++ )
         {
             Json::Value json_fire;
-            json_fire["id"] = i;
-            json_fire["group"] = group[i];
+            json_fire["neuron_id"] = group[i];
             json_fire["t_fired"] = t_fired[i];
             json_fired.append(json_fire);
         }
@@ -247,12 +246,10 @@ void polychronous(int nnum)
 	    for ( j=0; j<N_links; j++)
         {
             Json::Value json_link;
-            json_link["id"] = j;
             json_link["pre"] = links[j][0];
             json_link["post"] = links[j][1];
             json_link["delay"] = links[j][2];
             json_link["layer"] = links[j][3];
-            
             json_links.append(json_link);
         }
         json_group["links"] = json_links;
