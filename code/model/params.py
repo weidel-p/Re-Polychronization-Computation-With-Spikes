@@ -10,7 +10,7 @@ tau_plus=20
 tau_minus=20
 Aplus=0.1
 Aminus=0.12
-T_measure=18.0 * 60 * 60 * 1000
-N_measure=18
+T_measure=5.0 * 60 * 60 * 1000
+N_measure=5
 dt=1.0
 
