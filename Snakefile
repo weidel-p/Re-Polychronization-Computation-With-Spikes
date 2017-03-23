@@ -21,13 +21,11 @@ NEST_SRC_DIR=os.path.join(CODE_DIR,'nest/nest-simulator')
 
 
 WEIGHT_SAMPLES = ['all_{:02d}.json'.format(i) for i in range(N_measure+1)]        #define the weights files output to model.py and input to the cpp code
-SPIKE_SAMPLES = ['spikes_{:02d}-0.gdf'.format(1002)]        #define the weights files output to model.py and input to the cpp code
+SPIKE_SAMPLES = ['spikes_{:02d}-0.gdf'.format(1002)]        #define the spike files
 GROUP_SAMPLES = ['poly_all_{:02d}.json'.format(i) for i in range(N_measure+1)]   # define files output of cpp code and input to example_plots.py
 PLOT_FILES = ['plot_5.png','plot_8.png']
 MAN_FOLDER='manuscript/8538120cqhctwxyjvvn'
 FIG_FOLDER='figures'
-
-
 
 rule install_nest:
     output:
@@ -37,8 +35,6 @@ rule install_nest:
         cur_dir=CUR_FOLDER
     shell:
         """
-        git submodule init
-        git submodule update
         cd {params.nest_dir}
         mkdir -p bld
         mkdir -p instl
@@ -48,13 +44,29 @@ rule install_nest:
         make install
         """
 
+rule run_model:
+    output:
+        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES),
+        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=SPIKE_SAMPLES)
+    input:
+        model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
+        nest=rules.install_nest.output
+    shell:
+        """
+        {{input.nest}}
+        cd {folder}
+        python model.py -o {output_folder}
+        """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR)
+
 rule reformat_izhi:
     input:
-        expand('{folder}/{file}',folder=IZHI_DATA_DIR,file=IZHI_OUTPUT_FILES)
+        expand('{folder}/all.dat',folder=IZHI_DATA_DIR),
+        expand('{folder}/reformat',folder=ANA_DIR)
+
     output:
         expand('{folder}/all_reformat.json',folder=IZHI_DATA_DIR)
     shell:
-        '{folder}/reformat {{input}} {{output}}'.format(folder=ANA_DIR)
+        '{folder}/reformat {{input[0]}} {{output}}'.format(folder=ANA_DIR)
 
 
 rule compile_reformat:
@@ -64,6 +76,30 @@ rule compile_reformat:
         expand('{folder}/reformat',folder=ANA_DIR)
     shell:
         'g++ -o {output} {input} -ljsoncpp'
+
+rule find_groups:
+    output:
+        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES),
+        expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
+
+    input:
+        rules.run_model.output[:-1],
+        rules.reformat_izhi.output
+
+
+    run:
+        for job in zip(WEIGHT_SAMPLES,GROUP_SAMPLES):
+            print("./find_polychronous_groups ../../data/{} ../../data/{}".format(job[0],job[1]))
+            shell("cd code/analysis;./find_polychronous_groups ../../data/{} ../../data/{}".format(job[0],job[1]))
+
+
+rule compile_find_polychronous_groups:
+	output:
+	    expand('{folder}/find_polychronous_groups',folder=ANA_DIR)
+	input:
+	    expand('{folder}/find_polychronous_groups.cpp',folder=ANA_DIR)
+	shell:
+	    'g++ -o {output} {input} -ljsoncpp'
 
 
 
@@ -96,19 +132,6 @@ rule compile_poly_spnet:
 	    """.format(folder=IZHI_EXEC_DIR)
 
 
-rule run_model:
-    output:
-        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES),
-        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=SPIKE_SAMPLES)
-    input:
-        model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
-        nest=rules.install_nest.output
-    shell:
-        """
-        {{input.nest}}
-        cd {folder}
-        python model.py -o {output_folder}
-        """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR)
 
 rule make_plots:
     output:
@@ -141,23 +164,4 @@ rule move_to_manuscript:
             shell("cp {} {}".format(move[0],move[1]))
 
 
-rule find_groups:
-    output:
-        expand("data/{file}",file=GROUP_SAMPLES)
-    input:
-        expand("data/{file}",file=WEIGHT_SAMPLES),
-        'code/analysis/find_polychronous_groups'
-    run:
-        for job in zip(WEIGHT_SAMPLES,GROUP_SAMPLES):
-            print("./find_polychronous_groups ../../data/{} ../../data/{}".format(job[0],job[1]))
-            shell("cd code/analysis;./find_polychronous_groups ../../data/{} ../../data/{}".format(job[0],job[1]))
-
-
-rule compile_find_polychronous_groups:
-	output:
-	    expand('{folder}/find_polychronous_groups',folder=ANA_FOLDER)
-	input:
-	    expand('{folder}/find_polychronous_groups.cpp',folder=ANA_FOLDER)
-	shell:
-	    'g++ -o {output} {input} -ljsoncpp'
 """

@@ -80,8 +80,8 @@ spikedetector = nest.Create("spike_detector", params={
 
 nest.Connect(neurons, spikedetector, 'all_to_all')
 
-write_weights(neurons, os.path.join(args.o,'all_{}.json'.format(0)))
+write_weights(neurons, os.path.join(args.o,'all_{:02d}.json'.format(0)))
 T_interval = T_measure / N_measure
 for interval in range(1, N_measure + 1):
     nest.Simulate(T_interval)
-    write_weights(neurons, os.path.join(args.o,'all_{}.json'.format(interval)))
+    write_weights(neurons, os.path.join(args.o,'all_{:02d}.json'.format(interval)))
