@@ -3,36 +3,44 @@ sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handl
 from params import *
 
 #Define folders:
-CUR_FOLDER=os.getcwd()
-CODE_DIR=os.path.join(CUR_FOLDER,'code')
-DATA_DIR=os.path.join(CUR_FOLDER,'data')
+CUR_DIR=os.getcwd()
+CODE_DIR=os.path.join('.','code')
+DATA_DIR=os.path.join('.','data')
 nest_prefix='NEST_model'
 izhi_prefix='original_model'
 NEST_CODE_DIR=os.path.join(CODE_DIR,nest_prefix)
 NEST_DATA_DIR=os.path.join(DATA_DIR,nest_prefix)
+
 IZHI_CODE_DIR=os.path.join(CODE_DIR,izhi_prefix)
 IZHI_DATA_DIR=os.path.join(DATA_DIR,izhi_prefix)
+
 #compile poly_spnet into a folder because it outputs into ../
 IZHI_EXEC_DIR=os.path.join(IZHI_CODE_DIR,'exec')
 IZHI_OUTPUT_FILES=['all.dat']
 ANA_DIR=os.path.join(CODE_DIR,'analysis')
-NEST_SRC_DIR=os.path.join(CODE_DIR,'nest/nest-simulator')
+NEST_SRC_DIR=os.path.join(
+            os.path.join(CUR_DIR,CODE_DIR),'nest/nest-simulator')
 
 
+PREFIX = ['NEST']
+WEIGHT_SAMPLES = ['all_{:02d}.json'.format(i) for i in range(1,N_measure+1)]        #define the weights files output to model.py and input to the cpp code
+SPIKE_SAMPLES = ['spikes-{:02d}-0.gdf'.format(1002)]        #define the spike files
+GROUP_SAMPLES = ['poly_all_{:02d}.json'.format(i) for i in range(1,N_measure+1)]   # define files output of cpp code and input to example_plots.py
+PLOT_FILES = ['plot_8.png']
+MAN_DIR='manuscript/8538120cqhctwxyjvvn'
+FIG_DIR='figures'
 
-WEIGHT_SAMPLES = ['all_{:02d}.json'.format(i) for i in range(N_measure+1)]        #define the weights files output to model.py and input to the cpp code
-SPIKE_SAMPLES = ['spikes_{:02d}-0.gdf'.format(1002)]        #define the spike files
-GROUP_SAMPLES = ['poly_all_{:02d}.json'.format(i) for i in range(N_measure+1)]   # define files output of cpp code and input to example_plots.py
-PLOT_FILES = ['plot_5.png','plot_8.png']
-MAN_FOLDER='manuscript/8538120cqhctwxyjvvn'
-FIG_FOLDER='figures'
+
+rule all:
+    input:
+        os.path.join(FIG_DIR,'plot_8.png')
+
 
 rule install_nest:
     output:
-        expand('{nest_folder}/instl/bin/nest_vars.sh',nest_folder=NEST_SRC_DIR,cur_dir=CUR_FOLDER)
+        expand('{nest_folder}/instl/bin/nest_vars.sh',nest_folder=NEST_SRC_DIR)
     params:
         nest_dir=NEST_SRC_DIR,
-        cur_dir=CUR_FOLDER
     shell:
         """
         cd {params.nest_dir}
@@ -53,7 +61,7 @@ rule run_model:
         nest=rules.install_nest.output
     shell:
         """
-        {{input.nest}}
+        source {{input.nest}}
         cd {folder}
         python model.py -o {output_folder}
         """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR)
@@ -77,22 +85,6 @@ rule compile_reformat:
     shell:
         'g++ -o {output} {input} -ljsoncpp'
 
-rule find_groups:
-    output:
-        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES),
-        expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
-
-    input:
-        rules.run_model.output[:-1],
-        rules.reformat_izhi.output
-
-
-    run:
-        for job in zip(WEIGHT_SAMPLES,GROUP_SAMPLES):
-            print("./find_polychronous_groups ../../data/{} ../../data/{}".format(job[0],job[1]))
-            shell("cd code/analysis;./find_polychronous_groups ../../data/{} ../../data/{}".format(job[0],job[1]))
-
-
 rule compile_find_polychronous_groups:
 	output:
 	    expand('{folder}/find_polychronous_groups',folder=ANA_DIR)
@@ -101,9 +93,18 @@ rule compile_find_polychronous_groups:
 	shell:
 	    'g++ -o {output} {input} -ljsoncpp'
 
-
-
-
+rule find_groups:
+    output:
+        nest=expand("{folder}/{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES),
+        original=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR)
+    input:
+        program=rules.compile_find_polychronous_groups.output,
+        nest=rules.run_model.output[:-1],
+        original=rules.reformat_izhi.output
+    run:
+        shell('{input.program} {input.original} {output.original}')
+        for job in zip(input.nest,output.nest):
+            shell('{{input.program}} {} {}'.format(job[0],job[1]))
 
 rule run_and_move_poly_spnet:
     input:
@@ -135,11 +136,11 @@ rule compile_poly_spnet:
 
 rule make_plots:
     output:
-        expand("figures/{file}",file=PLOT_FILES)
+        expand("{folder}/{file}",folder=FIG_DIR,file=PLOT_FILES)
     input:
-        expand("data/{file}",file=GROUP_SAMPLES)
+        expand("{folder}/{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES)
     shell:
-        'cd code/model/;python example_plots.py'
+        'cd {folder};python make_plots.py '.format(folder=ANA_DIR)
 
 
 

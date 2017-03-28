@@ -225,7 +225,7 @@ void polychronous(int nnum)
 	    };
 
 	    N_polychronous++;
-        std::cout << "group found " << json_data.size() << std::endl;
+        std::cout << " group found " << json_data.size() << std::endl;
         
         // save group in JSON format
         Json::Value json_group;
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
     target--;
     delay--;
 
-    std::cout << source << " " << target << " " << delay << " " << weight << std::endl;
+    //std::cout << source << " " << target << " " << delay << " " << weight << std::endl;
 
     post[source][N_post[source]] = target;
     s[source][N_post[source]] = weight;

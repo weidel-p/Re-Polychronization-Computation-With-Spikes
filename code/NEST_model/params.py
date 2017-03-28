@@ -11,6 +11,8 @@ tau_minus=20
 Aplus=0.1
 Aminus=0.12
 T_measure=5.0 * 60 * 60 * 1000
-N_measure=5
+N_measure=1
 dt=1.0
+multapses=False
+prefix='NEST'
 
