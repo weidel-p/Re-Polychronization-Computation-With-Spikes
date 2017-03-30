@@ -88,8 +88,14 @@ def plot_group(group,ax,LP=False,numbers=True):
             post_i = link['post']
         else:
             post_i = (link['post'] - 800) * 4
+        pre_times=times[link['pre'] == senders]
+        if pre_times.size>1:
+            pre_times=[pre_times[0]]
+        post_times=times[link['post'] == senders]
+        if post_times.size > 1:
+            post_times = [post_times[0]]
 
-        ax.plot([times[link['pre'] == senders], times[link['post'] == senders]],
+        ax.plot([pre_times,post_times ],
                 [link['pre'], post_i], 'k')
         if numbers:
             ax.text(times[link['pre'] == senders] + 1,
@@ -115,7 +121,7 @@ def plot_group(group,ax,LP=False,numbers=True):
                      times[group['links'][i]['post'] == senders]], [group['links'][i]['pre'],
                                                   post_i], 'k', linewidth=4,alpha=0.5)
             if group['links'][i]['layer'] == group['L_max']:
-                ax.text(times[group['links'][i]['layer'] == senders] - 20,
+                ax.text(times[group['links'][i]['post'] == senders] - 20,
                         post_i + 20,
                         s='longest path',
                         fontsize=11)
@@ -198,7 +204,7 @@ def plot_specgram(times,senders,weights,outname):
     inh_times = times[senders > 800]
     inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
     exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
-    freqs, Pxx, bins=hf.calc_specgram(exc_bins, exc_rate-np.mean(exc_rate), NFFT=512, noverlap=500)
+    freqs, Pxx, bins=hf.calc_specgram(exc_bins, exc_rate-np.mean(exc_rate), NFFT=1024, noverlap=128)
 
     fig = plt.figure(figsize=(9, 8))
     gs2 = gridspec.GridSpec(2, 2)
@@ -242,20 +248,25 @@ def plot_specgram(times,senders,weights,outname):
     plt.close()
 
 groups = read_group_file(args.groupfile)
+print 'loading group data done'
+
 spikefile=args.spikefile
 times,senders=read_spikefile(spikefile)
+print 'loading spikes data done'
 weights=read_weightfile(args.weightfile)
-outfolder=args.outfolder
+print 'loading weight data done'
+outfolder='../../figures'
 outname=args.prefix+'_plot_8.pdf'
 plot_8(groups,os.path.join(outfolder,outname))
-
+print 'plot 8 done'
 fig=plt.figure()
 ax=fig.add_subplot(111)
 plot_group(groups[1], ax, LP=False, numbers=True)
 plt.savefig(os.path.join(outfolder,args.prefix+'_plot_7.pdf'))
-
+print 'plot 7 done'
 
 plot_5(times,senders,os.path.join(outfolder,args.prefix+'_plot_5.pdf'))
-
+print 'plot 5 done'
 outname=os.path.join(outfolder,args.prefix+'_dynamic_measures.pdf')
 plot_specgram(times,senders,weights,outname)
+print 'plot specgram done'

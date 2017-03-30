@@ -72,11 +72,12 @@ nest.SetStatus(random_input, params={'rate': 1.0})
 nest.Connect(random_input, neurons, 'all_to_all', {'weight': 20.0})
 
 spikedetector = nest.Create("spike_detector", params={
+    'start':T_measure*3.0/4,
     'withgid': True,
     'withtime': True,
     'to_memory': False,
     'to_file': True,
-    'label': os.path.join(args.o,'spikes')})
+    'label': os.path.join(args.o,prefix+'_spikes')})
 
 nest.Connect(neurons, spikedetector, 'all_to_all')
 
