@@ -70,7 +70,7 @@ rule make_plots:
         nest_spikes=rules.run_model.output.spikes,
         original_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='all_reformat.json'),
         original_groups=rules.run_and_move_poly_spnet.output.groups,
-        original_spikes=rules.run_and_move_poly_spnet.output.weights,
+        original_spikes=rules.run_and_move_poly_spnet.output.spikes,
         reformat_groups=rules.find_groups.output.original
     run:
         shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,input.original_groups,input.original_spikes,'original',input.original_weights))
