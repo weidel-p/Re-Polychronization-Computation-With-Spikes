@@ -49,7 +49,7 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'd': 8.0})
 
 nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
-nest.CopyModel("stdp_izh_synapse", "EX", {'weight': 6.})
+nest.CopyModel("stdp_izh_synapse", "EX", {'weight': 6.,'consistent_integration':False})
 
 conn_dict_inh = {'rule': 'fixed_outdegree', 'outdegree': N_syn, 'multapses': False, 'autapses': False}
 conn_dict_ex = {'rule': 'fixed_outdegree', 'outdegree': N_syn, 'multapses': False, 'autapses': False}
