@@ -10,10 +10,10 @@ parser.add_argument('-o', type=str)
 args = parser.parse_args()
 
 
-def write_weights(ex_neuron, fname):
+def write_weights(neuron, fname):
     json_data = []
-    for n_ex in ex_neuron:
-        conns = nest.GetConnections([n_ex], ex_neuron + inh_neuron)
+    for n in neuron:
+        conns = nest.GetConnections([n], neuron)
 
         for c in conns:
             json_conn = {}
@@ -58,8 +58,8 @@ ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)
 neurons = ex_neuron + inh_neuron
 
-nest.Connect(inh_neuron, ex_neuron, conn_dict_inh, syn_spec='II')
-nest.Connect(ex_neuron, neurons, conn_dict_ex, syn_spec='EX')
+nest.Connect(inh_neuron, ex_neuron, conn_spec=conn_dict_inh, syn_spec='II')
+nest.Connect(ex_neuron, neurons, conn_spec=conn_dict_ex, syn_spec='EX')
 delay_list = range(1, 21)
 delay_list = delay_list * 5
 delay_list = delay_list * 800
