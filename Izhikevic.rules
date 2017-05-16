@@ -45,3 +45,20 @@ rule reformat_izhi:
     shell:
         '{folder}/reformat {{input[0]}} {{output}}'.format(folder=ANA_DIR)
 
+
+rule compile_original_single_neuron_test:
+    input:
+        '{folder}/poly_spnet_single.cpp'.format(folder=IZHI_CODE_DIR)
+    output:
+        '{folder}/poly_spnet_single'.format(folder=IZHI_CODE_DIR)
+    shell:
+        'g++ -o {output} {input} -ljsoncpp'
+
+
+rule original_single_neuron_test:
+    input:
+        rules.compile_original_single_neuron_test.output
+    output:
+        '{folder}/original_single_neuron_test.dat'.format(folder=IZHI_DATA_DIR)
+    shell:
+        '{folder}/poly_spnet_single > {output_folder}/original_single_neuron_test.dat'.format(folder=IZHI_CODE_DIR,output_folder=IZHI_DATA_DIR)

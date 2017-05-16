@@ -30,13 +30,16 @@ rule run_model:
         """.format(folder=NEST_CODE_DIR,output_folder=os.path.join(CUR_DIR,NEST_DATA_DIR))
 
 
-rule single_neuron_test:
+rule nest_single_neuron_test:
     input:
         model='{folder}/single_neuron_test.py'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output
+    output:
+        '{folder}/NEST_single_neuron_test-09-0.dat'.format(folder=NEST_DATA_DIR)
+
     shell:
         """
         source {{input.nest}}
         cd {folder}
         python single_neuron_test.py -o {output_folder}
-        """.format(folder=NEST_CODE_DIR,output_folder=os.path.join(CUR_DIR,NEST_DATA_DIR))
+        """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR)
