@@ -41,7 +41,7 @@ rule reformat_izhi:
         rules.run_and_move_poly_spnet.output.weights,
         rules.compile_reformat.output
     output:
-        expand('{folder}/all_reformat.json',folder=IZHI_DATA_DIR)
+        expand('{folder}/reformat_all_01.json',folder=IZHI_DATA_DIR)
     shell:
         '{folder}/reformat {{input[0]}} {{output}}'.format(folder=ANA_DIR)
 

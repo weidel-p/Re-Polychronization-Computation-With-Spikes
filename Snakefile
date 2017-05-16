@@ -25,7 +25,7 @@ NEST_SRC_DIR=os.path.join(
 PREFIX = ['NEST']
 WEIGHT_SAMPLES = ['all_{:02d}.json'.format(i) for i in range(1,N_measure+1)]        #define the weights files output to model.py and input to the cpp code
 SPIKE_SAMPLES = ['spikes-{:02d}-0.gdf'.format(1002) for i in range(1,N_measure+1)]        #define the spike files
-GROUP_SAMPLES = ['poly_all_{:02d}.json'.format(i) for i in range(1,N_measure+1)]   # define files output of cpp code and input to example_plots.py
+GROUP_SAMPLES = ['groups_{:02d}.json'.format(i) for i in range(1,N_measure+1)]   # define files output of cpp code and input to example_plots.py
 PLOT_FILES = ['plot_8.pdf','plot_5.pdf','plot_7.pdf']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
@@ -36,7 +36,11 @@ include: "Izhikevic.rules"
 
 rule all:
     input:
-        expand("{folder}/{pre}_{file}",folder=FIG_DIR,file=PLOT_FILES,pre=PREFIX)
+        #plots=expand("{folder}/{pre}_{file}",folder=FIG_DIR,file=PLOT_FILES,pre=PREFIX),
+        original=expand("{folder}/reformat_groups_01.json",folder=IZHI_DATA_DIR),
+        nest_group=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
+        nest_weight=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
+
 
 rule compile_find_polychronous_groups:
 	output:
@@ -48,19 +52,17 @@ rule compile_find_polychronous_groups:
 
 rule find_groups:
     output:
-        nest=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
-        original=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR)
+        "{folder}/{pre}_groups_{file}.json"
     input:
+        "{folder}/{pre}_all_{file}.json",
         program=rules.compile_find_polychronous_groups.output,
-        nest=rules.run_model.output.weights,
-        original=rules.reformat_izhi.output
+
     run:
-        shell('{input.program} {input.original} {output.original}')
-        for job in zip(input.nest,output.nest):
-            shell('{{input.program}} {} {}'.format(job[0],job[1]))
+        shell('{input.program} {input} {output}')
 
 
 
+"""
 rule make_plots:
     output:
         expand("{folder}/{pre}_{file}",folder=FIG_DIR,file=PLOT_FILES,pre=PREFIX)
@@ -82,7 +84,6 @@ rule make_plots:
 
 
 
-"""
 rule create_pdf:
     output:
         expand('{folder}/main.pdf',folder=MAN_FOLDER)
