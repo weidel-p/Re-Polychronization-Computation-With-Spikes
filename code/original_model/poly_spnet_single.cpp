@@ -554,7 +554,7 @@ void	polychronous(int nnum)
 			if (discard == 0)
 			{
 				N_polychronous++;
-				std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ",  NL = " << NL_max << ", T=" << t_fired[N_fired-1];
+				//std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ",  NL = " << NL_max << ", T=" << t_fired[N_fired-1];
 				fprintf(fpoly, " %d  %d,       ", N_fired, NL_max);
 				for (j=0; j<N_fired; j++)
 					fprintf(fpoly, " %d %d, ", group[j], t_fired[j]);
@@ -716,7 +716,7 @@ void	polychronous(int nnum)
 				for (i=0;i<W;i++) {gr3[i]=group[i]; tf3[i]=t_fired[i];};
 
 				N_polychronous++;
-				std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ", L_max = " << L_max << ", T=" << t_fired[N_fired-1];
+				//std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ", L_max = " << L_max << ", T=" << t_fired[N_fired-1];
 				fprintf(fpoly, " %d  %d,       ", N_fired, L_max);
 				for (i=0; i<N_fired; i++)
 					fprintf(fpoly, " %d %d, ", group[i], t_fired[i]);
@@ -804,7 +804,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<2; sec++)
+	for (sec=0; sec<1; sec++)
 	{
 	
 
@@ -890,7 +890,10 @@ int main()
 
 			for (i=0;i<N;i++)
 			{
-                if ((i<2) || (i>997)) std::cout <<sec*1000 +t<<'\t'<< i<<'\t'<<v[i]<<'\t'<<I[i] <<std::endl;
+                if (i<2)
+                    std::cout <<i+1<<'\t'<<sec*1000 +t<< '\t'<<v[i] <<std::endl;
+                if (i>997)
+                    std::cout <<i-995<<'\t'<<sec*1000 +t<< '\t'<<v[i] <<std::endl;
 
 //		        v = v + 0.5*((0.04*v+5).*v+140-u+I);    % for numerical stability
 //			    v = v + 0.5*((0.04*v+5).*v+140-u+I);    % time step is 0.5 ms
