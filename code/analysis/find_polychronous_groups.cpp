@@ -225,8 +225,9 @@ void polychronous(int nnum)
 	    };
 
 	    N_polychronous++;
-        std::cout << " group found " << json_data.size() << std::endl;
-        
+        std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ", L_max = " << L_max << ", T=" << t_fired[N_fired-1];
+
+
         // save group in JSON format
         Json::Value json_group;
         json_group["N_fired"] = N_fired; 
