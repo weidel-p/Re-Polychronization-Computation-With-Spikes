@@ -48,7 +48,7 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'a': 0.02,
                                          'd': 8.0})
 
-nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
+nest.CopyModel("static_synapse", "II", {'weight': -5.0,'delay':1.0})
 nest.CopyModel("stdp_izh_synapse", "EX", {'weight': 6.,'consistent_integration':False})
 
 conn_dict_inh = {'rule': 'fixed_outdegree', 'outdegree': N_syn, 'multapses': False, 'autapses': False}
@@ -57,14 +57,18 @@ conn_dict_ex = {'rule': 'fixed_outdegree', 'outdegree': N_syn, 'multapses': Fals
 ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)
 neurons = ex_neuron + inh_neuron
+V_m=-65.+np.random.uniform(0,10,len(neurons))
+nest.SetStatus(neurons,'V_m',V_m)
+nest.SetStatus(neurons,'U_m',0.2*V_m)
+
 
 nest.Connect(inh_neuron, ex_neuron, conn_spec=conn_dict_inh, syn_spec='II')
 nest.Connect(ex_neuron, neurons, conn_spec=conn_dict_ex, syn_spec='EX')
-delay_list = range(1, 21)
-delay_list = delay_list * 5
-delay_list = delay_list * 800
-delay_list = np.array(delay_list).astype(float)
-nest.SetStatus(nest.GetConnections(ex_neuron), 'delay', delay_list)
+delay_list =[[j for i in range(5)] for j in range(1,21)]
+delay_list = np.reshape(np.array(delay_list).astype(float),(1,100))[0]
+for n in ex_neuron:
+    nest.SetStatus(nest.GetConnections(source=[n]), 'delay', delay_list)
+
 
 random_input = nest.Create('poisson_generator')
 nest.SetStatus(random_input, params={'rate': 1.0})
@@ -72,7 +76,7 @@ nest.SetStatus(random_input, params={'rate': 1.0})
 nest.Connect(random_input, neurons, 'all_to_all', {'weight': 20.0})
 
 spikedetector = nest.Create("spike_detector", params={
-    'start':T_measure*3.0/4,
+    'start':T_measure*2.0/4,
     'withgid': True,
     'withtime': True,
     'to_memory': False,
