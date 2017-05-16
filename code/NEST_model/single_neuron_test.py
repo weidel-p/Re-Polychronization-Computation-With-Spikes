@@ -74,7 +74,7 @@ mm = nest.Create("multimeter", params={
     'withtime': True,
     'to_memory': False,
     'to_file': True,
-    'label': os.path.join(args.o,prefix+'_mem_test')})
+    'label': os.path.join(args.o,prefix+'_single_neuron_test')})
 
 nest.Connect(mm,neurons[0:2]+neurons[-2:], 'all_to_all')
 
