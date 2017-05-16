@@ -161,9 +161,13 @@ void save_json_data(char fname[30]){
             json_connection["pre"] = n + 1;
             json_connection["post"] = post[n][m] + 1;
             json_connection["weight"] = s[n][m];
-            json_connection["delay"] = m / (M/D) + 1; // is that correct??
+            if (n<Ne)
+            {json_connection["delay"] = m / (M/D) + 1;} // is that correct??
+            else
+            {json_connection["delay"] = 1;}
             json_data.append(json_connection);
         }
+
     }
 
     fprintf(fout, writer.write(json_data).c_str());
