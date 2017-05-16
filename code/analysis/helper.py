@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import json
 colors=['b','g','r','purple','black','y','cyan','r','r','r','r','r','r','r']
 def match_pattern(times,senders,t,group,threshold=0.4):
     count=1
@@ -27,3 +27,7 @@ def calc_specgram(time,rate,NFFT=1024,noverlap=900):
 	Pxx, freqs, bins, im = plt.specgram(rate, NFFT=NFFT, Fs=1000./(time[2]-time[1]), noverlap=noverlap)
 	return freqs,Pxx,bins
 
+def load_json(fname):
+    f=open(fname,'r')
+    data=json.load(f)
+    return data
