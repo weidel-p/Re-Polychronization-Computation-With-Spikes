@@ -60,6 +60,25 @@ rule find_groups:
     run:
         shell('{input.program} {input} {output}')
 
+rule check_single_neuron_dynamics:
+    input:
+        original=rules.original_single_neuron_test.output,
+        nest=rules.nest_single_neuron_test.output
+    output:
+        'figures/single_neuron_dynamics.pdf'
+    shell:
+        'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original}} -n {{input.nest}} -o {{output}}'.format(ANA_DIR=ANA_DIR)
+
+rule check_weights_and_delay:
+    input:
+        nest=rules.run_model.output.weights[0],
+        original=rules.reformat_izhi.output
+    output:
+        weight='figures/weight_distribution.pdf',
+        delay='figures/delay_distribution.pdf'
+
+    shell:
+        'python {ANA_DIR}/weight_and_delay_distribution.py -i {{input.original}} -n {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
 
 
 """
