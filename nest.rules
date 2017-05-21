@@ -25,21 +25,21 @@ rule run_model:
     shell:
         """
         source {{input.nest}}
-        cd {folder}
-        python model.py -o {output_folder}
+        python {folder}/model.py -o {output_folder}
         """.format(folder=NEST_CODE_DIR,output_folder=os.path.join(CUR_DIR,NEST_DATA_DIR))
 
 
 rule nest_single_neuron_test:
     input:
-        model='{folder}/single_neuron_test.py'.format(folder=NEST_CODE_DIR),
-        nest=rules.install_nest.output
+        model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
+        nest=rules.install_nest.output,
+        repro= expand('{folder}/reformat_single_stim_all_01.json',folder=IZHI_DATA_DIR),
+        stim=rules.original_single_neuron_test.output.stim,
     output:
-        '{folder}/NEST_single_neuron_test-09-0.dat'.format(folder=NEST_DATA_DIR)
+        mem='{folder}/NEST_test_single_neuron-2002-0.dat'.format(folder=NEST_DATA_DIR)
 
     shell:
         """
         source {{input.nest}}
-        cd {folder}
-        python single_neuron_test.py -o {output_folder}
-        """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR)
+        python {folder}/model.py -o {output_folder} --stim {{input.stim}} --reproduce {{input.repro}}
+        """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR,data_folder=IZHI_DATA_DIR)

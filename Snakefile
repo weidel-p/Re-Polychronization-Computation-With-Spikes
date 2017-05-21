@@ -30,16 +30,27 @@ PLOT_FILES = ['plot_8.pdf','plot_5.pdf','plot_7.pdf']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 
-include: "nest.rules"
 include: "Izhikevic.rules"
+include: "nest.rules"
 
 
 rule all:
     input:
-        #plots=expand("{folder}/{pre}_{file}",folder=FIG_DIR,file=PLOT_FILES,pre=PREFIX),
-        original=expand("{folder}/reformat_groups_01.json",folder=IZHI_DATA_DIR),
-        nest_group=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
+        test_plot_weight='figures/weight_distribution.pdf',
+        test_plot_delay='figures/delay_distribution.pdf',
+        test_single_neuron='figures/delay_distribution.pdf',
+        original_groups=expand("{folder}/reformat_groups_01.json",folder=IZHI_DATA_DIR),
+        original_weights=expand("{folder}/reformat_all_01.json",folder=IZHI_DATA_DIR),
+        nest_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
         nest_weight=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
+        original_repro=expand("{folder}/reformat_single_stim_all_01.json",folder=IZHI_DATA_DIR)
+
+
+
+
+rule clean:
+    shell:
+        "rm $(snakemake --summary | tail -n+2 | cut -f1)"
 
 
 rule compile_find_polychronous_groups:
@@ -60,22 +71,22 @@ rule find_groups:
     run:
         shell('{input.program} {input} {output}')
 
-rule check_single_neuron_dynamics:
+rule test_single_neuron_dynamics:
     input:
-        original=rules.original_single_neuron_test.output,
-        nest=rules.nest_single_neuron_test.output
+        original=rules.original_single_neuron_test.output.mem,
+        nest=rules.nest_single_neuron_test.output.mem
     output:
         'figures/single_neuron_dynamics.pdf'
     shell:
         'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original}} -n {{input.nest}} -o {{output}}'.format(ANA_DIR=ANA_DIR)
 
-rule check_weights_and_delay:
+rule test_weights_and_delay:
     input:
-        nest=rules.run_model.output.weights[0],
-        original=rules.reformat_izhi.output
+        nest=rules.run_model.output.weights[-1],
+        original=expand('{folder}/reformat_{{stim,.*}}all_01.json',folder=IZHI_DATA_DIR)
     output:
-        weight='figures/weight_distribution.pdf',
-        delay='figures/delay_distribution.pdf'
+        weight='figures/{stim,.*}weight_distribution.pdf',
+        delay='figures/{stim,.*}delay_distribution.pdf'
 
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -i {{input.original}} -n {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
@@ -90,8 +101,8 @@ rule make_plots:
         nest_groups=rules.find_groups.output.nest,
         nest_spikes=rules.run_model.output.spikes,
         original_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='all_reformat.json'),
-        original_groups=rules.run_and_move_poly_spnet.output.groups,
-        original_spikes=rules.run_and_move_poly_spnet.output.spikes,
+        original_groups=rules.run_poly_spnet.output.groups,
+        original_spikes=rules.move_.output.spikes,
         reformat_groups=rules.find_groups.output.original
     run:
         shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,input.original_groups,input.original_spikes,'original',input.original_weights))

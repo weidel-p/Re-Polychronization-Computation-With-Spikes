@@ -19,7 +19,7 @@ rule compile_reformat:
     shell:
         'g++ -o {output} {input} -ljsoncpp'
 
-rule run_and_move_poly_spnet:
+rule run_poly_spnet:
     input:
         rules.compile_poly_spnet.output
     output:
@@ -38,10 +38,10 @@ rule run_and_move_poly_spnet:
 
 rule reformat_izhi:
     input:
-        rules.run_and_move_poly_spnet.output.weights,
+        '{folder}/{{stim,.*}}all.dat'.format(folder=IZHI_DATA_DIR),
         rules.compile_reformat.output
     output:
-        expand('{folder}/reformat_all_01.json',folder=IZHI_DATA_DIR)
+        expand('{folder}/reformat_{{stim,.*}}all_01.json',folder=IZHI_DATA_DIR)
     shell:
         '{folder}/reformat {{input[0]}} {{output}}'.format(folder=ANA_DIR)
 
@@ -50,7 +50,7 @@ rule compile_original_single_neuron_test:
     input:
         '{folder}/poly_spnet_single.cpp'.format(folder=IZHI_CODE_DIR)
     output:
-        '{folder}/poly_spnet_single'.format(folder=IZHI_CODE_DIR)
+        '{folder}/poly_spnet_single'.format(folder=IZHI_EXEC_DIR)
     shell:
         'g++ -o {output} {input} -ljsoncpp'
 
@@ -59,6 +59,14 @@ rule original_single_neuron_test:
     input:
         rules.compile_original_single_neuron_test.output
     output:
-        '{folder}/original_single_neuron_test.dat'.format(folder=IZHI_DATA_DIR)
+        mem='{folder}/vu.dat'.format(folder=IZHI_DATA_DIR),
+        stim='{folder}/stim.dat'.format(folder=IZHI_DATA_DIR),
+        alldat='{folder}/single_stim_all.dat'.format(folder=IZHI_DATA_DIR)
+
     shell:
-        '{folder}/poly_spnet_single > {output_folder}/original_single_neuron_test.dat'.format(folder=IZHI_CODE_DIR,output_folder=IZHI_DATA_DIR)
+        """
+        cd {folder}
+        ./poly_spnet_single
+        cd ..
+        mv *.dat {mv_folder}
+        """.format(folder=IZHI_EXEC_DIR,mv_folder=IZHI_DATA_DIR)
