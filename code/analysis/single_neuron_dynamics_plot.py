@@ -15,13 +15,24 @@ def mem_plot(data,c):
     id=data[:,0]
     t=data[:,1]
     v=data[:,2]
+    u = data[:, 3]
+    print v[(id==1)&(t<15)]
     for i in np.unique(id):
-        plt.plot(t[id==i],v[id==i]+(i-1)*40,c,linewidth=0.1)
-    plt.xlim([0,500])
+        if i>10:
+            k=i-996
+        else:
+            k=i
+
+        plt.subplot(2, 2,k)
+        plt.plot(t[id==i],v[id==i],c,linewidth=0.2)
+        plt.plot(t[id==i],u[id==i],c,linewidth=0.2)
+
+        plt.xlim([900, 1200])
+        plt.ylim([-100, 150])
+
 
 izh_data=np.loadtxt(args.i)
 nest_data=np.loadtxt(args.n)
-print izh_data,nest_data
 mem_plot(izh_data,'r')
 mem_plot(nest_data,'b')
 red_patch = mpatches.Patch(color='red', label='Izhikevic Model')

@@ -69,12 +69,12 @@ nest.SetStatus([spk_gen[3]],{'spike_times':[400.]})
 nest.Connect(spk_gen, neurons, 'one_to_one', {'weight': 20.0})
 
 mm = nest.Create("multimeter", params={
-    'record_from':['V_m'],
+    'record_from':['V_m','U_m'],
     'withgid': True,
     'withtime': True,
     'to_memory': False,
     'to_file': True,
-    'label': os.path.join(args.o,prefix+'_single_neuron_test')})
+    'label': os.path.join(args.o,prefix+'_test_single_neuron')})
 
 nest.Connect(mm,neurons[0:2]+neurons[-2:], 'all_to_all')
 

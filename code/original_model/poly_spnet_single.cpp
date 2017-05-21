@@ -66,6 +66,18 @@ void initialize()
 
 //	post=ceil([Ne+Ni*rand(Ne,M*Ni/N),Ne*rand(Ne,M*Ne/N);Ne*rand(Ni,M)]);
 
+    post[0][0]=1;
+    post[0][1]=998;
+    post[0][2]=999;
+
+    post[1][0]=0;
+    post[1][1]=998;
+    post[1][2]=999;
+
+    post[998][0]=0;
+    post[998][1]=1;
+    post[999][0]=0;
+    post[999][1]=1;
 
 	for (i=0;i<Ne;i++)
 	{
@@ -100,36 +112,10 @@ void initialize()
 	}
 
 //	s=[6*ones(Ne,M);-5*ones(Ni,M)];     % initial synaptic weights
-	for (i=0;i<Ne;i++) for (j=0;j<M;j++) s[i][j]=0;
+	for (i=0;i<Ne;i++) for (j=0;j<M;j++) s[i][j]=6;
 
-	for (i=Ne;i<N;i++) for (j=0;j<M;j++) s[i][j]=0;
+	for (i=Ne;i<N;i++) for (j=0;j<M;j++) s[i][j]=-5;
 
-    post[0][0]=1;
-    post[0][1]=998;
-    post[0][2]=999;
-
-    post[1][0]=0;
-    post[1][1]=998;
-    post[1][2]=999;
-
-    post[998][0]=0;
-    post[998][1]=1;
-    post[999][0]=0;
-    post[999][1]=1;
-
-    s[0][0]=6.;
-    s[0][1]=6.;
-    s[0][2]=6.;
-
-    s[1][0]=6.;
-    s[1][1]=6.;
-    s[1][2]=6.;
-
-    s[998][0]=-5.;
-    s[998][1]=-5.;
-
-    s[999][0]=-5.;
-    s[999][1]=-5.;
 
 	
 //	sd=zeros(N,M);                      % derivatives of synaptic weights
@@ -794,17 +780,20 @@ int main()
 {
 	int		i,j,k;
 	int		sec, t;
+	int idx;
 	double	I[N];
-	FILE	*fs, *fx, *fd;
-	
+	FILE	*fs, *fx, *fd,*fidx,*fvu;
+
 	
 	srand(0); 
 	initialize();
 
 
+    fidx = fopen("..//stim.dat","a");
+    fvu = fopen("..//vu.dat","a");
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<1; sec++)
+	for (sec=0; sec<5; sec++)
 	{
 	
 
@@ -815,6 +804,13 @@ int main()
 
 			for (i=0;i<N;i++) I[i] = 0;
 
+			if (t>2)
+			{
+			idx=int(floor(N*rand01));
+			I[idx]=20;
+            }
+
+            /*
 			if (t==100)
 			    I[0]=20;
             if (t==200)
@@ -823,7 +819,7 @@ int main()
 			    I[998]=20;
 			if (t==400)
 			    I[999]=20;
-
+            */
 
 			for (i=0;i<N;i++) 
 //			fired = find(v>=30);          % indices of fired neurons
@@ -856,7 +852,10 @@ int main()
 					std::cout << "*** Two many spikes, t=" << t << "*** (ignoring)";
 					N_firings=1;
 				}
+
 			}
+
+
 
 //	        k=size(firings,1);
 			k=N_firings-1;
@@ -888,17 +887,13 @@ int main()
 //		    end;
 			}
 
+
 			for (i=0;i<N;i++)
 			{
-                if (i<2)
-                    std::cout <<i+1<<'\t'<<sec*1000 +t<< '\t'<<v[i] <<std::endl;
-                if (i>997)
-                    std::cout <<i-995<<'\t'<<sec*1000 +t<< '\t'<<v[i] <<std::endl;
-
 //		        v = v + 0.5*((0.04*v+5).*v+140-u+I);    % for numerical stability
 //			    v = v + 0.5*((0.04*v+5).*v+140-u+I);    % time step is 0.5 ms
-				v[i]+=0.5*((0.04*v[i]+5)*v[i]+140-u[i]+I[i]);
-				v[i]+=0.5*((0.04*v[i]+5)*v[i]+140-u[i]+I[i]);
+				v[i]+=0.5*((0.04*v[i]+5)*v[i]+140.-u[i]+I[i]);
+				v[i]+=0.5*((0.04*v[i]+5)*v[i]+140.-u[i]+I[i]);
 
 //				u = u + a.*(0.2*v-u);
 				u[i]+=a[i]*(0.2*v[i]-u[i]);
@@ -908,8 +903,21 @@ int main()
 
 //				LTD=0.95*LTD;                 % tau = 20 ms
 				LTD[i]*=0.95;
-
 			}
+
+
+
+
+            for (i=0;i<N;i++)
+			{
+            if (i<2)
+                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
+            if (i>997)
+                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i-995,t+1+1000*sec,v[i],u[i]);
+            }
+            if (t>2){
+            fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
+            }
 
 
 //		end;
@@ -981,9 +989,8 @@ int main()
 //    if mod(sec,10)==0, 
 //        save all; 
 //    end;
-      if ( (sec%100==0) & (sec > 0)) 
+      if ( (sec%4==0) & (sec > 0))
 	  {
-		  save_all("..//all.dat");
 
 		  fs = fopen("..//s.dat", "w");
 		  for (i=0; i<Ne; i++)
@@ -991,10 +998,15 @@ int main()
 				fprintf(fs, "%d %3.3f\n", post[i][j], s[i][j]);
 		  fclose(fs);
 	  }
+
 			
 //	end;
 
 	}
+    save_all("..//single_stim_all.dat");
+
+    fclose(fidx);
+    fclose(fvu);
 
 //fpoly = fopen("..//polyall.dat","w");
 	all_polychronous(); k=N_polychronous;

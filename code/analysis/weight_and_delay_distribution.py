@@ -16,6 +16,7 @@ args = parser.parse_args()
 
 def weight_dist(data,c):
     weight=[i['weight'] for i in data]
+    print len(weight)
     delay = [i['delay'] for i in data]
     pre = [i['pre'] for i in data]
     post = [i['post'] for i in data]
