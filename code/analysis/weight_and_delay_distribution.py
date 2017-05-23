@@ -41,6 +41,10 @@ def delay_dist(data,c):
     delay = [i['delay'] for i in data]
     pre = [i['pre'] for i in data]
     post = [i['post'] for i in data]
+    print np.max(pre),np.min(pre)
+    print np.max(post), np.min(post)
+    print np.max(delay), np.min(delay)
+
     ex_ex_d = [i['delay'] for i in data if (i['pre']<800 and i['post']<800)]
     ex_in_d = [i['delay'] for i in data if (i['pre']<800 and i['post']>800)]
     in_ex_d = [i['delay'] for i in data if (i['pre']>800 and i['post']<800)]
