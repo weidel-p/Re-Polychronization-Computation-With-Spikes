@@ -61,7 +61,8 @@ rule original_single_neuron_test:
     output:
         mem='{folder}/vu.dat'.format(folder=IZHI_DATA_DIR),
         stim='{folder}/stim.dat'.format(folder=IZHI_DATA_DIR),
-        alldat='{folder}/single_stim_all.dat'.format(folder=IZHI_DATA_DIR)
+        alldat='{folder}/single_stim_all.dat'.format(folder=IZHI_DATA_DIR),
+        spk='{folder}/spikes.dat'.format(folder=IZHI_DATA_DIR)
 
     shell:
         """

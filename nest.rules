@@ -36,7 +36,8 @@ rule nest_single_neuron_test:
         repro= expand('{folder}/reformat_single_stim_all_01.json',folder=IZHI_DATA_DIR),
         stim=rules.original_single_neuron_test.output.stim,
     output:
-        mem='{folder}/NEST_test_single_neuron-2002-0.dat'.format(folder=NEST_DATA_DIR)
+        mem='{folder}/NEST_single_stim-2002-0.dat'.format(folder=NEST_DATA_DIR),
+        spk='{folder}/NEST_single_stim_spikes-2001-0.gdf'.format(folder=NEST_DATA_DIR)
 
     shell:
         """

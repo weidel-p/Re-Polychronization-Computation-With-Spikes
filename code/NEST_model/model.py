@@ -120,7 +120,8 @@ set_stimulus(neurons,args.stimulus)
 
 
 
-
+if args.reproduce is not None:
+    prefix='NEST_single_stim'
 spikedetector = nest.Create("spike_detector", params={
     'start':0.,
     'withgid': True,
@@ -137,12 +138,16 @@ if args.reproduce is not None:
         'withtime': True,
         'to_memory': False,
         'to_file': True,
-        'label': os.path.join(args.o,prefix+'_test_single_neuron')})
-
-    nest.Connect(mm,neurons[0:2]+neurons[-2:], 'all_to_all')
+        'label': os.path.join(args.o,prefix)})
+    nrns=(neurons[0],neurons[1],neurons[-1:],neurons[859])
+    nest.Connect(mm,[1,2,859,1000], 'all_to_all')
 
 write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(0)))
-T_interval = T_measure / N_measure
+if args.reproduce:
+    T_interval=5000.
+else:
+    T_interval = T_measure / N_measure
+
 for interval in range(1, N_measure + 1):
-    nest.Simulate(5000.)
+    nest.Simulate(T_interval)
     write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(interval)))

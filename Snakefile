@@ -68,7 +68,7 @@ rule find_groups:
     output:
         "{folder}/{pre}_groups_{file}.json"
     input:
-        "{folder}/{pre}_all_{file}.json",
+        "{folder}/{pre,.^g*}_all_{file}.json",
         program=rules.compile_find_polychronous_groups.output,
 
     run:
@@ -76,16 +76,21 @@ rule find_groups:
 
 rule test_single_neuron_dynamics:
     input:
-        original=rules.original_single_neuron_test.output.mem,
-        nest=rules.nest_single_neuron_test.output.mem
+        original_weight=rules.original_single_neuron_test.output.mem,
+        original_spk=rules.original_single_neuron_test.output.spk,
+        nest_weight=rules.nest_single_neuron_test.output.mem,
+        nest_spk=rules.nest_single_neuron_test.output.spk
+
     output:
-        'figures/single_neuron_dynamics.pdf'
+        'figures/membrane_potential_comparison.pdf',
+        'figures/spikes_comparison.pdf',
+
     shell:
-        'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original}} -n {{input.nest}} -o {{output}}'.format(ANA_DIR=ANA_DIR)
+        'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original_weight}} -n {{input.nest_weight}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule test_weights_and_delay:
     input:
-        nest=rules.run_model.output.weights[-1],
+        nest=expand('{folder}/NEST_{{stim,.*}}all_01.json',folder=NEST_DATA_DIR),
         original=expand('{folder}/reformat_{{stim,.*}}all_01.json',folder=IZHI_DATA_DIR)
     output:
         weight='figures/{stim,.*}weight_distribution.pdf',

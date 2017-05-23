@@ -116,7 +116,6 @@ void initialize()
 
 	for (i=Ne;i<N;i++) for (j=0;j<M;j++) s[i][j]=-5;
 
-
 	
 //	sd=zeros(N,M);                      % derivatives of synaptic weights
   	for (i=0;i<N;i++)for (j=0;j<M;j++) sd[i][j]=0;
@@ -201,7 +200,7 @@ void save_all(char fname[30])
 	int		i,j,k;
 	FILE	*fce;
 	fce = fopen(fname,"w");
-	//std::cout << "\nsaving data \n";
+	std::cout << "\nsaving data \n";
 	
 	for (i=0; i < N; ++i)
 	{
@@ -540,7 +539,7 @@ void	polychronous(int nnum)
 			if (discard == 0)
 			{
 				N_polychronous++;
-				//std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ",  NL = " << NL_max << ", T=" << t_fired[N_fired-1];
+				std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ",  NL = " << NL_max << ", T=" << t_fired[N_fired-1];
 				fprintf(fpoly, " %d  %d,       ", N_fired, NL_max);
 				for (j=0; j<N_fired; j++)
 					fprintf(fpoly, " %d %d, ", group[j], t_fired[j]);
@@ -702,7 +701,7 @@ void	polychronous(int nnum)
 				for (i=0;i<W;i++) {gr3[i]=group[i]; tf3[i]=t_fired[i];};
 
 				N_polychronous++;
-				//std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ", L_max = " << L_max << ", T=" << t_fired[N_fired-1];
+				std::cout << "\ni= " << nnum << ", N_polychronous= " << N_polychronous << ", N_fired = " << N_fired << ", L_max = " << L_max << ", T=" << t_fired[N_fired-1];
 				fprintf(fpoly, " %d  %d,       ", N_fired, L_max);
 				for (i=0; i<N_fired; i++)
 					fprintf(fpoly, " %d %d, ", group[i], t_fired[i]);
@@ -741,7 +740,7 @@ void	all_polychronous()
 
 	for (i=0;i<Ne;i++) polychronous(i);
 
-	//std::cout << "\nN_polychronous=" << N_polychronous << "\n";
+	std::cout << "\nN_polychronous=" << N_polychronous << "\n";
 	fclose(fpoly);
 }
 
@@ -782,7 +781,8 @@ int main()
 	int		sec, t;
 	int idx;
 	double	I[N];
-	FILE	*fs, *fx, *fd,*fidx,*fvu;
+	FILE	*fs, *fx, *fd,*fidx,*fvu,*fssd;
+
 
 	
 	srand(0); 
@@ -791,6 +791,9 @@ int main()
 
     fidx = fopen("..//stim.dat","a");
     fvu = fopen("..//vu.dat","a");
+    fs = fopen("..//spikes.dat","a");
+    fssd = fopen("..//ssd.dat","a");
+
 
 //	for sec=1:60*60*5
 	for (sec=0; sec<5; sec++)
@@ -803,23 +806,12 @@ int main()
 		{
 
 			for (i=0;i<N;i++) I[i] = 0;
-
-			if (t>2)
+			if (t +sec*1000>2)
 			{
 			idx=int(floor(N*rand01));
 			I[idx]=20;
             }
 
-            /*
-			if (t==100)
-			    I[0]=20;
-            if (t==200)
-			    I[1]=20;
-			if (t==300)
-			    I[998]=20;
-			if (t==400)
-			    I[999]=20;
-            */
 
 			for (i=0;i<N;i++) 
 //			fired = find(v>=30);          % indices of fired neurons
@@ -842,7 +834,11 @@ int main()
 //				for k=1:length(fired)
 //					sd(pre{fired(k)}) = sd(pre{fired(k)})+LTP(N*t+aux{fired(k)});
 //				end;
-				for (j=0;j<N_pre[i];j++) *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
+				for (j=0;j<N_pre[i];j++)
+				    {
+				    *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
+				    //std::cout<<LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<<std::endl;
+                    }
 
 //	            firings=[firings; t+zeros(length(fired),1), fired];
 				firings[N_firings  ][0]=t;
@@ -852,10 +848,7 @@ int main()
 					std::cout << "*** Two many spikes, t=" << t << "*** (ignoring)";
 					N_firings=1;
 				}
-
 			}
-
-
 
 //	        k=size(firings,1);
 			k=N_firings-1;
@@ -878,6 +871,8 @@ int main()
                 
 //						sd(firings(k,2),del)=sd(firings(k,2),del)-LTD(ind)';
 						sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]]-=LTD[i];
+                        //std::cout<<LTD[i]<<std::endl;
+
 //					end;
 				}
 
@@ -886,7 +881,6 @@ int main()
 
 //		    end;
 			}
-
 
 			for (i=0;i<N;i++)
 			{
@@ -905,21 +899,20 @@ int main()
 				LTD[i]*=0.95;
 			}
 
-
-
-
             for (i=0;i<N;i++)
 			{
             if (i<2)
                     fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
-            if (i>997)
-                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i-995,t+1+1000*sec,v[i],u[i]);
+            if (i==999)
+                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
+
+            if (i==858)
+                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
             }
-            if (t>2){
+
+            if (t+1000*sec>2){
             fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
             }
-
-
 //		end;
 		}
 	
@@ -941,7 +934,7 @@ int main()
 		for (i=1;i<N_firings;i++)
 			if ((firings[i][0] >=0) && (firings[i][1] >=Ne)) ifrate++;
 		ifrate = ifrate/Ni;
-		//std::cout << "sec=" << sec << ", exc. frate=" << frate << ",    exc->exc str=" << str << ",    inh. frate=" << ifrate << ".\n";
+		std::cout << "sec=" << sec << ", exc. frate=" << frate << ",    exc->exc str=" << str << ",    inh. frate=" << ifrate << ".\n";
 		fx = fopen("..//dat.dat","a");
 		fprintf(fx, "%d  %2.2f  %2.2f  %2.2f\n", sec, frate, str, ifrate);
 		fclose(fx);
@@ -949,13 +942,9 @@ int main()
 		
 //		plot(firings(:,1),firings(:,2),'.');
 //		axis([0 1000 0 N]); drawnow;
-   		fs = fopen("..//spikest.dat","w");
 		for (i=1;i<N_firings;i++)
 			if (firings[i][0] >=0)
-				fprintf(fs, "%d  %d\n", sec*000+firings[i][0], firings[i][1]);
-		fclose(fs);
-		remove("..//spikes.dat"); 
-		rename( "..//spikest.dat", "..//spikes.dat" );
+				fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
 //		LTP(:,1:D+1)=LTP(:,1001:1001+D);
@@ -984,29 +973,24 @@ int main()
 			s[i][j]+=0.01+sd[i][j];
 			if (s[i][j]>C_max) s[i][j]=C_max;
 			if (s[i][j]<0) s[i][j]=0;
+            fprintf(fssd, "%8.4f\t%8.4f \n",s[i][j],sd[i][j]);
+
 		}
     
 //    if mod(sec,10)==0, 
 //        save all; 
 //    end;
-      if ( (sec%4==0) & (sec > 0))
-	  {
-
-		  fs = fopen("..//s.dat", "w");
-		  for (i=0; i<Ne; i++)
-			  for (j=0;j<M; j++)
-				fprintf(fs, "%d %3.3f\n", post[i][j], s[i][j]);
-		  fclose(fs);
-	  }
 
 			
 //	end;
 
 	}
     save_all("..//single_stim_all.dat");
-
+    fclose(fssd);
     fclose(fidx);
     fclose(fvu);
+    fclose(fs);
+
 
 //fpoly = fopen("..//polyall.dat","w");
 	all_polychronous(); k=N_polychronous;
