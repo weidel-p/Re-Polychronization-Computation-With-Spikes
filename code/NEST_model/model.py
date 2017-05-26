@@ -52,7 +52,13 @@ def connect_network(ex_neuron,inh_neuron,reproduce=None):
         print delay,np,min(delay),np,max(delay)
         for pre_neuron in np.unique(pre):
             if pre_neuron in ex_neuron:
-                nest.Connect([pre_neuron],post[pre_neuron==pre].tolist(),conn_spec='all_to_all',syn_spec='EX')
+                idxes=np.where(pre_neuron==pre)[0]
+                if pre_neuron==1:
+                    nest.Connect([pre_neuron],[post[idxes[0]]],conn_spec='all_to_all',syn_spec='EX')
+                    nest.Connect([pre_neuron], post[idxes[1:]].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
+                else:
+                    nest.Connect([pre_neuron], post[idxes].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
+
                 conns=nest.GetConnections(source=[pre_neuron],target=post[pre_neuron==pre].tolist() )
                 nest.SetStatus(conns,'delay',delay[pre_neuron==pre].tolist())
             elif pre_neuron in inh_neuron:
@@ -107,6 +113,7 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
 
 nest.CopyModel("static_synapse", "II", {'weight': -5.0,'delay':1.0})
 nest.CopyModel("stdp_izh_synapse", "EX", {'weight': 6.,'consistent_integration':False})
+nest.CopyModel("static_synapse", "EX_stat", {'weight': 6.})
 
 ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)

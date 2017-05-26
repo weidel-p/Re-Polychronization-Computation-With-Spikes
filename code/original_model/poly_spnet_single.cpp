@@ -836,9 +836,13 @@ int main()
 //				end;
 				for (j=0;j<N_pre[i];j++)
 				    {
+				    if ((i==0)&(j==1))
+				    {
 				    *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
-				    //std::cout<<LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<<std::endl;
+                    std::cout << "increment for post spike at " << t+sec*1000 << " sd " << sd[i][j] <<*sd_pre[i][j] << " LTP " << LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<< std::endl;
+
                     }
+				    }
 
 //	            firings=[firings; t+zeros(length(fired),1), fired];
 				firings[N_firings  ][0]=t;
@@ -868,10 +872,15 @@ int main()
 
 //					if firings(k,2) <=Ne
 					if (firings[k][1] <Ne)
-                
+                        {
 //						sd(firings(k,2),del)=sd(firings(k,2),del)-LTD(ind)';
+						if ((firings[k][1]==0) & (delays[firings[k][1]][t-firings[k][0]][j]==1))
+						{
 						sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]]-=LTD[i];
-                        //std::cout<<LTD[i]<<std::endl;
+                        std::cout << "decrement for pre spike at " << t+sec*1000 << " sd " <<sd[i][j]<<*sd_pre[i][j] << " LTD "<<LTD[i] << std::endl;
+
+                        }
+						}//std::cout<<LTD[i]<<std::endl;
 
 //					end;
 				}
@@ -970,7 +979,11 @@ int main()
 		for (j=0;j<M;j++)
 		{
 			sd[i][j]*=0.9;
+			//debug
+			if ((i==0)&(j==0))
+			{
 			s[i][j]+=0.01+sd[i][j];
+			}
 			if (s[i][j]>C_max) s[i][j]=C_max;
 			if (s[i][j]<0) s[i][j]=0;
             fprintf(fssd, "%8.4f\t%8.4f \n",s[i][j],sd[i][j]);

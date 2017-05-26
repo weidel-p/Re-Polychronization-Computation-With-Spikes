@@ -13,11 +13,14 @@ parser.add_argument('-o', type=str)
 
 args = parser.parse_args()
 
-def mem_plot(data,c):
+def mem_plot(data,spk,c):
     id=data[:,0]
     t=data[:,1]
     v=data[:,2]
     u = data[:, 3]
+    sender=spk[:,0]
+    times=spk[:,1]
+    print sender
     print v[(id==1)&(t<15)]
     for i,idx in enumerate(np.unique(id)):
         print i,idx
@@ -25,8 +28,9 @@ def mem_plot(data,c):
         plt.subplot(2, 2,i+1)
         plt.plot(t[id==idx],v[id==idx],c,linewidth=0.2)
         plt.plot(t[id==idx],u[id==idx],c,linewidth=0.2)
+        plt.plot(times[sender==idx],sender[sender==idx]*0,c+'*',markersize=10)
 
-        plt.xlim([900, 1200])
+        plt.xlim([0, 1500])
         plt.ylim([-100, 150])
 
 def spk_plot(data,c):
@@ -34,16 +38,19 @@ def spk_plot(data,c):
     t=data[:,1]
     plt.plot(t,id,c)
 
-    plt.xlim([990, 1200])
+    plt.xlim([0, 5000])
 
 
+
+spk_izh_data=np.loadtxt(args.si)
+spk_izh_data[:,0]=spk_izh_data[:,0]+1
+
+spk_nest_data=np.loadtxt(args.sn)
 
 izh_data=np.loadtxt(args.i)
 nest_data=np.loadtxt(args.n)
-mem_plot(izh_data,'r')
-mem_plot(nest_data,'b')
-izh_data=np.loadtxt(args.si)
-nest_data=np.loadtxt(args.sn)
+mem_plot(izh_data,spk_izh_data,'r')
+mem_plot(nest_data,spk_nest_data,'b')
 
 red_patch = mpatches.Patch(color='red', label='Izhikevic Model')
 blue_patch = mpatches.Patch(color='blue', label='NEST Model')
@@ -55,8 +62,8 @@ plt.savefig(os.path.join(args.o,'membrane_potential_comparison.pdf'))
 
 plt.close()
 
-spk_plot(izh_data,'r.')
-spk_plot(nest_data,'b.')
+spk_plot(spk_izh_data,'r.')
+spk_plot(spk_nest_data,'b.')
 
 red_patch = mpatches.Patch(color='red', label='Izhikevic Model')
 blue_patch = mpatches.Patch(color='blue', label='NEST Model')

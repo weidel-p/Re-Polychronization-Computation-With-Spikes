@@ -36,17 +36,15 @@ include: "nest.rules"
 
 rule all:
     input:
-        test_plot_weight='figures/weight_distribution.pdf',
-        test_plot_delay='figures/delay_distribution.pdf',
-        dynamics_plot='figures/single_neuron_dynamics.pdf',
-        weight='figures/single_stim_weight_distribution.pdf',
-        delay='figures/single_stim_delay_distribution.pdf',
-
+        #test_plot_weight='figures/weight_distribution.pdf',
+        #test_plot_delay='figures/delay_distribution.pdf',
+        #weight='figures/single_stim_weight_distribution.pdf',
+        #delay='figures/single_stim_delay_distribution.pdf',
         original_groups=expand("{folder}/reformat_groups_01.json",folder=IZHI_DATA_DIR),
         original_weights=expand("{folder}/reformat_all_01.json",folder=IZHI_DATA_DIR),
-        nest_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
-        nest_weight=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
         original_repro=expand("{folder}/reformat_single_stim_all_01.json",folder=IZHI_DATA_DIR)
+        #nest_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
+        #nest_weight=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
 
 
 
@@ -68,7 +66,7 @@ rule find_groups:
     output:
         "{folder}/{pre}_groups_{file}.json"
     input:
-        "{folder}/{pre,.^g*}_all_{file}.json",
+        "{folder}/{pre}_all_{file}.json",
         program=rules.compile_find_polychronous_groups.output,
 
     run:
