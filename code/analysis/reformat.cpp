@@ -158,7 +158,7 @@ void save_json_data(char fname[30]){
         for( int m = 0; m < M; ++m)
         {
             Json::Value json_connection;
-            json_connection["pre"] = n + 1;
+            json_connection["pre"] = n + 1; //TODO can we remove the +1 ?
             json_connection["post"] = post[n][m] + 1;
             json_connection["weight"] = s[n][m];
             if (n<Ne)
