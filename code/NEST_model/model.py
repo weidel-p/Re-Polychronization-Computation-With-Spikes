@@ -150,12 +150,11 @@ if args.reproduce is not None:
         'to_memory': False,
         'to_file': True,
         'label': os.path.join(args.o,prefix)})
-    nrns=(neurons[0],neurons[1],neurons[-1:],neurons[859])
-    nest.Connect(mm,[1,2,17,1000], 'all_to_all')
+    nest.Connect(mm,[1,2,17,859], 'all_to_all')
 
 write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(0)))
 if args.reproduce:
-    T_interval=2000.
+    T_interval=100000.
 else:
     T_interval = T_measure / N_measure
 

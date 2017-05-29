@@ -21,7 +21,10 @@ def mem_plot(data,spk,c):
     sender=spk[:,0]
     times=spk[:,1]
     print sender
-    print v[(id==1)&(t<15)]
+
+    print v[(id == 17) & (t > 1950)]
+
+    print v[ (id==1)&(t>1950)]
     for i,idx in enumerate(np.unique(id)):
         print i,idx
 
@@ -30,15 +33,17 @@ def mem_plot(data,spk,c):
         plt.plot(t[id==idx],u[id==idx],c,linewidth=0.2)
         plt.plot(times[sender==idx],sender[sender==idx]*0,c+'*',markersize=10)
 
-        plt.xlim([0, 1500])
-        plt.ylim([-100, 150])
+        plt.xlim([900, 2000])
+        plt.ylim([-70, -60])
 
 def spk_plot(data,c):
     id=data[:,0]
     t=data[:,1]
+    print t[(id==1)&(t>1950)]
+
     plt.plot(t,id,c)
 
-    plt.xlim([0, 1500])
+    plt.xlim([900, 2000])
 
 
 
@@ -49,6 +54,7 @@ spk_nest_data=np.loadtxt(args.sn)
 
 izh_data=np.loadtxt(args.i)
 nest_data=np.loadtxt(args.n)
+print np.max(izh_data[-104:-4]-nest_data[-100:])
 mem_plot(izh_data,spk_izh_data,'r')
 mem_plot(nest_data,spk_nest_data,'b')
 

@@ -785,7 +785,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<2; sec++)
+	for (sec=0; sec<100; sec++)
 	{
 	
 
@@ -914,7 +914,7 @@ int main()
 //		end;
 		}
 	
-//		frate(end+1)=sum(firings(:,2)<=Ne)/Ne;
+////		frate(end+1)=sum(firings(:,2)<=Ne)/Ne;
 		double	frate=0;
 		for (i=1;i<N_firings;i++)
 			if ((firings[i][0] >=0) && (firings[i][1] <Ne)) frate++;
@@ -972,7 +972,7 @@ int main()
 			if ((i==0)&(j==20))
 			{
 			s[i][j]+=0.01+sd[i][j];
-			std::cout<<s[i][j]<<" "<<0.01+sd[i][j]<<std::endl;
+			std::cout<<s[i][j]<<" "<<sd[i][j]<<std::endl;
 			}
 			if (s[i][j]>C_max) s[i][j]=C_max;
 			if (s[i][j]<0) s[i][j]=0;
