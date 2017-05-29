@@ -38,7 +38,7 @@ def spk_plot(data,c):
     t=data[:,1]
     plt.plot(t,id,c)
 
-    plt.xlim([0, 5000])
+    plt.xlim([0, 1500])
 
 
 

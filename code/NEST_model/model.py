@@ -13,7 +13,6 @@ parser.add_argument('-s','--stimulus', type=str)
 
 args = parser.parse_args()
 
-print args
 
 def write_weights(neuron, fname):
     json_data = []
@@ -49,20 +48,28 @@ def connect_network(ex_neuron,inh_neuron,reproduce=None):
         delay = np.array([float(i['delay']) for i in file])
         pre = np.array([i['pre'] for i in file])
         post = np.array([i['post'] for i in file])
-        print delay,np,min(delay),np,max(delay)
         for pre_neuron in np.unique(pre):
+            idxes = np.where(pre_neuron == pre)[0]
             if pre_neuron in ex_neuron:
-                idxes=np.where(pre_neuron==pre)[0]
+
                 if pre_neuron==1:
-                    nest.Connect([pre_neuron],[post[idxes[0]]],conn_spec='all_to_all',syn_spec='EX')
-                    nest.Connect([pre_neuron], post[idxes[1:]].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
+                    idxes_stdp=np.where(post[idxes]==17)[0]
+
+                    idxes_stat_l = np.where(post[idxes]<17)[0]
+                    idxes_stat_h = np.where(post[idxes]> 17)[0]
+
+                    nest.Connect([pre_neuron], post[idxes_stat_l].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
+                    nest.Connect([pre_neuron],post[idxes_stdp].tolist(),conn_spec='all_to_all',syn_spec='EX')
+                    nest.Connect([pre_neuron], post[idxes_stat_h].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
+
+
                 else:
                     nest.Connect([pre_neuron], post[idxes].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
-
-                conns=nest.GetConnections(source=[pre_neuron],target=post[pre_neuron==pre].tolist() )
-                nest.SetStatus(conns,'delay',delay[pre_neuron==pre].tolist())
             elif pre_neuron in inh_neuron:
-                nest.Connect([pre_neuron],post[pre_neuron==pre].tolist(),conn_spec= 'all_to_all',syn_spec='II')
+                nest.Connect([pre_neuron],post[idxes].tolist(),conn_spec= 'all_to_all',syn_spec='II')
+        for pr,po,de in zip(pre,post,delay):
+            conn=nest.GetConnections(source=[pr],target=[po])
+            nest.SetStatus(conn,'delay',de)
 
 
 def set_stimulus(neurons,stimulus):
@@ -77,16 +84,13 @@ def set_stimulus(neurons,stimulus):
         stim_t = stimulus[:, 1]-1
         stim_t=stim_t[stim_t>1]
         stim_id=stim_id[stim_t>1]
-        print stim_id
         random_input = nest.Create('spike_generator',len(neurons))
         nest.Connect(random_input,neurons,'one_to_one')
         nest.SetStatus(nest.GetConnections(random_input),'weight',20.0)
 
         for i in np.unique(stim_id):
-            print 'stimulut for id ',i
             idx=stim_id==i
             times=stim_t[idx]
-            print times,int(i-1)
             nest.SetStatus([random_input[int(i-1)]],{'spike_times':times})
 
 
@@ -147,11 +151,11 @@ if args.reproduce is not None:
         'to_file': True,
         'label': os.path.join(args.o,prefix)})
     nrns=(neurons[0],neurons[1],neurons[-1:],neurons[859])
-    nest.Connect(mm,[1,2,859,1000], 'all_to_all')
+    nest.Connect(mm,[1,2,17,1000], 'all_to_all')
 
 write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(0)))
 if args.reproduce:
-    T_interval=5000.
+    T_interval=2000.
 else:
     T_interval = T_measure / N_measure
 
