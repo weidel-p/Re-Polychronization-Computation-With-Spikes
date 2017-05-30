@@ -55,7 +55,7 @@ rule all:
 
 rule clean:
     shell:
-        "rm $(snakemake --summary | tail -n+2 | cut -f1)"
+        "rm -r data/*"
 
 
 rule compile_find_polychronous_groups:
