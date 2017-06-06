@@ -42,7 +42,7 @@ def mem_plot(data,spk,c):
 def spk_plot(data,c):
     id=data[:,0]
     t=data[:,1]
-    idx=t>55000
+    idx=t>36000
     t_max=np.max(t)
 
     plt.plot(t[idx],id[idx],c)

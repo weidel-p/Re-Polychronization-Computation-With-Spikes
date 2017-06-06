@@ -52,7 +52,7 @@ def connect_network(ex_neuron,inh_neuron,reproduce=None):
             idxes = np.where(pre_neuron == pre)[0]
             if pre_neuron in ex_neuron:
 
-                if pre_neuron<401:
+                if pre_neuron<801:
                     # print post[idxes]
                     # idxes_stdp=np.where((post[idxes]==17)|(post[idxes]==395) )[0]
                     #
@@ -150,15 +150,15 @@ if args.reproduce is not None:
         'withtime': True,
         'to_memory': False,
         'to_file': True,
-        'precision':5,
-        'start':46000.,
-        'stop': 48000.,
+        'precision':17,
+        'start':1000. * 1.,
+        'stop': 1000. * 3.,
         'label': os.path.join(args.o,prefix)})
     nest.Connect(mm,neurons, 'all_to_all')
 
 write_weights(ex_neuron,neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(0)))
 if args.reproduce:
-    T_interval=50.*1000
+    T_interval=4.*1000
 else:
     T_interval = T_measure / N_measure
 

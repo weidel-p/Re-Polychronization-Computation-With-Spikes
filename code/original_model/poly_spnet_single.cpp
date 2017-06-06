@@ -38,7 +38,7 @@ int		min_group_path = 7;		// minimal length of a group
 int		min_group_time = 40;	// minimal duration of a group (ms)
 
 
-int N_stdp=400;
+int N_stdp=800;
 double	a[N], d[N];		//
 int		post[N][M];		//
 double	s[N][M], sd[N][M];	  //
@@ -785,7 +785,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<50; sec++)
+	for (sec=0; sec<4; sec++)
 	{
 	
 
@@ -828,10 +828,10 @@ int main()
 				    if ((I_pre[i][j]<N_stdp))
 				    {
 				    *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
-				    if ((I_pre[i][j]==0)&(i==970)&(sec>55))
-                    {
-                    std::cout << "increment for post spike at " << t+sec*1000 << " sd " <<*sd_pre[i][j] << " LTP " << LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<< std::endl;
-                    }
+				    //if ((I_pre[i][j]==0)&(i==970)&(sec>55))
+                    //{
+                    //std::cout << "increment for post spike at " << t+sec*1000 << " sd " <<*sd_pre[i][j] << " LTP " << LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<< std::endl;
+                    //}
                     }
 				    }
 
@@ -868,11 +868,11 @@ int main()
 						if (firings[k][1]<N_stdp)
 						{
                         sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]]-=LTD[i];
-                        if ((i==970)&(firings[k][1]==0)&(sec>55))
-                        {
-                        std::cout << "decrement for pre spike at " << 1000*sec +firings[k][0]+t-firings[k][0]<< " sd " <<sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]] << " LTD "<<LTD[i] << std::endl;
-                        }
-
+//                        if ((i==970)&(firings[k][1]==0)&(sec>55))
+//                        {
+//                        std::cout << "decrement for pre spike at " << 1000*sec +firings[k][0]+t-firings[k][0]<< " sd " <<sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]] << " LTD "<<LTD[i] << std::endl;
+//                        }
+//
 //
                         }
 						}//std::cout<<LTD[i]<<std::endl;
@@ -896,6 +896,9 @@ int main()
 //				u = u + a.*(0.2*v-u);
 				u[i]+=a[i]*(0.2*v[i]-u[i]);
 
+                //v[i] = round(v[i] * 10000.) / 10000.;
+                //u[i] = round(u[i] * 10000.) / 10000.;
+
 //				LTP(:,t+D+1)=0.95*LTP(:,t+D); % tau = 20 ms
 				LTP[i][t+D+1]=0.95*LTP[i][t+D];
 
@@ -913,8 +916,8 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            if ((t+1+1000*sec>=46000)&&(t+1+1000*sec<=48000))
-                      fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+            if ((t+1+1000*sec>=1. * 1000.)&&(t+1+1000*sec<=3. * 1000.))
+                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
             }
 
             if (t+1000*sec>2){
@@ -987,7 +990,7 @@ int main()
             {
 			std::cout<<s[i][j]<<" "<<sd[i][j]<<std::endl;
             }
-            fprintf(fssd, "%11.7f\t%11.7f \n",s[i][j],sd[i][j]);
+            fprintf(fssd, "%21.17f\t%21.17f \n",s[i][j],sd[i][j]);
 			}
 		}
     
