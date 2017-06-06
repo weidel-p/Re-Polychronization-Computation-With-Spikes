@@ -38,7 +38,7 @@ int		min_group_path = 7;		// minimal length of a group
 int		min_group_time = 40;	// minimal duration of a group (ms)
 
 
-
+int N_stdp=400;
 double	a[N], d[N];		//
 int		post[N][M];		//
 double	s[N][M], sd[N][M];	  //
@@ -683,7 +683,7 @@ void	polychronous(int nnum)
 				if (used[i] == 1) discard = 1;
 			}
 
-//			if ((discard == 0) & (t_fired[N_fired-1] > min_group_time) )  // (L_max >= min_group_path))
+//			if ((discard == 0) & (t_fired[N_fired-1] > min_group_time) )   (L_max >= min_group_path))
 			if ((discard == 0) & (L_max >= min_group_path))
 			{
 
@@ -785,7 +785,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<100; sec++)
+	for (sec=0; sec<50; sec++)
 	{
 	
 
@@ -825,11 +825,14 @@ int main()
 //				end;
 				for (j=0;j<N_pre[i];j++)
 				    {
-//				    if ((I_pre[i][j]==0))
-//				    {
+				    if ((I_pre[i][j]<N_stdp))
+				    {
 				    *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
-//                    std::cout <<"post "<<i<< "increment for post spike at " << t+sec*1000 << " sd " <<*sd_pre[i][j] << " LTP " << LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<< std::endl;
-//                    }
+				    if ((I_pre[i][j]==0)&(i==970)&(sec>55))
+                    {
+                    std::cout << "increment for post spike at " << t+sec*1000 << " sd " <<*sd_pre[i][j] << " LTP " << LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<< std::endl;
+                    }
+                    }
 				    }
 
 //	            firings=[firings; t+zeros(length(fired),1), fired];
@@ -862,12 +865,16 @@ int main()
 					if (firings[k][1] <Ne)
                         {
 //						sd(firings(k,2),del)=sd(firings(k,2),del)-LTD(ind)';
-//						if ((firings[k][1]==0) )
-//						{
+						if (firings[k][1]<N_stdp)
+						{
                         sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]]-=LTD[i];
-//                        std::cout <<"post "<<i<< "decrement for pre spike at " << 1000*sec +firings[k][0]+t-firings[k][0]<< " sd " <<sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]] << " LTD "<<LTD[i] << std::endl;
+                        if ((i==970)&(firings[k][1]==0)&(sec>55))
+                        {
+                        std::cout << "decrement for pre spike at " << 1000*sec +firings[k][0]+t-firings[k][0]<< " sd " <<sd[firings[k][1]][delays[firings[k][1]][t-firings[k][0]][j]] << " LTD "<<LTD[i] << std::endl;
+                        }
+
 //
-//                        }
+                        }
 						}//std::cout<<LTD[i]<<std::endl;
 
 //					end;
@@ -895,16 +902,19 @@ int main()
 //				LTD=0.95*LTD;                 % tau = 20 ms
 				LTD[i]*=0.95;
 			}
+			//
 
             for (i=0;i<N;i++)
 			{
-            if (i<2)
-                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
-            if (i==16)
-                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
-
-            if (i==394)
-                    fprintf(fvu, "%d\t%d\t%8.4f\t%8.4f\n",i+1,t+1+1000*sec,v[i],u[i]);
+//            if (i<2)
+//                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+//            if (i==529)
+//                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+//
+//            if (i==931)
+//                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+            if ((t+1+1000*sec>=46000)&&(t+1+1000*sec<=48000))
+                      fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
             }
 
             if (t+1000*sec>2){
@@ -968,22 +978,24 @@ int main()
 		{
 			sd[i][j]*=0.9;
 //			//debug
-//			if ((i==0))
-//			{
+			if ((i<N_stdp))
+			{
 			s[i][j]+=0.01+sd[i][j];
 			if (s[i][j]>C_max) s[i][j]=C_max;
 			if (s[i][j]<0) s[i][j]=0;
-
-//			std::cout<<s[i][j]<<" "<<sd[i][j]<<std::endl;
-            fprintf(fssd, "%8.4f\t%8.4f \n",s[i][j],sd[i][j]);
-//			}
+            if ((i==0)&(j==60)&(sec>55))
+            {
+			std::cout<<s[i][j]<<" "<<sd[i][j]<<std::endl;
+            }
+            fprintf(fssd, "%11.7f\t%11.7f \n",s[i][j],sd[i][j]);
+			}
 		}
     
 //    if mod(sec,10)==0, 
 //        save all; 
 //    end;
 
-			
+//
 //	end;
 
 	}

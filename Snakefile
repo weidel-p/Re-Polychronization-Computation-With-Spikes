@@ -55,8 +55,11 @@ rule all:
 
 rule clean:
     shell:
-        "rm -r data/*"
-
+        """
+        rm -r {data}/*
+        rm -r {fig}/*
+        rm -r {exec}/*
+        """.format(exec=IZHI_EXEC_DIR,fig=FIG_DIR,data=DATA_DIR)
 
 rule compile_find_polychronous_groups:
 	output:
