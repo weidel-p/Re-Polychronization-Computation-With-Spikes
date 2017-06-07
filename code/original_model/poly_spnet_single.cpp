@@ -785,7 +785,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<4; sec++)
+	for (sec=0; sec<101; sec++)
 	{
 	
 
@@ -890,6 +890,9 @@ int main()
 			{
 //		        v = v + 0.5*((0.04*v+5).*v+140-u+I);    % for numerical stability
 //			    v = v + 0.5*((0.04*v+5).*v+140-u+I);    % time step is 0.5 ms
+//
+                //I[i] = round(I[i] * 100000000.) / 100000000.;
+
 				v[i]+=0.5*((0.04*v[i]+5)*v[i]+140.-u[i]+I[i]);
 				v[i]+=0.5*((0.04*v[i]+5)*v[i]+140.-u[i]+I[i]);
 
@@ -916,7 +919,7 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            if ((t+1+1000*sec>=1. * 1000.)&&(t+1+1000*sec<=3. * 1000.))
+            if ((t+1+1000*sec>=98 * 1000.)&&(t+1+1000*sec<=100. * 1000.))
                       fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
             }
 
