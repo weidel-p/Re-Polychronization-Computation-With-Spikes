@@ -59,9 +59,9 @@ rule original_single_neuron_test:
     input:
         rules.compile_original_single_neuron_test.output
     output:
-        mem='{folder}/vu.dat'.format(folder=IZHI_DATA_DIR),
-        stim='{folder}/stim.dat'.format(folder=IZHI_DATA_DIR),
-        init='{folder}/vuinit.dat'.format(folder=IZHI_DATA_DIR),
+        mem='{folder}/single_stim_vu.dat'.format(folder=IZHI_DATA_DIR),
+        stim='{folder}/single_stim_stim.dat'.format(folder=IZHI_DATA_DIR),
+        init='{folder}/single_stim_vuinit.dat'.format(folder=IZHI_DATA_DIR),
         alldat='{folder}/single_stim_all.dat'.format(folder=IZHI_DATA_DIR),
         spk='{folder}/single_stim_spikes.dat'.format(folder=IZHI_DATA_DIR)
 
@@ -70,5 +70,5 @@ rule original_single_neuron_test:
         cd {folder}
         ./poly_spnet_single
         cd ..
-        mv *.dat {mv_folder}
+        mv single_stim_*.dat {mv_folder}
         """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))

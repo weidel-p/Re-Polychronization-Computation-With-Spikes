@@ -781,10 +781,10 @@ int main()
 	initialize();
 
 
-    fidx = fopen("..//stim.dat","a");
-    fvu = fopen("..//vu.dat","a");
+    fidx = fopen("..//single_stim_stim.dat","a");
+    fvu = fopen("..//single_stim_vu.dat","a");
     fs = fopen("..//single_stim_spikes.dat","a");
-    fssd = fopen("..//ssd.dat","a");
+    fssd = fopen("..//single_stim_ssd.dat","a");
 
 
 //	for sec=1:60*60*5
