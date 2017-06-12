@@ -52,7 +52,7 @@ rule compile_original_single_neuron_test:
     output:
         '{folder}/poly_spnet_single'.format(folder=IZHI_EXEC_DIR)
     shell:
-        'g++ -o {output} {input} -ljsoncpp'
+        'g++ -o {output} {input}'
 
 
 rule original_single_neuron_test:
