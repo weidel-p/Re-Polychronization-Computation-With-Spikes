@@ -29,7 +29,6 @@ rule original_single_neuron_test:
 rule compile_poly_spnet:
     input:
         expand('{folder}/poly_spnet.cpp',folder=IZHI_CODE_DIR),
-        rules.original_single_neuron_test.output
 
     output:
         expand('{folder}/poly_spnet',folder=IZHI_EXEC_DIR)
@@ -50,7 +49,9 @@ rule compile_reformat:
 
 rule run_poly_spnet:
     input:
-        rules.compile_poly_spnet.output
+        rules.compile_poly_spnet.output,
+        rules.original_single_neuron_test.output
+
     output:
         spikes=expand('{folder}/spikes.dat',folder=IZHI_DATA_DIR),
         weights=expand('{folder}/all.dat',folder=IZHI_DATA_DIR),
