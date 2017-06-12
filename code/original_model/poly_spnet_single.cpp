@@ -788,7 +788,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<2; sec++)
+	for (sec=0; sec<5*60*60; sec++)
 	{
 	
 
@@ -801,6 +801,7 @@ int main()
 
 			idx=int(floor(N*rand01));
 			I[idx]=20;
+            fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
 
 
 
@@ -912,8 +913,8 @@ int main()
 			}
 			//
 //
-   for (i=0;i<N;i++)
-			{
+//   for (i=0;i<N;i++)
+//			{
 //            for (i=0;i<N;i++)
 //			{
 //            if (i<2)
@@ -923,12 +924,10 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+//            if (((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))
+//                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+//            }
 
-            if (((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))
-                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            }
-
-            fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
 
 //		end;
 		}
