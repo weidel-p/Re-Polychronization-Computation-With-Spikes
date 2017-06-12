@@ -774,7 +774,7 @@ int main()
 
 
 	
-	srand(0); 
+	srand(10);
 	initialize();
 
 
@@ -785,7 +785,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<101; sec++)
+	for (sec=0; sec<5*60*60; sec++)
 	{
 	
 
@@ -909,9 +909,9 @@ int main()
 				LTD[i]*=0.95;
 			}
 			//
-
-            for (i=0;i<N;i++)
-			{
+//
+//            for (i=0;i<N;i++)
+//			{
 //            if (i<2)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
 //            if (i==529)
@@ -919,9 +919,9 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            if ((t+1+1000*sec>=98 * 1000.)&&(t+1+1000*sec<=100. * 1000.))
-                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            }
+//            if ((t+1+1000*sec>=98 * 1000.)&&(t+1+1000*sec<=100. * 1000.))
+//                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+//            }
 
             if (t+1000*sec>2){
             fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
@@ -956,7 +956,7 @@ int main()
 //		plot(firings(:,1),firings(:,2),'.');
 //		axis([0 1000 0 N]); drawnow;
 		for (i=1;i<N_firings;i++)
-			if (firings[i][0] >=0)
+			if (firings[i][0] >=0 & sec>5*60*60-10)
 				fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
@@ -989,11 +989,11 @@ int main()
 			s[i][j]+=0.01+sd[i][j];
 			if (s[i][j]>C_max) s[i][j]=C_max;
 			if (s[i][j]<0) s[i][j]=0;
-            if ((i==0)&(j==60)&(sec>55))
-            {
-			std::cout<<s[i][j]<<" "<<sd[i][j]<<std::endl;
-            }
-            fprintf(fssd, "%21.17f\t%21.17f \n",s[i][j],sd[i][j]);
+//            if ((i==0)&(j==60)&(sec>55))
+//            {
+//			std::cout<<s[i][j]<<" "<<sd[i][j]<<std::endl;
+//            }
+//            fprintf(fssd, "%21.17f\t%21.17f \n",s[i][j],sd[i][j]);
 			}
 		}
     

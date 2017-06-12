@@ -33,7 +33,7 @@ rule run_poly_spnet:
         ./poly_spnet
         cd ..
         mv *.dat {mv_folder}
-        """.format(folder=IZHI_EXEC_DIR,mv_folder=IZHI_DATA_DIR)
+        """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))
 
 
 rule reformat_izhi:
@@ -70,4 +70,4 @@ rule original_single_neuron_test:
         ./poly_spnet_single
         cd ..
         mv *.dat {mv_folder}
-        """.format(folder=IZHI_EXEC_DIR,mv_folder=IZHI_DATA_DIR)
+        """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))
