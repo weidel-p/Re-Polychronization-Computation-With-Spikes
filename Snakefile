@@ -1,6 +1,10 @@
 import os,glob,sys
 sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handle this
-from params import *
+
+import socket
+if "cluster" in socket.gethostname():
+    shell.prefix('module load pystuff_new; module load mpi/openmpi/1.10.0;')
+
 
 #Define folders:
 CUR_DIR=os.getcwd()
@@ -18,10 +22,10 @@ IZHI_DATA_DIR=os.path.join(DATA_DIR,izhi_prefix)
 #compile poly_spnet into a folder because it outputs into ../
 IZHI_EXEC_DIR=os.path.join(IZHI_CODE_DIR,'exec')
 ANA_DIR=os.path.join(CODE_DIR,'analysis')
-NEST_SRC_DIR=os.path.join(
-            CODE_DIR,'nest/nest-simulator')
+NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
+            CODE_DIR,'nest/nest-simulator'))
 
-
+N_measure=1
 PREFIX = ['NEST']
 WEIGHT_SAMPLES = ['all_{:02d}.json'.format(i) for i in range(1,N_measure+1)]        #define the weights files output to model.py and input to the cpp code
 SPIKE_SAMPLES = ['spikes-{:02d}-0.gdf'.format(1002) for i in range(1,N_measure+1)]        #define the spike files
@@ -30,10 +34,9 @@ PLOT_FILES = ['plot_8.pdf','plot_5.pdf','plot_7.pdf']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 
+
 include: "Izhikevic.rules"
 include: "nest.rules"
-if "cluster" in socket.gethostname():
-    shell.prefix('cd $SLURM_SUBMIT_DIR; module load pystuff_new; module load mpi/openmpi/1.10.0;')
 
 
 rule all:
@@ -94,7 +97,7 @@ rule test_single_neuron_dynamics:
 
     output:
         'figures/membrane_potential_comparison.pdf',
-        'figures/spikes_comparison.pdf',
+        #'figures/spikes_comparison.pdf',
 
     shell:
         'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original_weight}} -n {{input.nest_weight}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)

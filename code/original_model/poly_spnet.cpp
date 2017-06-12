@@ -769,7 +769,7 @@ int main()
 	FILE	*fs, *fx, *fd;
 	
 	
-	srand(0); 
+	srand(0);
 	initialize();
 
 

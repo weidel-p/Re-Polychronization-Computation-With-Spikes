@@ -35,14 +35,14 @@ rule nest_single_neuron_test:
         nest=rules.install_nest.output,
         repro= expand('{folder}/reformat_single_stim_all_01.json',folder=IZHI_DATA_DIR),
         stim=rules.original_single_neuron_test.output.stim,
+        init=rules.original_single_neuron_test.output.init,
     output:
         mem='{folder}/NEST_single_stim-2002-0.dat'.format(folder=NEST_DATA_DIR),
         spk='{folder}/NEST_single_stim_spikes-2001-0.gdf'.format(folder=NEST_DATA_DIR),
         weight='{folder}/NEST_single_stim_all_01.json'.format(folder=NEST_DATA_DIR)
 
-
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -o {output_folder} --stim {{input.stim}} --reproduce {{input.repro}}
+        python {folder}/model.py -o {output_folder} --stim {{input.stim}} --reproduce {{input.repro}} --initials {{input.init}}
         """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR,data_folder=IZHI_DATA_DIR)

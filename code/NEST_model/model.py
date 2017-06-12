@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-o', type=str)
 parser.add_argument('-r','--reproduce', type=str)
 parser.add_argument('-s','--stimulus', type=str)
+parser.add_argument('-i','--initials', type=str)
 
 args = parser.parse_args()
 
@@ -82,10 +83,18 @@ def set_stimulus(neurons,stimulus):
         nest.Connect(random_input, neurons, 'all_to_all', {'weight': 20.0})
     else:
         stimulus=np.loadtxt(stimulus)
-        stim_id=stimulus[:,0]
+        stim_id=stimulus[:,0].astype(int)
         stim_t = stimulus[:, 1]-1
-        stim_t=stim_t[stim_t>1]
-        stim_id=stim_id[stim_t>1]
+        #first neuron gets current manually rest via spike generator
+
+        print stim_t[0]
+
+        print stim_id[0]
+        print neurons[stim_id[0]]
+        nest.SetStatus([neurons[stim_id[0]]], 'I', 20.)
+        # otherwise stimulus must occur at -1ms
+        stim_t=stim_t[stim_t>0]
+        stim_id=stim_id[stim_t>0]
         random_input = nest.Create('spike_generator',len(neurons))
         nest.Connect(random_input,neurons,'one_to_one')
         nest.SetStatus(nest.GetConnections(random_input),'weight',20.)
@@ -94,6 +103,20 @@ def set_stimulus(neurons,stimulus):
             idx=stim_id==i
             times=stim_t[idx]
             nest.SetStatus([random_input[int(i-1)]],{'spike_times':times})
+
+def set_initial_conditions(neurons,initials):
+    if initials is None:
+        pass
+    else:
+        initials = np.loadtxt(initials)
+        stim_id = initials[:, 0]
+        stim_v  = initials[:, 1]
+        stim_u  = initials[:, 2]
+
+        # first neuron gets current manually rest via spike generator
+        nest.SetStatus(neurons, 'V_m', stim_v)
+        nest.SetStatus(neurons, 'U_m', stim_u)
+
 
 
 nest.ResetKernel()
@@ -124,9 +147,9 @@ nest.CopyModel("static_synapse", "EX_stat", {'weight': 6.})
 ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)
 neurons = ex_neuron + inh_neuron
-V_m=-65.
-nest.SetStatus(neurons,'V_m',V_m)
-nest.SetStatus(neurons,'U_m',0.2*V_m)
+
+set_initial_conditions(neurons,args.initials)
+
 
 connect_network(ex_neuron,inh_neuron,reproduce=args.reproduce)
 set_stimulus(neurons,args.stimulus)
@@ -136,7 +159,7 @@ set_stimulus(neurons,args.stimulus)
 if args.reproduce is not None:
     prefix='NEST_single_stim'
 spikedetector = nest.Create("spike_detector", params={
-    'start':T_measure-10000,
+    'start':0.,
     'withgid': True,
     'withtime': True,
     'to_memory': False,
@@ -144,25 +167,24 @@ spikedetector = nest.Create("spike_detector", params={
     'label': os.path.join(args.o,prefix+'_spikes')})
 
 nest.Connect(neurons, spikedetector, 'all_to_all')
-# if args.reproduce is not None:
-mm = nest.Create("multimeter", params={
-    'record_from':['V_m','U_m','combined_current'],
-    'withgid': True,
-    'withtime': True,
-    'to_memory': False,
-    'to_file': True,
-    'precision':17,
-    'start':1000. * 98.,
-    'stop': 1000. * 100.,
-    'label': os.path.join(args.o,prefix)})
-#     nest.Connect(mm,neurons, 'all_to_all')
+if args.reproduce is not None:
+    mm = nest.Create("multimeter", params={
+        'record_from':['V_m','U_m','combined_current'],
+        'withgid': True,
+        'withtime': True,
+        'to_memory': False,
+        'to_file': True,
+        'precision':17,
+        # 'start':0.,
+        # 'stop': 1000. * 100.,
+        'label': os.path.join(args.o,prefix)})
+    nest.Connect(mm,[699,705,731,831], 'all_to_all')
 
 write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(0)))
-# if args.reproduce:
-#     T_interval=101.*1000
-# else:
-
-T_interval = T_measure / N_measure
+if args.reproduce:
+    T_interval=2.*1000
+else:
+    T_interval = T_measure / N_measure
 
 for interval in range(1, N_measure + 1):
     nest.Simulate(T_interval)

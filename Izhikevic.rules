@@ -8,7 +8,7 @@ rule compile_poly_spnet:
         """
         mkdir -p {folder}
         echo {{output}}
-	    g++ -o {{output}} {{input}} -ljsoncpp
+	    g++ -o {{output}} {{input}}
 	    """.format(folder=IZHI_EXEC_DIR)
 
 rule compile_reformat:
@@ -61,6 +61,7 @@ rule original_single_neuron_test:
     output:
         mem='{folder}/vu.dat'.format(folder=IZHI_DATA_DIR),
         stim='{folder}/stim.dat'.format(folder=IZHI_DATA_DIR),
+        init='{folder}/vuinit.dat'.format(folder=IZHI_DATA_DIR),
         alldat='{folder}/single_stim_all.dat'.format(folder=IZHI_DATA_DIR),
         spk='{folder}/single_stim_spikes.dat'.format(folder=IZHI_DATA_DIR)
 

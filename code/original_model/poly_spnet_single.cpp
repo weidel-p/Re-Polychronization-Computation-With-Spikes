@@ -38,7 +38,7 @@ int		min_group_path = 7;		// minimal length of a group
 int		min_group_time = 40;	// minimal duration of a group (ms)
 
 
-int N_stdp=800;
+int N_stdp=Ne;
 double	a[N], d[N];		//
 int		post[N][M];		//
 double	s[N][M], sd[N][M];	  //
@@ -65,9 +65,6 @@ void initialize()
 
 
 //	post=ceil([Ne+Ni*rand(Ne,M*Ni/N),Ne*rand(Ne,M*Ne/N);Ne*rand(Ni,M)]);
-
-
-
 	for (i=0;i<Ne;i++)
 	{
 
@@ -169,10 +166,16 @@ void initialize()
 	for (i=0;i<N;i++)	LTD[i]=0;
 
 //	v = -65+10*rand(N,1);               % initial values for v
-	for (i=0;i<N;i++)	v[i]=-65;//+10*rand01;
 
+	for (i=0;i<N;i++)	v[i]=-65+10*rand01;
 //	u = 0.2.*v;                         % initial values for u
 	for (i=0;i<N;i++)	u[i]=0.2*v[i];
+    FILE	*fvuinit;
+    fvuinit = fopen("..//vuinit.dat","a");
+	for (i=0;i<N;i++)	fprintf(fvuinit, "%d\t%21.17f\t%21.17f\n",i+1,v[i],u[i]);
+	fclose(fvuinit);
+
+
 
 //	firings=[-D 0];                     % spike timings
 	N_firings=1;
@@ -774,7 +777,7 @@ int main()
 
 
 	
-	srand(10);
+	srand(0);
 	initialize();
 
 
@@ -785,7 +788,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<5*60*60; sec++)
+	for (sec=0; sec<2; sec++)
 	{
 	
 
@@ -795,11 +798,10 @@ int main()
 		{
 
 			for (i=0;i<N;i++) I[i] = 0;
-			if (t +sec*1000>2)
-			{
+
 			idx=int(floor(N*rand01));
 			I[idx]=20;
-            }
+
 
 
 			for (i=0;i<N;i++) 
@@ -910,6 +912,8 @@ int main()
 			}
 			//
 //
+   for (i=0;i<N;i++)
+			{
 //            for (i=0;i<N;i++)
 //			{
 //            if (i<2)
@@ -919,13 +923,13 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-//            if ((t+1+1000*sec>=98 * 1000.)&&(t+1+1000*sec<=100. * 1000.))
-//                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-//            }
 
-            if (t+1000*sec>2){
-            fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
+            if (((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))
+                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
             }
+
+            fprintf(fidx, "%d\t%d \n",idx+1,t+1+1000*sec);
+
 //		end;
 		}
 	
@@ -956,7 +960,7 @@ int main()
 //		plot(firings(:,1),firings(:,2),'.');
 //		axis([0 1000 0 N]); drawnow;
 		for (i=1;i<N_firings;i++)
-			if (firings[i][0] >=0 & sec>5*60*60-10)
+			if (firings[i][0] >=0 & sec>-1)
 				fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
