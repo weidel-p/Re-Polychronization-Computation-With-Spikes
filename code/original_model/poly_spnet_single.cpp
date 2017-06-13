@@ -959,7 +959,7 @@ int main()
 //		plot(firings(:,1),firings(:,2),'.');
 //		axis([0 1000 0 N]); drawnow;
 		for (i=1;i<N_firings;i++)
-			if (firings[i][0] >=0 & sec>-1)
+			if (firings[i][0] >=0 & sec>5*60*60-10)
 				fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
