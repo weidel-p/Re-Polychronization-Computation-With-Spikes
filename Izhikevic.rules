@@ -50,7 +50,6 @@ rule compile_reformat:
 rule run_poly_spnet:
     input:
         rules.compile_poly_spnet.output,
-        rules.original_single_neuron_test.output
 
     output:
         spikes=expand('{folder}/spikes.dat',folder=IZHI_DATA_DIR),
