@@ -1,5 +1,8 @@
 import numpy as np
 import sys
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import pylab as plt
 
 izh_mem = np.loadtxt(sys.argv[1])
