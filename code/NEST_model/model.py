@@ -50,6 +50,7 @@ def connect_network(ex_neuron,inh_neuron,reproduce=None):
         pre = np.array([i['pre'] for i in file])
         post = np.array([i['post'] for i in file])
         for pre_neuron in np.unique(pre):
+            print 'settin connectivity for neuron {}'.format(pre_neuron)
             idxes = np.where(pre_neuron == pre)[0]
             if pre_neuron in ex_neuron:
 
@@ -82,15 +83,15 @@ def set_stimulus(neurons,stimulus):
 
         nest.Connect(random_input, neurons, 'all_to_all', {'weight': 20.0})
     else:
+        print 'starting to load the data'
         stimulus=np.loadtxt(stimulus)
+        print 'loaded stimulus data'
         stim_id=stimulus[:,0].astype(int)
         stim_t = stimulus[:, 1]-1
+        del stimulus
         #first neuron gets current manually rest via spike generator
 
-        print stim_t[0]
 
-        print stim_id[0]
-        print neurons[stim_id[0]]
         nest.SetStatus([neurons[stim_id[0]]], 'I', 20.)
         # otherwise stimulus must occur at -1ms
         stim_t=stim_t[stim_t>0]
@@ -103,7 +104,8 @@ def set_stimulus(neurons,stimulus):
             idx=stim_id==i
             times=stim_t[idx]
             nest.SetStatus([random_input[int(i-1)]],{'spike_times':times})
-
+        del stim_id
+        del stim_t
 def set_initial_conditions(neurons,initials):
     if initials is None:
         pass
@@ -112,7 +114,6 @@ def set_initial_conditions(neurons,initials):
         stim_id = initials[:, 0]
         stim_v  = initials[:, 1]
         stim_u  = initials[:, 2]
-        print len(neurons),len(stim_id),len(stim_u),len(stim_v)
         # first neuron gets current manually rest via spike generator
         nest.SetStatus(neurons, 'V_m', stim_v)
         nest.SetStatus(neurons, 'U_m', stim_u)
@@ -152,6 +153,7 @@ set_initial_conditions(neurons,args.initials)
 
 
 connect_network(ex_neuron,inh_neuron,reproduce=args.reproduce)
+
 set_stimulus(neurons,args.stimulus)
 
 
