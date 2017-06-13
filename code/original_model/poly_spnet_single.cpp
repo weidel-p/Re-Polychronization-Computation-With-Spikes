@@ -171,7 +171,7 @@ void initialize()
 //	u = 0.2.*v;                         % initial values for u
 	for (i=0;i<N;i++)	u[i]=0.2*v[i];
     FILE	*fvuinit;
-    fvuinit = fopen("..//single_stim_vuinit.dat","a");
+    fvuinit = fopen("..//single_stim_vuinit.dat","w");
 	for (i=0;i<N;i++)	fprintf(fvuinit, "%d\t%21.17f\t%21.17f\n",i+1,v[i],u[i]);
 	fclose(fvuinit);
 

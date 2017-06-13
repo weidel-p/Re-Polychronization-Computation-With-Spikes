@@ -112,7 +112,7 @@ def set_initial_conditions(neurons,initials):
         stim_id = initials[:, 0]
         stim_v  = initials[:, 1]
         stim_u  = initials[:, 2]
-
+        print len(neurons),len(stim_id),len(stim_u),len(stim_v)
         # first neuron gets current manually rest via spike generator
         nest.SetStatus(neurons, 'V_m', stim_v)
         nest.SetStatus(neurons, 'U_m', stim_u)
