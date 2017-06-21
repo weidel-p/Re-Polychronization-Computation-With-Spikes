@@ -21,12 +21,13 @@ rule run_model:
         spikes=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=SPIKE_SAMPLES,pre=PREFIX)
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
+        conf='{folder}/experiments/reproduction.yaml'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -o {output_folder}
-        """.format(folder=NEST_CODE_DIR,output_folder=os.path.join(CUR_DIR,NEST_DATA_DIR))
+        python {folder}/model.py -c {{input.conf}}
+        """.format(folder=NEST_CODE_DIR)
 
 
 rule nest_single_neuron_test:
