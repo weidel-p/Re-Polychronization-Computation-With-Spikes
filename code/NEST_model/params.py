@@ -11,6 +11,8 @@ Aplus = 0.1
 Aminus = 0.12
 multapses = False
 
+num_threads = 4
+
 exc_neuron_model = {'consistent_integration': False,
                     'V_th': 30.,
                     'U_m': -0.2 * 65.0,

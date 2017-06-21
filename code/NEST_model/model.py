@@ -151,10 +151,14 @@ def set_initial_conditions(neurons, conf):
 
 
 nest.ResetKernel()
+
+seed = [np.random.randint(0,9999999)]*num_threads
+
 nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                       'print_time': True,
-                      'grng_seed': 2,
-                      'overwrite_files': True})
+                      'rng_seeds': seed,
+                      'overwrite_files': True,
+                      'local_num_threads': num_threads})
 
 neuron_model = 'izhikevich'
 
@@ -200,17 +204,17 @@ spikedetector = nest.Create("spike_detector", params={
 nest.Connect(neurons, spikedetector, 'all_to_all')
 
 #if cfg["network-params"]["connectivity"]["type"] == "generate": 
-#    mm = nest.Create("multimeter", params={
-#        'record_from': ['V_m', 'U_m', 'combined_current'],
-#        'withgid': True,
-#        'withtime': True,
-#        'to_memory': False,
-#        'to_file': True,
-#        'precision': 17,
-#        # 'start':0.,
-#        # 'stop': 1000. * 100.,
-#        'label': os.path.join(args.o, prefix)})
-#    nest.Connect(mm,[699,705,731,831], 'all_to_all')
+mm = nest.Create("multimeter", params={
+        'record_from': ['V_m', 'U_m', 'combined_current'],
+        'withgid': True,
+        'withtime': True,
+        'to_memory': False,
+        'to_file': True,
+        'precision': 17,
+        # 'start':0.,
+        # 'stop': 1000. * 100.,
+        'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"])})
+nest.Connect(mm,[699,705,731,831], 'all_to_all')
 
 write_weights(neurons, os.path.join(
     cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_all_{:02d}.json'.format(0)))
