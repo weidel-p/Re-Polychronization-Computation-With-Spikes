@@ -10,7 +10,7 @@ rule install_nest:
         mkdir -p bld
         mkdir -p instl
         cd bld
-        cmake3 -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python=ON {params.nest_dir}
+        cmake -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python=ON {params.nest_dir}
         make -j8
         make install
         """
@@ -33,9 +33,7 @@ rule nest_single_neuron_test:
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output,
-        repro= expand('{folder}/reformat_single_stim_all_01.json',folder=IZHI_DATA_DIR),
-        stim=rules.original_single_neuron_test.output.stim,
-        init=rules.original_single_neuron_test.output.init,
+        conf='{folder}/experiments/bitwise_reproduction.yaml'.format(folder=NEST_CODE_DIR)
 
     output:
         mem='{folder}/NEST_single_stim-2002-0.dat'.format(folder=NEST_DATA_DIR),
@@ -46,5 +44,5 @@ rule nest_single_neuron_test:
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -o {output_folder} --stim {{input.stim}} --reproduce {{input.repro}} --initials {{input.init}}
-        """.format(folder=NEST_CODE_DIR,output_folder=NEST_DATA_DIR,data_folder=IZHI_DATA_DIR)
+        python {folder}/model.py -c {{input.conf}}
+        """.format(folder=NEST_CODE_DIR)

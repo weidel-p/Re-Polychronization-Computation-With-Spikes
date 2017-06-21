@@ -1,0 +1,28 @@
+# Simulation Parameter
+simulation-params:
+    resolution: 1. # (ms)
+    sim-time: 18000000 # (ms) 5 hours: 5 * 60 * 60 * 1000
+    num-measurements: 1 
+    data-prefix: NEST_reproduction
+    data-path: data/NEST_model/
+
+# Network Parameter
+network-params:
+    connectivity: 
+        type: generate
+        delay-distribution: uniform-non-random
+        delay-range: [1, 21] # excluding right boundary
+
+    stimulus:
+        type: generate
+        distribution: poisson
+        rate: 1. # (spikes/sec) per neuron
+        weight: 20. # (mV)
+
+    initial-state:
+        type: generate
+        distribution: uniform
+        V_m-range: [-65, -55] # excluding right boundary
+
+
+

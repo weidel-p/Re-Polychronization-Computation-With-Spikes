@@ -1,0 +1,24 @@
+# Simulation Parameter
+simulation-params:
+    resolution: 1. # (ms)
+    sim-time: 18000000 # (ms) 5 hours: 5 * 60 * 60 * 1000
+    num-measurements: 1 
+    data-prefix: NEST_single_stim
+    data-path: data/NEST_model/
+
+# Network Parameter
+network-params:
+    connectivity: 
+        type: reproduce
+        from-file: data/original_model/reformat_single_stim_all_01.json
+
+    stimulus:
+        type: reproduce
+        from-file: data/original_model/single_stim_stim.dat
+
+    initial-state:
+        type: reproduce
+        from-file: data/original_model/single_stim_vuinit.dat
+
+
+

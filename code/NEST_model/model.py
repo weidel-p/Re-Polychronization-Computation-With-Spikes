@@ -1,18 +1,19 @@
 import nest
 import json
-import os,sys
+import os
+import sys
 import argparse
-sys.path.insert(0, 'code/analysis/') #ugly but not sure how to otherwise handle this
+# ugly but not sure how to otherwise handle this
+sys.path.insert(0, 'code/analysis/')
 from params import *
 import helper
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-o', type=str)
-parser.add_argument('-r','--reproduce', type=str)
-parser.add_argument('-s','--stimulus', type=str)
-parser.add_argument('-i','--initials', type=str)
+parser.add_argument('-c', '--config', type=str)
 
 args = parser.parse_args()
+
+cfg = helper.parse_config(args.config)
 
 
 def write_weights(neuron, fname):
@@ -32,96 +33,125 @@ def write_weights(neuron, fname):
         json.dump(json_data, f)
 
 
-def connect_network(ex_neuron,inh_neuron,reproduce=None):
-    print reproduce
-    if reproduce is None:
-        conn_dict_inh = {'rule': 'fixed_outdegree', 'outdegree': N_syn, 'multapses': False, 'autapses': False}
-        conn_dict_ex = {'rule': 'fixed_outdegree', 'outdegree': N_syn, 'multapses': False, 'autapses': False}
-        nest.Connect(inh_neuron, ex_neuron, conn_spec=conn_dict_inh, syn_spec='II')
-        nest.Connect(ex_neuron, neurons, conn_spec=conn_dict_ex, syn_spec='EX')
-        delay_list =[[j for i in range(5)] for j in range(1,21)]
-        delay_list = np.reshape(np.array(delay_list).astype(float),(1,100))[0]
-        for n in ex_neuron:
-            nest.SetStatus(nest.GetConnections(source=[n]), 'delay', delay_list)
-    else:
+def connect_network(ex_neuron, inh_neuron, conf):
 
-        file=helper.load_json(reproduce)
+    if conf["type"] == "reproduce":
+        file = helper.load_json(conf["from-file"])
+
         delay = np.array([float(i['delay']) for i in file])
         pre = np.array([i['pre'] for i in file])
         post = np.array([i['post'] for i in file])
+
         for pre_neuron in np.unique(pre):
-            print 'settin connectivity for neuron {}'.format(pre_neuron)
+            print 'setting connectivity for neuron {}'.format(pre_neuron)
             idxes = np.where(pre_neuron == pre)[0]
             if pre_neuron in ex_neuron:
 
-                if pre_neuron<801:
-                    # print post[idxes]
-                    # idxes_stdp=np.where((post[idxes]==17)|(post[idxes]==395) )[0]
-                    #
-                    # idxes_stat = np.where((post[idxes]!=17)&(post[idxes]!=395))[0]
-                    #
-                    # nest.Connect([pre_neuron], post[idxes_stat].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
-                    nest.Connect([pre_neuron],post[idxes].tolist(),conn_spec='all_to_all',syn_spec='EX')
+                if pre_neuron < 801:
+                    nest.Connect([pre_neuron], post[idxes].tolist(),
+                                 conn_spec='all_to_all', syn_spec='EX')
                 else:
-                    nest.Connect([pre_neuron], post[idxes].tolist(), conn_spec='all_to_all', syn_spec='EX_stat')
-                # nest.Connect([pre_neuron], post[idxes].tolist(), conn_spec='all_to_all', syn_spec='EX')
-
-
+                    nest.Connect([pre_neuron], post[idxes].tolist(),
+                                 conn_spec='all_to_all', syn_spec='EX_stat')
 
             elif pre_neuron in inh_neuron:
-                nest.Connect([pre_neuron],post[idxes].tolist(),conn_spec= 'all_to_all',syn_spec='II')
-        for pr,po,de in zip(pre,post,delay):
-            conn=nest.GetConnections(source=[pr],target=[po])
-            nest.SetStatus(conn,'delay',de)
-        # stdp_connection=nest.GetConnections(source=[1],target=[971])
-        # nest.SetStatus(stdp_connection,{'plot':True})
+                nest.Connect([pre_neuron], post[idxes].tolist(),
+                             conn_spec='all_to_all', syn_spec='II')
 
-def set_stimulus(neurons,stimulus):
-    if stimulus is None:
-        random_input = nest.Create('poisson_generator')
-        nest.SetStatus(random_input, params={'rate': 1.0})
+        for pr, po, de in zip(pre, post, delay):
+            conn = nest.GetConnections(source=[pr], target=[po])
+            nest.SetStatus(conn, 'delay', de)
 
-        nest.Connect(random_input, neurons, 'all_to_all', {'weight': 20.0})
+    elif conf["type"] == "generate":
+
+        conn_dict_inh = {'rule': 'fixed_outdegree',
+                         'outdegree': N_syn, 'multapses': False, 'autapses': False}
+        conn_dict_ex = {'rule': 'fixed_outdegree',
+                        'outdegree': N_syn, 'multapses': False, 'autapses': False}
+        nest.Connect(inh_neuron, ex_neuron,
+                     conn_spec=conn_dict_inh, syn_spec='II')
+        nest.Connect(ex_neuron, neurons, conn_spec=conn_dict_ex, syn_spec='EX')
+
+        if conf["delay-distribution"] == "uniform-non-random":
+            delay_list = [[j for i in range(5)] for j in range(conf["delay-range"][0], conf["delay-range"][1])]
+            delay_list = np.reshape(
+                np.array(delay_list).astype(float), (1, 100))[0]
+
+        elif conf["delay-distribution"] == "uniform":
+            print "Connectivity: NotImplementedError", conf["delay-distribution"]
+
+        for n in ex_neuron:
+            nest.SetStatus(nest.GetConnections(
+                source=[n]), 'delay', delay_list)
     else:
-        print 'starting to load the data'
-        stimulus=np.loadtxt(stimulus)
-        print 'loaded stimulus data'
-        stim_id=stimulus[:,0].astype(int)
-        stim_t = stimulus[:, 1]-1
-        del stimulus
-        #first neuron gets current manually rest via spike generator
+        print "warning: no connectivity has been generated"
 
+
+
+def set_stimulus(neurons, conf):
+    if conf["type"] == "reproduce":
+        print 'load stimulus data...'
+        stimulus = np.loadtxt(conf["from-file"])
+        print 'done.'
+        stim_id = stimulus[:, 0].astype(int)
+        stim_t = stimulus[:, 1] - 1
+        del stimulus
+        # first neuron gets current manually rest via spike generator
 
         nest.SetStatus([neurons[stim_id[0]]], 'I', 20.)
         # otherwise stimulus must occur at -1ms
-        stim_t=stim_t[stim_t>0]
-        stim_id=stim_id[stim_t>0]
-        random_input = nest.Create('spike_generator',len(neurons))
-        nest.Connect(random_input,neurons,'one_to_one')
-        nest.SetStatus(nest.GetConnections(random_input),'weight',20.)
+        stim_t = stim_t[stim_t > 0]
+        stim_id = stim_id[stim_t > 0]
+        random_input = nest.Create('spike_generator', len(neurons))
+        nest.Connect(random_input, neurons, 'one_to_one')
+        nest.SetStatus(nest.GetConnections(random_input), 'weight', 20.)
         for i in np.unique(stim_id):
             print 'stimulus for neuron id {} done '.format(i)
-            idx=stim_id==i
-            times=stim_t[idx]
-            nest.SetStatus([random_input[int(i-1)]],{'spike_times':times})
+            idx = stim_id == i
+            times = stim_t[idx]
+            nest.SetStatus([random_input[int(i - 1)]], {'spike_times': times})
         del stim_id
         del stim_t
-def set_initial_conditions(neurons,initials):
-    if initials is None:
-        pass
+
+    elif conf["type"] == "generate":
+        if conf["distribution"] == "poisson":
+            random_input = nest.Create('poisson_generator')
+            nest.SetStatus(random_input, params={'rate': conf["rate"]})
+
+            nest.Connect(random_input, neurons, 'all_to_all', {'weight': conf["weight"]})
+        else:
+            print "Stimulus: NotImplementedError", conf["distribution"]
+
+
     else:
-        initials = np.loadtxt(initials)
+        print "warning: no stimulus has been generated"
+
+
+def set_initial_conditions(neurons, conf):
+    if conf["type"] == "reproduce":
+        initials = np.loadtxt(conf["from-file"])
         stim_id = initials[:, 0]
-        stim_v  = initials[:, 1]
-        stim_u  = initials[:, 2]
+        stim_v = initials[:, 1]
+        stim_u = initials[:, 2]
         # first neuron gets current manually rest via spike generator
         nest.SetStatus(neurons, 'V_m', stim_v)
         nest.SetStatus(neurons, 'U_m', stim_u)
+    elif conf["type"] == "generate":
+        if conf["distribution"] == "uniform":
 
+            vms = np.random.uniform(conf["V_m-range"][0], conf["V_m-range"][1], len(neurons))
+            ums = np.array([0.2 * v for v in vms])
+
+            nest.SetStatus(neurons, 'V_m', vms)
+            nest.SetStatus(neurons, 'U_m', ums)
+        else:
+            print "Init State: NotImplementedError", conf["distribution"]
+    else:
+        print "warning: no inital state has been generated"
 
 
 nest.ResetKernel()
-nest.SetKernelStatus({'resolution': dt,
+nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                       'print_time': True,
                       'grng_seed': 2,
                       'overwrite_files': True})
@@ -141,53 +171,56 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'a': 0.02,
                                          'd': 8.0})
 
-nest.CopyModel("static_synapse", "II", {'weight': -5.0,'delay':1.0})
-nest.CopyModel("stdp_izh_synapse", "EX", {'weight': 6.,'consistent_integration':False})
+nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
+nest.CopyModel("stdp_izh_synapse", "EX", {
+               'weight': 6., 'consistent_integration': False})
 nest.CopyModel("static_synapse", "EX_stat", {'weight': 6.})
 
 ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)
 neurons = ex_neuron + inh_neuron
 
-set_initial_conditions(neurons,args.initials)
+set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
 
 
-connect_network(ex_neuron,inh_neuron,reproduce=args.reproduce)
+connect_network(ex_neuron, inh_neuron, cfg["network-params"]["connectivity"])
 
-set_stimulus(neurons,args.stimulus)
+set_stimulus(neurons, cfg["network-params"]["stimulus"])
 
 
 
-if args.reproduce is not None:
-    prefix='NEST_single_stim'
 spikedetector = nest.Create("spike_detector", params={
-    'start':T_measure-10000.,
+    'start': cfg["simulation-params"]["sim-time"] - 10000.,
     'withgid': True,
     'withtime': True,
     'to_memory': False,
     'to_file': True,
-    'label': os.path.join(args.o,prefix+'_spikes')})
+    'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_spikes')})
 
 nest.Connect(neurons, spikedetector, 'all_to_all')
-if args.reproduce is not None:
-    mm = nest.Create("multimeter", params={
-        'record_from':['V_m','U_m','combined_current'],
-        'withgid': True,
-        'withtime': True,
-        'to_memory': False,
-        'to_file': True,
-        'precision':17,
-        # 'start':0.,
-        # 'stop': 1000. * 100.,
-        'label': os.path.join(args.o,prefix)})
+
+#if cfg["network-params"]["connectivity"]["type"] == "generate": 
+#    mm = nest.Create("multimeter", params={
+#        'record_from': ['V_m', 'U_m', 'combined_current'],
+#        'withgid': True,
+#        'withtime': True,
+#        'to_memory': False,
+#        'to_file': True,
+#        'precision': 17,
+#        # 'start':0.,
+#        # 'stop': 1000. * 100.,
+#        'label': os.path.join(args.o, prefix)})
 #    nest.Connect(mm,[699,705,731,831], 'all_to_all')
 
-write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(0)))
-if args.reproduce:
-    T_interval = T_measure / N_measure
-else:
-    T_interval = T_measure / N_measure
+write_weights(neurons, os.path.join(
+    cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_all_{:02d}.json'.format(0)))
 
-for interval in range(1, N_measure + 1):
+T_interval = cfg["simulation-params"]["sim-time"] / cfg["simulation-params"]["num-measurements"]
+
+for interval in range(1, cfg["simulation-params"]["num-measurements"] + 1):
     nest.Simulate(T_interval)
-    write_weights(neurons, os.path.join(args.o,prefix+'_all_{:02d}.json'.format(interval)))
+    write_weights(neurons, os.path.join(
+        cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_all_{:02d}.json'.format(interval)))
+
+
+
