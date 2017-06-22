@@ -727,7 +727,7 @@ void	all_polychronous()
 {
 	int	i;
 	N_polychronous=0;
-	fpoly = fopen("..//polyall.dat","w");
+	fpoly = fopen("..//single_stim_polyall.dat","w");
    	for (i=0;i<polylenmax;i++) N_postspikes[i]=0;
 
 	for (i=0;i<Ne;i++) polychronous(i);
@@ -826,17 +826,12 @@ int main()
 //				for k=1:length(fired)
 //					sd(pre{fired(k)}) = sd(pre{fired(k)})+LTP(N*t+aux{fired(k)});
 //				end;
-				for (j=0;j<N_pre[i];j++)
-				    {
-				    if ((I_pre[i][j]<N_stdp))
-				    {
-				    *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
+				for (j=0;j<N_pre[i];j++)  *sd_pre[i][j]+=LTP[I_pre[i][j]][t+D-D_pre[i][j]-1];
 				    //if ((I_pre[i][j]==0)&(i==970)&(sec>55))
                     //{
                     //std::cout << "increment for post spike at " << t+sec*1000 << " sd " <<*sd_pre[i][j] << " LTP " << LTP[I_pre[i][j]][t+D-D_pre[i][j]-1]<< std::endl;
                     //}
-                    }
-				    }
+
 
 //	            firings=[firings; t+zeros(length(fired),1), fired];
 				firings[N_firings  ][0]=t;
@@ -915,8 +910,8 @@ int main()
 //
 //   for (i=0;i<N;i++)
 //			{
-//            for (i=0;i<N;i++)
-//			{
+            for (i=0;i<N;i++)
+			{
 //            if (i<2)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
 //            if (i==529)
@@ -924,9 +919,9 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-//            if (((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))
-//                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-//            }
+            if ((((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))&(sec==5*60*60-1))
+                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+            }
 
 
 //		end;
@@ -958,9 +953,11 @@ int main()
 		
 //		plot(firings(:,1),firings(:,2),'.');
 //		axis([0 1000 0 N]); drawnow;
-		for (i=1;i<N_firings;i++)
-			if (firings[i][0] >=0 & sec>5*60*60-10)
-				fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
+//		axis([0 1000 0 N]); drawnow;
+
+        for (i=1;i<N_firings;i++)
+            if((firings[i][0] >=0)&&(sec==5*60*60-1))
+                fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
 //		LTP(:,1:D+1)=LTP(:,1001:1001+D);
@@ -1015,9 +1012,8 @@ int main()
     fclose(fs);
 
 
-//fpoly = fopen("..//polyall.dat","w");
-//	all_polychronous(); k=N_polychronous;
-//	fclose(fpoly);
+   all_polychronous(); k=N_polychronous;
+
 //	shuffle();
 //	all_polychronous(); 
 //	std::cout << "ratio (true/shuffled) = " << double(k)/(N_polychronous+1) << "                                                                                     ";

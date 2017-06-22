@@ -47,13 +47,12 @@ rule all:
         #delay='figures/single_stim_delay_distribution.pdf',
         test_membrane='figures/membrane_potential_comparison.pdf',
         #test_rasta='figures/spikes_comparison.pdf',
-
         original_groups=expand("{folder}/reformat_groups_01.json",folder=IZHI_DATA_DIR),
         original_weights=expand("{folder}/reformat_all_01.json",folder=IZHI_DATA_DIR),
         original_repro=expand("{folder}/reformat_single_stim_all_01.json",folder=IZHI_DATA_DIR),
-
         nest_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
         nest_weight=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
+        nest_test_weights=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre='NEST_single_stim'),
         nest_test_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre='NEST_single_stim'),
         original_test_groups=expand("{folder}/{pre}_{file}",folder=IZHI_DATA_DIR,file=GROUP_SAMPLES,pre='reformat_single_stim'),
 
@@ -89,9 +88,9 @@ rule find_groups:
 
 rule test_single_neuron_dynamics:
     input:
-        original_weight=rules.original_single_neuron_test.output.mem,
+        original_mem=rules.original_single_neuron_test.output.mem,
         original_spk=rules.original_single_neuron_test.output.spk,
-        nest_weight=rules.nest_single_neuron_test.output.mem,
+        nest_mem=rules.nest_single_neuron_test.output.mem,
         nest_spk=rules.nest_single_neuron_test.output.spk
 
     output:
@@ -99,7 +98,7 @@ rule test_single_neuron_dynamics:
         #'figures/spikes_comparison.pdf',
 
     shell:
-        'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original_weight}} -n {{input.nest_weight}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+        'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original_mem}} -n {{input.nest_mem}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule test_weights_and_delay:
     input:
@@ -112,27 +111,30 @@ rule test_weights_and_delay:
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -i {{input.original}} -n {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
 
-
 """
 rule make_plots:
     output:
-        expand("{folder}/{pre}_{file}",folder=FIG_DIR,file=PLOT_FILES,pre=PREFIX)
+        expand("{folder}/{pre}_{file}",folder=FIG_DIR)
     input:
+        weights={pre}_all_{file}
+        group={pre}_groups_{file}
+        spikes=
+
         nest_weights=rules.run_model.output.weights,
         nest_groups=rules.find_groups.output.nest,
         nest_spikes=rules.run_model.output.spikes,
-        original_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='all_reformat.json'),
+        original_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='reformat_all_01.json'),
         original_groups=rules.run_poly_spnet.output.groups,
         original_spikes=rules.move_.output.spikes,
-        reformat_groups=rules.find_groups.output.original
+        original_bitwise_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='all_reformat.json'),
+        original_bitwise_groups=rules.run_poly_spnet.output.groups,
+        original_bitwise_spikes=rules.move_.output.spikes,
+
     run:
         shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,input.original_groups,input.original_spikes,'original',input.original_weights))
         shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,input.reformat_groups,input.original_spikes,'reformat',input.original_weights))
         for group,weight,spike in zip(input.nest_groups,input.nest_weights,input.nest_spikes):
             shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,group,spike,weight.split('_')[0].split('/')[-1],weight))
-
-
-
 
 
 rule create_pdf:
