@@ -154,7 +154,8 @@ nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                       'print_time': True,
                       'rng_seeds': seed,
                       'overwrite_files': True,
-                      'local_num_threads': num_threads})
+                      'local_num_threads': num_threads,
+                      'syn_update_interval': cfg["simulation-params"]["synapse-update-interval']})
 
 neuron_model = 'izhikevich'
 
