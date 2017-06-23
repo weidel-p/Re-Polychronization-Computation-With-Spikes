@@ -43,7 +43,6 @@ def connect_network(ex_neuron, inh_neuron, conf):
         post = np.array([i['post'] for i in file])
 
         for pre_neuron in np.unique(pre):
-            print 'setting connectivity for neuron {}'.format(pre_neuron)
             idxes = np.where(pre_neuron == pre)[0]
             if pre_neuron in ex_neuron:
 
@@ -90,23 +89,20 @@ def connect_network(ex_neuron, inh_neuron, conf):
 
 def set_stimulus(neurons, conf):
     if conf["type"] == "reproduce":
-        print 'load stimulus data...'
         stimulus = np.loadtxt(conf["from-file"])
-        print 'done.'
         stim_id = stimulus[:, 0].astype(int)
         stim_t = stimulus[:, 1] - 1
         del stimulus
         # first neuron gets current manually rest via spike generator
 
-        nest.SetStatus([neurons[stim_id[0]]], 'I', 20.)
+        nest.SetStatus([neurons[stim_id[0]-1]], 'I', 20.)
         # otherwise stimulus must occur at -1ms
-        stim_t = stim_t[stim_t > 0]
         stim_id = stim_id[stim_t > 0]
+        stim_t = stim_t[stim_t > 0]
         random_input = nest.Create('spike_generator', len(neurons))
         nest.Connect(random_input, neurons, 'one_to_one')
         nest.SetStatus(nest.GetConnections(random_input), 'weight', 20.)
         for i in np.unique(stim_id):
-            print 'stimulus for neuron id {} done '.format(i)
             idx = stim_id == i
             times = stim_t[idx]
             nest.SetStatus([random_input[int(i - 1)]], {'spike_times': times})
@@ -176,7 +172,7 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'd': 8.0})
 
 nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
-nest.CopyModel("stdp_izh_synapse", "EX", {
+nest.CopyModel(cfg["network-params"]["connectivity"]["synapse-model"], "EX", {
                'weight': 6., 'consistent_integration': False})
 nest.CopyModel("static_synapse", "EX_stat", {'weight': 6.})
 
@@ -205,7 +201,7 @@ nest.Connect(neurons, spikedetector, 'all_to_all')
 
 #if cfg["network-params"]["connectivity"]["type"] == "generate": 
 mm = nest.Create("multimeter", params={
-        'record_from': ['V_m', 'U_m', 'combined_current'],
+        'record_from': ['V_m', 'U_m'],
         'withgid': True,
         'withtime': True,
         'to_memory': False,

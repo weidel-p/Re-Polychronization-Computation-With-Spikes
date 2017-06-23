@@ -12,6 +12,7 @@ network-params:
         type: generate
         delay-distribution: uniform-non-random
         delay-range: [1, 21] # excluding right boundary
+        synapse-model: stdp_izh_synapse
 
     stimulus:
         type: generate
