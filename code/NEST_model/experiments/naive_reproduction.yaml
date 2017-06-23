@@ -4,23 +4,22 @@ simulation-params:
     synapse-update-interval: 1000.
     sim-time: 18000000 # (ms) 5 hours: 5 * 60 * 60 * 1000
     num-measurements: 1 
-    data-prefix: NEST_naive_reproduction
+    data-prefix: naive_reproduction
     data-path: data/NEST_model/
 
 # Network Parameter
 network-params:
     connectivity: 
         type: reproduce
-        from-file: data/original_model/reformat_single_stim_all_01.json
+        from-file: data/original_model/reformat_bitwise_reproduction_all_01.json
         synapse-model: stdp_izh_naive_synapse
 
     stimulus:
         type: reproduce
-        from-file: data/original_model/single_stim_stim.dat
-
+        from-file: data/original_model/bitwise_reproduction_stim.dat
     initial-state:
         type: reproduce
-        from-file: data/original_model/single_stim_vuinit.dat
+        from-file: data/original_model/bitwise_reproduction_vuinit.dat
 
 
 

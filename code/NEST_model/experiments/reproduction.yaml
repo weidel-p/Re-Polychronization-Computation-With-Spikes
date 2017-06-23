@@ -4,7 +4,7 @@ simulation-params:
     synapse-update-interval: 1000.
     sim-time: 18000000 # (ms) 5 hours: 5 * 60 * 60 * 1000
     num-measurements: 1 
-    data-prefix: NEST_reproduction
+    data-prefix: reproduction
     data-path: data/NEST_model/
 
 # Network Parameter

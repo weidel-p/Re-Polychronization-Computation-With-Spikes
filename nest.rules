@@ -1,4 +1,4 @@
-
+#ruleorder: nest_bitwise_reproduction > run_model
 rule install_nest:
     output:
         expand('{nest_folder}/instl/bin/nest_vars.sh',nest_folder=NEST_SRC_DIR)
@@ -10,18 +10,18 @@ rule install_nest:
         mkdir -p bld
         mkdir -p instl
         cd bld
-        cmake -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python=ON {params.nest_dir}
+        cmake -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python=ON {params.nest_dir} -Dwith-mpi=ON
         make -j8
         make install
         """
 
 rule run_model:
     output:
-        weights=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
-        spikes=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=SPIKE_SAMPLES,pre=PREFIX)
+        weights=expand("{folder}/{{experiment}}_connectivity.json",folder=NEST_DATA_DIR),
+        spikes=expand("{folder}/{{experiment}}_spikes-2002-0.gdf",folder=NEST_DATA_DIR)
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
-        conf='{folder}/experiments/reproduction.yaml'.format(folder=NEST_CODE_DIR),
+        conf='{folder}/experiments/{{experiment,^(?!.*(bit))}}.yaml'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output
     shell:
         """
@@ -30,20 +30,20 @@ rule run_model:
         """.format(folder=NEST_CODE_DIR)
 
 
-rule nest_single_neuron_test:
+rule nest_bitwise_reproduction:
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output,
-        repro= expand('{folder}/reformat_single_stim_all_01.json',folder=IZHI_DATA_DIR),
-        stim=rules.original_single_neuron_test.output.stim,
-        init=rules.original_single_neuron_test.output.init,
+        repro= expand('{folder}/reformat_bitwise_reproduction_connectivity.json',folder=IZHI_DATA_DIR),
+        stim=rules.original_bitwise_reproduction.output.stim,
+        init=rules.original_bitwise_reproduction.output.init,
         conf='{folder}/experiments/bitwise_reproduction.yaml'.format(folder=NEST_CODE_DIR)
 
     output:
         mem='{folder}/NEST_single_stim-2002-0.dat'.format(folder=NEST_DATA_DIR),
         spk='{folder}/NEST_single_stim_spikes-2001-0.gdf'.format(folder=NEST_DATA_DIR),
         weight='{folder}/NEST_single_stim_all_01.json'.format(folder=NEST_DATA_DIR)
-
+    priority:1
 
     shell:
         """

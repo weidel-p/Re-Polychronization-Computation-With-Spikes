@@ -13,6 +13,7 @@ DATA_DIR='data'
 
 nest_prefix='NEST_model'
 izhi_prefix='original_model'
+
 NEST_CODE_DIR=os.path.join(CODE_DIR,nest_prefix)
 NEST_DATA_DIR=os.path.join(DATA_DIR,nest_prefix)
 
@@ -25,19 +26,16 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-N_measure=1
-PREFIX = ['NEST']
-WEIGHT_SAMPLES = ['all_{:02d}.json'.format(i) for i in range(1,N_measure+1)]        #define the weights files output to model.py and input to the cpp code
-SPIKE_SAMPLES = ['spikes-{:02d}-0.gdf'.format(1002) for i in range(1,N_measure+1)]        #define the spike files
-GROUP_SAMPLES = ['groups_{:02d}.json'.format(i) for i in range(1,N_measure+1)]   # define files output of cpp code and input to example_plots.py
 PLOT_FILES = ['plot_8.pdf','plot_5.pdf','plot_7.pdf']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 
+CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
+
+configfiles=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 
 include: "Izhikevic.rules"
 include: "nest.rules"
-
 
 rule all:
     input:
@@ -45,16 +43,16 @@ rule all:
         #test_plot_delay='figures/delay_distribution.pdf',
         #weight='figures/single_stim_weight_distribution.pdf',
         #delay='figures/single_stim_delay_distribution.pdf',
-        test_membrane='figures/membrane_potential_comparison.pdf',
         #test_rasta='figures/spikes_comparison.pdf',
-        original_groups=expand("{folder}/reformat_groups_01.json",folder=IZHI_DATA_DIR),
-        original_weights=expand("{folder}/reformat_all_01.json",folder=IZHI_DATA_DIR),
-        original_repro=expand("{folder}/reformat_single_stim_all_01.json",folder=IZHI_DATA_DIR),
-        nest_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre=PREFIX),
-        nest_weight=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre=PREFIX),
-        nest_test_weights=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre='NEST_single_stim'),
-        nest_test_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre='NEST_single_stim'),
-        original_test_groups=expand("{folder}/{pre}_{file}",folder=IZHI_DATA_DIR,file=GROUP_SAMPLES,pre='reformat_single_stim'),
+        #test_membrane='figures/membrane_potential_comparison.pdf',
+        #nest_test_weights=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre='NEST_single_stim'),
+        #nest_test_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre='NEST_single_stim'),
+        #nest_groups=expand("{folder}/{pre}_groups.json",folder=NEST_DATA_DIR,pre=configfiles),
+        nest_weight=expand("{folder}/{pre}_connectivity.json",folder=NEST_DATA_DIR,pre=configfiles),
+        original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
+        original_weights=expand("{folder}/reformat_connectivity.json",folder=IZHI_DATA_DIR),
+        original_repro=expand("{folder}/reformat_bitwise_reproduction_connectivity.json",folder=IZHI_DATA_DIR),
+        original_test_groups=expand("{folder}/reformat_bitwise_reproduction_groups.json",folder=IZHI_DATA_DIR),
 
 
 
@@ -78,14 +76,13 @@ rule compile_find_polychronous_groups:
 
 rule find_groups:
     output:
-        "{folder}/{pre}_groups_{file}.json"
+        "{folder}/{pre}_groups.json"
     input:
-        all_file="{folder}/{pre}_all_{file}.json",
+        connectivity="{folder}/{pre}_connectivity.json",
         program=rules.compile_find_polychronous_groups.output,
-
     run:
-        shell('{input.program} {input.all_file} {output}')
-
+        shell('{input.program} {input.connectivity} {output}')
+"""
 rule test_single_neuron_dynamics:
     input:
         original_mem=rules.original_single_neuron_test.output.mem,
@@ -111,7 +108,7 @@ rule test_weights_and_delay:
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -i {{input.original}} -n {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
 
-"""
+
 rule make_plots:
     output:
         expand("{folder}/{pre}_{file}",folder=FIG_DIR)

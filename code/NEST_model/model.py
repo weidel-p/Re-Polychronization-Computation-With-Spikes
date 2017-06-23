@@ -155,7 +155,7 @@ nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                       'rng_seeds': seed,
                       'overwrite_files': True,
                       'local_num_threads': num_threads,
-                      'syn_update_interval': cfg["simulation-params"]["synapse-update-interval']})
+                      'syn_update_interval': cfg["simulation-params"]["synapse-update-interval"]})
 
 neuron_model = 'izhikevich'
 
@@ -213,15 +213,12 @@ mm = nest.Create("multimeter", params={
         'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"])})
 nest.Connect(mm,[699,705,731,831], 'all_to_all')
 
-write_weights(neurons, os.path.join(
-    cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_all_{:02d}.json'.format(0)))
-
 T_interval = cfg["simulation-params"]["sim-time"] / cfg["simulation-params"]["num-measurements"]
 
 for interval in range(1, cfg["simulation-params"]["num-measurements"] + 1):
     nest.Simulate(T_interval)
     write_weights(neurons, os.path.join(
-        cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_all_{:02d}.json'.format(interval)))
+        cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_connectivity.json'.format(interval)))
 
 
 
