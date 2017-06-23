@@ -17,61 +17,6 @@ parser.add_argument('-p','--prefix', type=str)
 args = parser.parse_args()
 
 
-def convert_line(line):
-    split_line = line.split(',')
-    N,L=split_line.pop(0).split() # Number of neurons in group and max Layer in the first line
-    fired=[] # save all time/sender pairs of the group, these items are in pairs of two
-    while len(split_line[0].split())<4:
-        s,t=split_line.pop(0).split()
-        fired.append({'neuron_id':int(s),'t_fired':int(t)})
-    links=[]
-    while len(split_line[0].split()) == 4: #save all links, writte nin pairs of 4, pre post delay and layer
-        pr,po,d,l = split_line.pop(0).split()
-        links.append({'pre':int(pr),'post':int(po),'delay':int(d),'layer':int(l)})
-
-    group=dict(
-        N_fired=N,
-        L_max=L,
-        fired=fired,
-        links=links
-    )
-    return group
-
-def read_group_file(filename):
-    with open(filename, "r") as f:
-        if '.json' in filename:
-                groups = json.load(f)
-        else:
-            groups=[]
-            for line in f.readlines():
-                groups.append(convert_line(line))
-    return groups
-
-def get_t_s(group):
-    times=[]
-    senders=[]
-    for i in group['fired']:
-        times.append(i['t_fired'])
-        senders.append(i['neuron_id'])
-
-    return np.array(times).astype(float),np.array(senders).astype(float)
-
-def read_spikefile(filename):
-    if 'spikes.dat' in filename:
-        spikes=np.loadtxt(filename)
-        times=spikes[:,0]
-        senders=spikes[:,1]
-    else:
-        spikes = np.loadtxt(filename)
-        times = spikes[:,1]
-        senders = spikes[:, 0]
-    return times,senders
-def read_weightfile(filename):
-    with open(filename, "r") as f:
-        all_data = json.load(f)
-    weights=[i['weight'] for i in all_data]
-    return np.array(weights)
-
 def plot_group(group,ax,LP=False,numbers=True):
 
     N_fired = group['N_fired']
@@ -166,7 +111,7 @@ def plot_8(group_data,outname):
         L_list.append(int(g["L_max"])) # longest path
 
     ax1.hist(N_list, 100)
-    ax1.set_title('# of neurons')
+    ax1.set_title('# of neurons, total {}'.format(len(group_data)))
     ax2.hist(T_list, 100)
     ax2.set_title('time span[ms]')
     ax3.hist(L_list, 30)
@@ -181,9 +126,11 @@ def plot_5(times,senders,outname):
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
+    tmin=np.min(times)
+
     for t, ax in [(0, ax1), (100, ax2), (3600, ax3)]:
 
-        idx = (times > (t*1000)) & (times < (t*1000 + 1000.))
+        idx = (times > (t*1000+tmin)) & (times < (t*1000 + 1000.+tmin))
         sub_times = times[idx]
         sub_senders = senders[idx]
         ax.plot(sub_times, sub_senders, 'k.')
@@ -216,11 +163,11 @@ def plot_specgram(times,senders,weights,outname):
     ax3 = plt.subplot(gs2[1,1])
 
 
-    idx = (times > (np.min(times))) & ((times < (np.min(times)+5000.) ))
+    idx = (times > (np.min(times))) & ((times < (np.min(times)+1000.) ))
     ax0.plot(times[idx],senders[idx],'k.',markersize=2)
     ax0.set_xlim([np.min(times),np.min(times)+5000])
     ax0.set_ylim([0, 1000])
-    ax0.set_xticks(np.linspace(np.min(times),np.min(times)+5000, num=6, endpoint=True))
+    ax0.set_xticks(np.linspace(np.min(times),np.min(times)+1000, num=6, endpoint=True))
     ax0.set_xticklabels(np.linspace(0, 5, num=6,endpoint=True))
     ax0.set_xlabel('Time [s]')
     ax0.set_ylabel('#Neuron')
@@ -255,7 +202,7 @@ times,senders=read_spikefile(spikefile)
 print 'loading spikes data done'
 weights=read_weightfile(args.weightfile)
 print 'loading weight data done'
-outfolder='../../figures'
+outfolder=args.outfolder
 outname=args.prefix+'_plot_8.pdf'
 plot_8(groups,os.path.join(outfolder,outname))
 print 'plot 8 done'
