@@ -106,7 +106,6 @@ def set_stimulus(neurons, conf,sim_time):
         print stim_id[:10],stim_t[:10]
         stim_id = stim_id[stim_t > 0]
         stim_t = stim_t[stim_t > 0]
-        print stim_id[:10], stim_t[:10]
         random_input = nest.Create('spike_generator', len(neurons))
         nest.Connect(random_input, neurons, 'one_to_one')
         nest.SetStatus(nest.GetConnections(random_input), 'weight', 20.)
@@ -138,7 +137,6 @@ def set_stimulus(neurons, conf,sim_time):
         elif conf["distribution"] == "original":
             stim_id,stim_t=np.random.choice(1000,sim_time),np.array(np.linspace(0,sim_time,sim_time+1))
             stim_t=stim_t[:-1]
-            print stim_id[:10],stim_t[:10]
             set_stimulus_times(stim_t,stim_id)
         else:
             print "Stimulus: NotImplementedError", conf["distribution"]

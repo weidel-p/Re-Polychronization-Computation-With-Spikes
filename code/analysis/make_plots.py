@@ -2,6 +2,8 @@ import numpy as np
 import json
 import sys
 import os
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.gridspec as gridspec
 import pylab as plt
 import helper as hf
