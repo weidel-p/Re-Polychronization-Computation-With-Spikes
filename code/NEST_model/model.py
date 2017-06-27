@@ -81,7 +81,7 @@ def connect_network(ex_neuron, inh_neuron, conf):
 
             for n in ex_neuron:
                 nest.SetStatus(nest.GetConnections(
-                    source=[n],target=ex_neuron+inh_neuron), 'delay', np.permutate(delay_list))
+                    source=[n],target=ex_neuron+inh_neuron), 'delay', np.random.permutate(delay_list))
 
         elif conf["delay-distribution"] == "uniform-random":
             print 'using randomly generated uniform distribution of delays with min {} and max {} delays'\
