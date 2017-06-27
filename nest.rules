@@ -1,4 +1,4 @@
-#ruleorder: nest_bitwise_reproduction > run_model
+ruleorder: nest_bitwise_reproduction > run_model
 rule install_nest:
     output:
         expand('{nest_folder}/instl/bin/nest_vars.sh',nest_folder=NEST_SRC_DIR)
@@ -17,16 +17,18 @@ rule install_nest:
 
 rule run_model:
     output:
-        weights=expand("{folder}/{{experiment}}_connectivity.json",folder=NEST_DATA_DIR),
-        spikes=expand("{folder}/{{experiment}}_spikes-2002-0.gdf",folder=NEST_DATA_DIR)
+        weights= "{folder}/{{experiment}}_connectivity.json".format(folder=NEST_DATA_DIR),
+        spikes=expand("{folder}/{{experiment}}_spikes-1001-0.gdf",folder=NEST_DATA_DIR),
+
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
-        conf='{folder}/experiments/{{experiment,^(?!.*(bit))}}.yaml'.format(folder=NEST_CODE_DIR),
+        conf='{folder}/experiments/{{experiment}}.yaml'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output
+    log: 'logs/nest_{experiment}.log'
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -c {{input.conf}}
+        python {folder}/model.py -c {{input.conf}} &>{{log}}
         """.format(folder=NEST_CODE_DIR)
 
 
@@ -37,16 +39,17 @@ rule nest_bitwise_reproduction:
         repro= expand('{folder}/reformat_bitwise_reproduction_connectivity.json',folder=IZHI_DATA_DIR),
         stim=rules.original_bitwise_reproduction.output.stim,
         init=rules.original_bitwise_reproduction.output.init,
-        conf='{folder}/experiments/bitwise_reproduction.yaml'.format(folder=NEST_CODE_DIR)
+        conf='{folder}/experiments/{{experiment}}_reproduction.yaml'.format(folder=NEST_CODE_DIR)
 
     output:
-        mem='{folder}/NEST_single_stim-2002-0.dat'.format(folder=NEST_DATA_DIR),
-        spk='{folder}/NEST_single_stim_spikes-2001-0.gdf'.format(folder=NEST_DATA_DIR),
-        weight='{folder}/NEST_single_stim_all_01.json'.format(folder=NEST_DATA_DIR)
-    priority:1
+        mem='{folder}/{{experiment}}_reproduction-1002-0.dat'.format(folder=NEST_DATA_DIR),
+        spikes=expand("{folder}/{{experiment}}_reproduction_spikes-1001-0.gdf",folder=NEST_DATA_DIR),
+        weights=expand("{folder}/{{experiment}}_reproduction_connectivity.json",folder=NEST_DATA_DIR)
+    #priority:1
+    log: 'logs/nest_{experiment}_reproduction.log'
 
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -c {{input.conf}}
+        python {folder}/model.py -c {{input.conf}} &>{{log}}
         """.format(folder=NEST_CODE_DIR)

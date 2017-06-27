@@ -29,30 +29,27 @@ NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
 PLOT_FILES = ['plot_8.pdf','plot_5.pdf','plot_7.pdf']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
-
+LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
-configfiles=[file[:-5] for file in os.listdir(CONFIG_DIR)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
+#repetition is used to set seed to get statistics for the experiemnts
+repetitions=5
 
 include: "Izhikevic.rules"
 include: "nest.rules"
 
 rule all:
     input:
-        #test_plot_weight='figures/weight_distribution.pdf',
-        #test_plot_delay='figures/delay_distribution.pdf',
-        #weight='figures/single_stim_weight_distribution.pdf',
-        #delay='figures/single_stim_delay_distribution.pdf',
-        #test_rasta='figures/spikes_comparison.pdf',
-        #test_membrane='figures/membrane_potential_comparison.pdf',
-        #nest_test_weights=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=WEIGHT_SAMPLES,pre='NEST_single_stim'),
-        #nest_test_groups=expand("{folder}/{pre}_{file}",folder=NEST_DATA_DIR,file=GROUP_SAMPLES,pre='NEST_single_stim'),
-        #nest_groups=expand("{folder}/{pre}_groups.json",folder=NEST_DATA_DIR,pre=configfiles),
-        nest_weight=expand("{folder}/{pre}_connectivity.json",folder=NEST_DATA_DIR,pre=configfiles),
+        test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
+        test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
+        test_plot_5=expand('figures/{experiment}_plot_5.pdf',experiment=CONFIG_FILES),
+        weight_distributions=expand('{folder}/{experiment}_weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES),
+        delay_distributions=expand('{folder}/{experiment}_delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES),
+
         original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
         original_weights=expand("{folder}/reformat_connectivity.json",folder=IZHI_DATA_DIR),
-        original_repro=expand("{folder}/reformat_bitwise_reproduction_connectivity.json",folder=IZHI_DATA_DIR),
-        original_test_groups=expand("{folder}/reformat_bitwise_reproduction_groups.json",folder=IZHI_DATA_DIR),
+
 
 
 
@@ -61,10 +58,12 @@ rule all:
 rule clean:
     shell:
         """
-        rm -r {data}/*
-        rm -r {fig}/*
-        rm -r {exec}/*
-        """.format(exec=IZHI_EXEC_DIR,fig=FIG_DIR,data=DATA_DIR)
+        rm -rf {data}/*
+        rm -rf {code}/*.dat
+        rm -rf {exec}/*
+        rm -rf {fig}/*
+        rm -rf {logs}/*
+        """.format(exec=IZHI_EXEC_DIR,fig=FIG_DIR,data=DATA_DIR,code=IZHI_CODE_DIR,logs=LOG_DIR)
 
 rule compile_find_polychronous_groups:
 	output:
@@ -80,58 +79,74 @@ rule find_groups:
     input:
         connectivity="{folder}/{pre}_connectivity.json",
         program=rules.compile_find_polychronous_groups.output,
+    log: 'logs/find_groups_{pre}.log'
     run:
-        shell('{input.program} {input.connectivity} {output}')
-"""
-rule test_single_neuron_dynamics:
-    input:
-        original_mem=rules.original_single_neuron_test.output.mem,
-        original_spk=rules.original_single_neuron_test.output.spk,
-        nest_mem=rules.nest_single_neuron_test.output.mem,
-        nest_spk=rules.nest_single_neuron_test.output.spk
+        shell('{input.program} {input.connectivity} {output} &>{log}')
 
-    output:
-        'figures/membrane_potential_comparison.pdf',
-        #'figures/spikes_comparison.pdf',
-
-    shell:
-        'python {ANA_DIR}/single_neuron_dynamics_plot.py -i {{input.original_mem}} -n {{input.nest_mem}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule test_weights_and_delay:
     input:
-        nest=expand('{folder}/NEST_{{stim,.*}}all_01.json',folder=NEST_DATA_DIR),
-        original=expand('{folder}/reformat_{{stim,.*}}all_01.json',folder=IZHI_DATA_DIR)
+        nest=expand('{folder}/{{experiment}}_connectivity.json',folder=[NEST_DATA_DIR]),
     output:
-        weight='figures/{stim,.*}weight_distribution.pdf',
-        delay='figures/{stim,.*}delay_distribution.pdf'
+        weight=expand('{folder}/{{experiment}}_weight_distribution.pdf',folder=FIG_DIR),
+        delay=expand('{folder}/{{experiment}}_delay_distribution.pdf',folder=FIG_DIR)
+    priority:1
 
     shell:
-        'python {ANA_DIR}/weight_and_delay_distribution.py -i {{input.original}} -n {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
+        'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
 
-
-rule make_plots:
-    output:
-        expand("{folder}/{pre}_{file}",folder=FIG_DIR)
+rule test_bitwise_reproduction:
     input:
-        weights={pre}_all_{file}
-        group={pre}_groups_{file}
-        spikes=
+        original_mem=expand('{folder}/bitwise_reproduction_vu.dat',folder=IZHI_DATA_DIR),
+        original_spk=expand('{folder}/bitwise_reproduction_spikes.dat',folder=IZHI_DATA_DIR),
+        nest_mem=expand('{folder}/bitwise_reproduction-1002-0.dat',folder=NEST_DATA_DIR),
+        nest_spk=expand('{folder}/bitwise_reproduction_spikes-1001-0.gdf',folder=NEST_DATA_DIR),
+    output:
+        'figures/test_bitwise_reproduction_spk.pdf',
+        'figures/test_bitwise_reproduction_mem.pdf',
+    shell:
+        'python {ANA_DIR}/test_bitwise_reproduction.py -i {{input.original_mem}} -n {{input.nest_mem}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
-        nest_weights=rules.run_model.output.weights,
-        nest_groups=rules.find_groups.output.nest,
-        nest_spikes=rules.run_model.output.spikes,
-        original_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='reformat_all_01.json'),
-        original_groups=rules.run_poly_spnet.output.groups,
-        original_spikes=rules.move_.output.spikes,
-        original_bitwise_weights=expand("{folder}/{file}",folder=IZHI_DATA_DIR,file='all_reformat.json'),
-        original_bitwise_groups=rules.run_poly_spnet.output.groups,
-        original_bitwise_spikes=rules.move_.output.spikes,
+ruleorder: make_plots_1 > make_plots_2
 
+rule make_plots_1:
+    output:
+        '{folder}/{{experiment}}_plot_5.pdf'.format(folder=FIG_DIR)
+    input:
+        connectivity='{folder}/{{experiment}}_connectivity.json'.format(folder=NEST_DATA_DIR),
+        groups='{folder}/{{experiment}}_groups.json'.format(folder=NEST_DATA_DIR),
+        spikes='{folder}/{{experiment}}_spikes-1001-0.gdf'.format(folder=NEST_DATA_DIR),
+    priority: 1
     run:
-        shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,input.original_groups,input.original_spikes,'original',input.original_weights))
-        shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,input.reformat_groups,input.original_spikes,'reformat',input.original_weights))
-        for group,weight,spike in zip(input.nest_groups,input.nest_weights,input.nest_spikes):
-            shell('cd {};python make_plots.py -g {} -s {} --prefix {} -w {}'.format(ANA_DIR,group,spike,weight.split('_')[0].split('/')[-1],weight))
+        shell("""
+        python code/analysis/make_plots.py \
+        --groupfile data/NEST_model/{wildcards.experiment}_groups.json \
+        --spikefile data/NEST_model/{wildcards.experiment}_spikes-1001-0.gdf\
+        --weightfile data/NEST_model/{wildcards.experiment}_connectivity.json\
+        --outfolder figures\
+        --prefix {wildcards.experiment}
+        """)
+
+rule make_plots_2:
+    output:
+        '{folder}/{{experiment}}_plot_5.pdf'.format(folder=FIG_DIR)
+    input:
+        connectivity='{folder}/{{experiment}}_connectivity.json'.format(folder=NEST_DATA_DIR),
+        groups='{folder}/{{experiment}}_groups.json'.format(folder=NEST_DATA_DIR),
+        spikes='{folder}/{{experiment}}_spikes-1001-0.gdf'.format(folder=NEST_DATA_DIR),
+    priority:1
+    run:
+        shell("""
+        python code/analysis/make_plots.py \
+        --groupfile {input.groups} \
+        --spikefile {input.spikes}\
+        --weightfile {input.connectivity}\
+        --outfolder figures\
+        --prefix {wildcards.experiment}
+        """)
+
+"""
+
 
 
 rule create_pdf:

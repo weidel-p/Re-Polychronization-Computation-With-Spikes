@@ -1,16 +1,35 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import json
-<<<<<<< HEAD
-colors=['b','g','r','purple','black','y','cyan','r','r','r','r','r','r','r']
-
-
-def match_pattern(times,senders,t,group,threshold=0.4):
-    count=1
-=======
 import yaml
 
-colors = ['b', 'g', 'r', 'purple', 'black', 'y', 'cyan', 'r', 'r', 'r', 'r', 'r', 'r', 'r']
+
+def weight_dist(data,c):
+    weight=[i['weight'] for i in data]
+    delay = [i['delay'] for i in data]
+    pre = [i['pre'] for i in data]
+    post = [i['post'] for i in data]
+    ex_ex_w = [i['weight'] for i in data if (i['pre']<800 and i['post']<800)]
+    ex_in_w = [i['weight'] for i in data if (i['pre']<800 and i['post']>=800)]
+    in_ex_w = [i['weight'] for i in data if (i['pre']>=800 and i['post']<800)]
+    all_w=weight
+    return all_w,ex_ex_w,ex_in_w,in_ex_w
+
+
+def delay_dist(data,c):
+    weight=[i['weight'] for i in data]
+    delay = [i['delay'] for i in data]
+    pre = [i['pre'] for i in data]
+    post = [i['post'] for i in data]
+
+
+    ex_ex_d = [i['delay'] for i in data if (i['pre']<800 and i['post']<800)]
+    ex_in_d = [i['delay'] for i in data if (i['pre']<800 and i['post']>=800)]
+    in_ex_d = [i['delay'] for i in data if (i['pre']>=800 and i['post']<800)]
+    all_d=delay
+
+
+    return all_d,ex_ex_d, ex_in_d, in_ex_d
 
 
 def parse_config(config_file):
@@ -21,7 +40,6 @@ def parse_config(config_file):
 
 def match_pattern(times, senders, t, group, threshold=0.4):
     count = 1
->>>>>>> c0ad12fde55b2a6ef5e0ea897643eac0fa3c3e8e
     adjusted_time = times - t
     for i, neuron in enumerate(group['senders']):
         t_window = adjusted_time - group['times'][i]

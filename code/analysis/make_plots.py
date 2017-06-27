@@ -20,7 +20,7 @@ args = parser.parse_args()
 def plot_group(group,ax,LP=False,numbers=True):
 
     N_fired = group['N_fired']
-    times, senders = get_t_s(group)
+    times, senders = hf.get_t_s(group)
     idx_in = senders > 800
     idx_ex = senders < 800
     ax1 = ax.twinx()
@@ -102,7 +102,7 @@ def plot_8(group_data,outname):
     L_list=[]
     T_list=[]
     for i, g in enumerate(group_data):
-        times, senders = get_t_s(g)
+        times, senders = hf.get_t_s(g)
 
         N_list.append(int(g["N_fired"]))
     
@@ -117,7 +117,8 @@ def plot_8(group_data,outname):
     ax3.hist(L_list, 30)
     ax3.set_title('length of longest path')
 
-    plot_group(g, ax0, LP=True, numbers=False)
+    if len(group_data)>1:
+        plot_group(g, ax0, LP=True, numbers=False)
 
     plt.savefig(outname)
 
@@ -194,13 +195,13 @@ def plot_specgram(times,senders,weights,outname):
     plt.savefig(outname)
     plt.close()
 
-groups = read_group_file(args.groupfile)
+groups = hf.read_group_file(args.groupfile)
 print 'loading group data done'
 
 spikefile=args.spikefile
-times,senders=read_spikefile(spikefile)
+times,senders=hf.read_spikefile(spikefile)
 print 'loading spikes data done'
-weights=read_weightfile(args.weightfile)
+weights=hf.read_weightfile(args.weightfile)
 print 'loading weight data done'
 outfolder=args.outfolder
 outname=args.prefix+'_plot_8.pdf'
@@ -208,7 +209,8 @@ plot_8(groups,os.path.join(outfolder,outname))
 print 'plot 8 done'
 fig=plt.figure()
 ax=fig.add_subplot(111)
-plot_group(groups[1], ax, LP=False, numbers=True)
+if len(groups)>1:
+    plot_group(groups[1], ax, LP=False, numbers=True)
 plt.savefig(os.path.join(outfolder,args.prefix+'_plot_7.pdf'))
 print 'plot 7 done'
 

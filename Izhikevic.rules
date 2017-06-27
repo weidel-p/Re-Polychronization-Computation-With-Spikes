@@ -18,13 +18,15 @@ rule original_bitwise_reproduction:
         init='{folder}/bitwise_reproduction_vuinit.dat'.format(folder=IZHI_DATA_DIR),
         alldat='{folder}/bitwise_reproduction_all.dat'.format(folder=IZHI_DATA_DIR),
         spk='{folder}/bitwise_reproduction_spikes.dat'.format(folder=IZHI_DATA_DIR)
-
+    log: os.path.join(CUR_DIR,'logs/run_poly_spnet_bitwise.log')
+    priority: 10
     shell:
         """
         cd {folder}
-        ./poly_spnet_single
+
+        ./poly_spnet_bitwise_reproduction &>{{log}}
         cd ..
-        mv single_stim_*.dat {mv_folder}
+        mv bitwise_reproduction_*.dat {mv_folder}
         """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))
 
 
@@ -38,17 +40,18 @@ rule compile_reformat:
 
 rule run_poly_spnet:
     input:
-        '{folder}/poly_spnet'.format(folder=IZHI_EXEC_DIR)
-
+        '{folder}/poly_spnet'.format(folder=IZHI_EXEC_DIR),
+        rules.original_bitwise_reproduction.output
     output:
         spikes=expand('{folder}/spikes.dat',folder=IZHI_DATA_DIR),
         weights=expand('{folder}/all.dat',folder=IZHI_DATA_DIR),
         groups=expand('{folder}/polyall.dat',folder=IZHI_DATA_DIR)
+    log: os.path.join(CUR_DIR,'logs/run_poly_spnet.log')
 
     shell:
         """
         cd {folder}
-        ./poly_spnet
+        ./poly_spnet &>{{log}}
         cd ..
         mv *.dat {mv_folder}
         """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))

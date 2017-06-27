@@ -1,8 +1,8 @@
 # Simulation Parameter
 simulation-params:
     resolution: 1. # (ms)
-    synapse-update-interval: 1000.
-    sim-time: 18000000 # (ms) 5 hours: 5 * 60 * 60 * 1000
+    synapse-update-interval: 1000
+    sim-time: 18000000. # (ms) 5 hours: 5 * 60 * 60 * 1000
     num-measurements: 1 
     data-prefix: naive_reproduction
     data-path: data/NEST_model/
@@ -11,7 +11,7 @@ simulation-params:
 network-params:
     connectivity: 
         type: reproduce
-        from-file: data/original_model/reformat_bitwise_reproduction_all_01.json
+        from-file: data/original_model/reformat_bitwise_reproduction_connectivity.json
         synapse-model: stdp_izh_naive_synapse
 
     stimulus:

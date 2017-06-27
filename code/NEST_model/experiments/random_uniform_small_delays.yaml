@@ -1,0 +1,30 @@
+# Simulation Parameter
+simulation-params:
+    resolution: 1. # (ms)
+    synapse-update-interval: 1000
+    sim-time: 18000000. # (ms) 5 hours: 5 * 60 * 60 * 1000
+    num-measurements: 1 
+    data-prefix: random_uniform_small_delays
+    data-path: data/NEST_model/
+
+# Network Parameter
+network-params:
+    connectivity: 
+        type: generate
+        delay-distribution: uniform-random
+        delay-range: [1, 6] # excluding right boundary
+        synapse-model: stdp_izh_synapse
+
+    stimulus:
+        type: generate
+        distribution: poisson
+        rate: 1. # (spikes/sec) per neuron
+        weight: 20. # (mV)
+
+    initial-state:
+        type: generate
+        distribution: uniform
+        V_m-range: [-65, -55] # excluding right boundary
+
+
+

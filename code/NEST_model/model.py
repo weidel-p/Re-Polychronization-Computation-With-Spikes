@@ -62,7 +62,7 @@ def connect_network(ex_neuron, inh_neuron, conf):
             nest.SetStatus(conn, 'delay', de)
 
     elif conf["type"] == "generate":
-
+        print 'conntype ',conf["type"]
         conn_dict_inh = {'rule': 'fixed_outdegree',
                          'outdegree': N_syn, 'multapses': False, 'autapses': False}
         conn_dict_ex = {'rule': 'fixed_outdegree',
@@ -72,33 +72,41 @@ def connect_network(ex_neuron, inh_neuron, conf):
         nest.Connect(ex_neuron, neurons, conn_spec=conn_dict_ex, syn_spec='EX')
 
         if conf["delay-distribution"] == "uniform-non-random":
-            delay_list = [[j for i in range(5)] for j in range(conf["delay-range"][0], conf["delay-range"][1])]
+            print 'using uniform NON RANDOM delay distribution with min {} and max {} delays '\
+                 .format(conf["delay-range"][0], conf["delay-range"][1])
+            delay_range=range(int(conf["delay-range"][0]), int(conf["delay-range"][1]))
+            delay_list = [[j for i in range(100/len(delay_range))] for j in delay_range]
             delay_list = np.reshape(
                 np.array(delay_list).astype(float), (1, 100))[0]
 
-        elif conf["delay-distribution"] == "uniform":
-            print "Connectivity: NotImplementedError", conf["delay-distribution"]
+            for n in ex_neuron:
+                nest.SetStatus(nest.GetConnections(
+                    source=[n],target=ex_neuron+inh_neuron), 'delay', np.permutate(delay_list))
 
-        for n in ex_neuron:
-            nest.SetStatus(nest.GetConnections(
-                source=[n]), 'delay', delay_list)
+        elif conf["delay-distribution"] == "uniform-random":
+            print 'using randomly generated uniform distribution of delays with min {} and max {} delays'\
+                .format(conf["delay-range"][0],conf["delay-range"][1]-1)
+
+            for n in ex_neuron:
+                delay_list = np.random.randint(int(conf["delay-range"][0]), int(conf["delay-range"][1]), 100).astype(float)
+                print np.min(delay_list),np.max(delay_list),delay_list
+
+                nest.SetStatus(nest.GetConnections(
+                source=[n],target=ex_neuron+inh_neuron), 'delay', delay_list)
     else:
         print "warning: no connectivity has been generated"
 
 
 
-def set_stimulus(neurons, conf):
-    if conf["type"] == "reproduce":
-        stimulus = np.loadtxt(conf["from-file"])
-        stim_id = stimulus[:, 0].astype(int)
-        stim_t = stimulus[:, 1] - 1
-        del stimulus
-        # first neuron gets current manually rest via spike generator
+def set_stimulus(neurons, conf,sim_time):
+    def set_stimulus_times(stim_t,stim_id):
 
         nest.SetStatus([neurons[stim_id[0]-1]], 'I', 20.)
         # otherwise stimulus must occur at -1ms
+        print stim_id[:10],stim_t[:10]
         stim_id = stim_id[stim_t > 0]
         stim_t = stim_t[stim_t > 0]
+        print stim_id[:10], stim_t[:10]
         random_input = nest.Create('spike_generator', len(neurons))
         nest.Connect(random_input, neurons, 'one_to_one')
         nest.SetStatus(nest.GetConnections(random_input), 'weight', 20.)
@@ -109,12 +117,29 @@ def set_stimulus(neurons, conf):
         del stim_id
         del stim_t
 
+    if conf["type"] == "reproduce":
+        print 'use stimulus recorded from original cpp code'
+        stimulus = np.loadtxt(conf["from-file"])
+        stim_id = stimulus[:, 0].astype(int)
+        stim_t = stimulus[:, 1] - 1
+        del stimulus
+        set_stimulus_times(stim_t,stim_id)
+        # first neuron gets current manually rest via spike generator
+
     elif conf["type"] == "generate":
+
         if conf["distribution"] == "poisson":
+            print 'use poissonian input statistics'
+
             random_input = nest.Create('poisson_generator')
             nest.SetStatus(random_input, params={'rate': conf["rate"]})
-
             nest.Connect(random_input, neurons, 'all_to_all', {'weight': conf["weight"]})
+
+        elif conf["distribution"] == "original":
+            stim_id,stim_t=np.random.choice(1000,sim_time),np.array(np.linspace(0,sim_time,sim_time+1))
+            stim_t=stim_t[:-1]
+            print stim_id[:10],stim_t[:10]
+            set_stimulus_times(stim_t,stim_id)
         else:
             print "Stimulus: NotImplementedError", conf["distribution"]
 
@@ -125,6 +150,7 @@ def set_stimulus(neurons, conf):
 
 def set_initial_conditions(neurons, conf):
     if conf["type"] == "reproduce":
+        print 'using random numbers copied from original cpp code'
         initials = np.loadtxt(conf["from-file"])
         stim_id = initials[:, 0]
         stim_v = initials[:, 1]
@@ -133,6 +159,7 @@ def set_initial_conditions(neurons, conf):
         nest.SetStatus(neurons, 'V_m', stim_v)
         nest.SetStatus(neurons, 'U_m', stim_u)
     elif conf["type"] == "generate":
+        print 'drawing random distribition for initial membranepotential with numpy between {} and {}'.format(conf["V_m-range"][0], conf["V_m-range"][1])
         if conf["distribution"] == "uniform":
 
             vms = np.random.uniform(conf["V_m-range"][0], conf["V_m-range"][1], len(neurons))
@@ -181,17 +208,8 @@ ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)
 neurons = ex_neuron + inh_neuron
 
-set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
-
-
-connect_network(ex_neuron, inh_neuron, cfg["network-params"]["connectivity"])
-
-set_stimulus(neurons, cfg["network-params"]["stimulus"])
-
-
-
 spikedetector = nest.Create("spike_detector", params={
-    'start': cfg["simulation-params"]["sim-time"] - 10000.,
+    'start': cfg["simulation-params"]["sim-time"] - 10001.,
     'withgid': True,
     'withtime': True,
     'to_memory': False,
@@ -199,26 +217,33 @@ spikedetector = nest.Create("spike_detector", params={
     'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_spikes')})
 
 nest.Connect(neurons, spikedetector, 'all_to_all')
+mm = nest.Create("multimeter", params={
+    'record_from': ['V_m', 'U_m'],
+    'withgid': True,
+    'withtime': True,
+    'to_memory': False,
+    'to_file': True,
+    'precision': 17,
+    'start': cfg["simulation-params"]["sim-time"] - 10001,
+    # 'stop': 1000. * 100.,
+    'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"])})
+nest.Connect(mm, [699, 705, 731, 831], 'all_to_all')
+
+set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
+
+
+connect_network(ex_neuron, inh_neuron, cfg["network-params"]["connectivity"])
+
+set_stimulus(neurons, cfg["network-params"]["stimulus"],cfg["simulation-params"]["sim-time"])
+
+
 
 #if cfg["network-params"]["connectivity"]["type"] == "generate": 
-mm = nest.Create("multimeter", params={
-        'record_from': ['V_m', 'U_m'],
-        'withgid': True,
-        'withtime': True,
-        'to_memory': False,
-        'to_file': True,
-        'precision': 17,
-        # 'start':0.,
-        # 'stop': 1000. * 100.,
-        'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"])})
-nest.Connect(mm,[699,705,731,831], 'all_to_all')
 
-T_interval = cfg["simulation-params"]["sim-time"] / cfg["simulation-params"]["num-measurements"]
 
-for interval in range(1, cfg["simulation-params"]["num-measurements"] + 1):
-    nest.Simulate(T_interval)
-    write_weights(neurons, os.path.join(
-        cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_connectivity.json'.format(interval)))
+nest.Simulate(cfg["simulation-params"]["sim-time"])
+write_weights(neurons, os.path.join(
+    cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_connectivity.json'))
 
 
 
