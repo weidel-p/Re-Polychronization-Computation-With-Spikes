@@ -17,9 +17,7 @@ network-params:
 
     stimulus:
         type: generate
-        distribution: poisson
-        rate: 1. # (spikes/sec) per neuron
-        weight: 20. # (mV)
+        distribution: original
 
     initial-state:
         type: generate

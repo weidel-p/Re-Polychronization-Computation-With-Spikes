@@ -10,6 +10,8 @@ import helper
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', type=str)
+parser.add_argument('-n', '--num_threads', type=int)
+parser.add_argument('-r', '--repetition', type=int)
 
 args = parser.parse_args()
 
@@ -173,13 +175,13 @@ def set_initial_conditions(neurons, conf):
 
 nest.ResetKernel()
 
-seed = [np.random.randint(0,9999999)]*num_threads
+seed = [np.random.randint(0,9999999)]*args.num_threads
 
 nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                       'print_time': True,
                       'rng_seeds': seed,
+                      'local_num_threads': args.num_threads,
                       'overwrite_files': True,
-                      'local_num_threads': num_threads,
                       'syn_update_interval': cfg["simulation-params"]["synapse-update-interval"]})
 
 neuron_model = 'izhikevich'
@@ -205,6 +207,9 @@ nest.CopyModel("static_synapse", "EX_stat", {'weight': 6.})
 ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)
 neurons = ex_neuron + inh_neuron
+label= os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"])
+label=os.path.join(label,str(args.repetition))
+
 
 spikedetector = nest.Create("spike_detector", params={
     'start': cfg["simulation-params"]["sim-time"] - 10001.,
@@ -212,9 +217,11 @@ spikedetector = nest.Create("spike_detector", params={
     'withtime': True,
     'to_memory': False,
     'to_file': True,
-    'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_spikes')})
+    'label': os.path.join(label, 'spikes')})
 
 nest.Connect(neurons, spikedetector, 'all_to_all')
+
+
 mm = nest.Create("multimeter", params={
     'record_from': ['V_m', 'U_m'],
     'withgid': True,
@@ -224,7 +231,7 @@ mm = nest.Create("multimeter", params={
     'precision': 17,
     'start': cfg["simulation-params"]["sim-time"] - 10001,
     # 'stop': 1000. * 100.,
-    'label': os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"])})
+    'label': os.path.join(label,'membrane_potential')})
 nest.Connect(mm, [699, 705, 731, 831], 'all_to_all')
 
 set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
@@ -240,8 +247,7 @@ set_stimulus(neurons, cfg["network-params"]["stimulus"],cfg["simulation-params"]
 
 
 nest.Simulate(cfg["simulation-params"]["sim-time"])
-write_weights(neurons, os.path.join(
-    cfg["simulation-params"]["data-path"], cfg["simulation-params"]["data-prefix"] + '_connectivity.json'))
+write_weights(neurons, os.path.join(label, 'connectivity.json'))
 
 
 

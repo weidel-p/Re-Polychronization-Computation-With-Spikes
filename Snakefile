@@ -4,7 +4,9 @@ sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handl
 import socket
 if "cluster" in socket.gethostname():
     shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;')
-
+    NUM_THREADS=8
+else:
+    NUM_THREADS=1
 
 #Define folders:
 CUR_DIR=os.getcwd()
@@ -34,8 +36,7 @@ CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 #repetition is used to set seed to get statistics for the experiemnts
-repetitions=5
-
+NUM_REP=range(5)
 include: "Izhikevic.rules"
 include: "nest.rules"
 
@@ -43,9 +44,16 @@ rule all:
     input:
         test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
         test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
-        test_plot_5=expand('figures/{experiment}_plot_5.pdf',experiment=CONFIG_FILES),
+        #test_plot_5=expand('figures/{experiment}_plot_5.pdf',experiment=CONFIG_FILES),
+        test_plot_5=expand('figures/{experiment}_dynamic_measures.png',experiment=CONFIG_FILES),
+
         weight_distributions=expand('{folder}/{experiment}_weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES),
         delay_distributions=expand('{folder}/{experiment}_delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES),
+        nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+
 
         original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
         original_weights=expand("{folder}/reformat_connectivity.json",folder=IZHI_DATA_DIR),
@@ -75,9 +83,9 @@ rule compile_find_polychronous_groups:
 
 rule find_groups:
     output:
-        "{folder}/{pre}_groups.json"
+        "{folder}/{pre}/groups.json"
     input:
-        connectivity="{folder}/{pre}_connectivity.json",
+        connectivity="{folder}/{pre}/connectivity.json",
         program=rules.compile_find_polychronous_groups.output,
     log: 'logs/find_groups_{pre}.log'
     run:
@@ -107,9 +115,8 @@ rule test_bitwise_reproduction:
     shell:
         'python {ANA_DIR}/test_bitwise_reproduction.py -i {{input.original_mem}} -n {{input.nest_mem}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
-ruleorder: make_plots_1 > make_plots_2
 
-rule make_plots_1:
+rule plot_groups:
     output:
         '{folder}/{{experiment}}_plot_5.pdf'.format(folder=FIG_DIR)
     input:
@@ -127,18 +134,16 @@ rule make_plots_1:
         --prefix {wildcards.experiment}
         """)
 
-rule make_plots_2:
+rule plot_dynamics:
     output:
-        '{folder}/{{experiment}}_plot_5.pdf'.format(folder=FIG_DIR)
+        '{folder}/{{experiment}}_dynamic_measures.png'.format(folder=FIG_DIR)
     input:
         connectivity='{folder}/{{experiment}}_connectivity.json'.format(folder=NEST_DATA_DIR),
-        groups='{folder}/{{experiment}}_groups.json'.format(folder=NEST_DATA_DIR),
         spikes='{folder}/{{experiment}}_spikes-1001-0.gdf'.format(folder=NEST_DATA_DIR),
     priority:1
     run:
         shell("""
-        python code/analysis/make_plots.py \
-        --groupfile {input.groups} \
+        python code/analysis/plot_dynamic_statistics.py \
         --spikefile {input.spikes}\
         --weightfile {input.connectivity}\
         --outfolder figures\

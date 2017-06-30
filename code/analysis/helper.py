@@ -59,6 +59,13 @@ def bin_pop_rate(times, senders, binwidth=1.):
     N_senders = len(np.unique(senders))
     rate, bin_edges = np.histogram(times, np.arange(t_min, t_max, binwidth))
     return rate * 1000 / (N_senders * binwidth), bin_edges[:-1]
+def split_in_ex(times, senders):
+    exc_sender = senders[senders <= 800]
+    exc_times = times[senders <= 800]
+    inh_sender = senders[senders > 800]
+    inh_times = times[senders > 800]
+    return exc_times,exc_sender,inh_times,inh_sender
+
 
 
 def calc_specgram(time, rate, NFFT=1024, noverlap=900):
@@ -103,7 +110,7 @@ def get_t_s(group):
 
 def read_spikefile(filename):
     if '.dat' in filename:
-        if 'single_stim' in filename:
+        if 'bitwise' in filename:
             spikes = np.loadtxt(filename)
             times = spikes[:, 1]
             senders = spikes[:, 0]

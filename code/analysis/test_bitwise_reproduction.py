@@ -25,7 +25,7 @@ def mem_plot(data,spk,c):
     sender=spk[:,0]
     times=spk[:,1]
     t_max=np.max(t)
-    for i,idx in enumerate([705,699,731,831]):
+    for i,idx in enumerate([705,831]):
 
         plt.subplot(2, 2,i+1)
         plt.plot(t[id==idx],v[id==idx],c,linewidth=0.2)
