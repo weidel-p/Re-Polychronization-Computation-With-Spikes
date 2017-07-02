@@ -42,8 +42,8 @@ include: "nest.rules"
 
 rule all:
     input:
-        test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
-        test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
+        #test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
+        #test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
         test_plot_5=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
 
         weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
@@ -54,7 +54,7 @@ rule all:
         #nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 
 
-        original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
+        #original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
         original_weights=expand("{folder}/reformat_connectivity.json",folder=IZHI_DATA_DIR),
 
 
