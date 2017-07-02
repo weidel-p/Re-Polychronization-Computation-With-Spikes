@@ -44,11 +44,10 @@ rule all:
     input:
         test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
         test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
-        #test_plot_5=expand('figures/{experiment}_plot_5.pdf',experiment=CONFIG_FILES),
-        test_plot_5=expand('figures/{experiment}_dynamic_measures.png',experiment=CONFIG_FILES),
+        test_plot_5=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
 
-        weight_distributions=expand('{folder}/{experiment}_weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES),
-        delay_distributions=expand('{folder}/{experiment}_delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES),
+        weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
@@ -94,10 +93,10 @@ rule find_groups:
 
 rule test_weights_and_delay:
     input:
-        nest=expand('{folder}/{{experiment}}_connectivity.json',folder=[NEST_DATA_DIR]),
+        nest=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=[NEST_DATA_DIR]),
     output:
-        weight=expand('{folder}/{{experiment}}_weight_distribution.pdf',folder=FIG_DIR),
-        delay=expand('{folder}/{{experiment}}_delay_distribution.pdf',folder=FIG_DIR)
+        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.pdf',folder=FIG_DIR),
+        delay=expand('{folder}/{{experiment}}/{{rep}}/delay_distribution.pdf',folder=FIG_DIR)
     priority:1
 
     shell:
@@ -136,10 +135,10 @@ rule plot_groups:
 
 rule plot_dynamics:
     output:
-        '{folder}/{{experiment}}_dynamic_measures.png'.format(folder=FIG_DIR)
+        '{folder}/{{experiment}}/{{rep}}/dynamic_measures.png'.format(folder=FIG_DIR)
     input:
-        connectivity='{folder}/{{experiment}}_connectivity.json'.format(folder=NEST_DATA_DIR),
-        spikes='{folder}/{{experiment}}_spikes-1001-0.gdf'.format(folder=NEST_DATA_DIR),
+        connectivity='{folder}/{{experiment}}/{{rep}}/connectivity.json'.format(folder=NEST_DATA_DIR),
+        spikes='{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf'.format(folder=NEST_DATA_DIR),
     priority:1
     run:
         shell("""
@@ -157,7 +156,7 @@ rule plot_dynamics:
 rule create_pdf:
     output:
         expand('{folder}/main.pdf',folder=MAN_FOLDER)
-    input:
+    input:added mpi threading for nest and collecting data,
         'manuscript/8538120cqhctwxyjvvn/main.tex',
         expand("{folder}/{fig_folder}/{file}",folder=MAN_FOLDER,fig_folder=FIG_FOLDER,file=PLOT_FILES)
     shell:
