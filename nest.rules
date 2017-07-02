@@ -37,7 +37,7 @@ rule run_model:
         conf='{folder}/experiments/{{experiment}}.yaml'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output
     threads: NUM_THREADS
-    log: 'logs/nest_{experiment}.log'
+    log: 'logs/nest_{experiment}_{rep}.log'
     shell:
         """
         source {{input.nest}}
@@ -59,10 +59,10 @@ rule nest_bitwise_reproduction:
         spikes=expand("{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
         weights=expand("{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json",folder=NEST_DATA_DIR)
     priority:1
-    log: 'logs/nest_{experiment}_reproduction.log'
+    log: 'logs/nest_{experiment}_reproduction_{rep}.log'
 
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -c {{input.conf}} &>{{log}}
+        python {folder}/model.py -c {{input.conf}}  -r {{wildcards.rep}} -n {{threads}} &>{{log}}
         """.format(folder=NEST_CODE_DIR)
