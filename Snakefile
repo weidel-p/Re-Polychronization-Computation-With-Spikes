@@ -6,7 +6,7 @@ if "cluster" in socket.gethostname():
     shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;')
     NUM_THREADS=8
 else:
-    NUM_THREADS=1
+    NUM_THREADS=3
 
 #Define folders:
 CUR_DIR=os.getcwd()

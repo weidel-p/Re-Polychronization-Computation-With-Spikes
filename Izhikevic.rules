@@ -26,7 +26,6 @@ rule original_bitwise_reproduction:
         cp poly_spnet_bitwise_reproduction {{wildcards.rep}}
         cd {{wildcards.rep}}
         ./poly_spnet_bitwise_reproduction &>{{log}}
-        cd ..
         mv *.dat {mv_folder}/bitwise_reproduction/{{wildcards.rep}}
         """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))
 
@@ -54,7 +53,6 @@ rule run_poly_spnet:
         """
         cd {folder}
         ./poly_spnet &>{{log}}
-        cd ..
         mv *.dat {mv_folder}
         """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))
 

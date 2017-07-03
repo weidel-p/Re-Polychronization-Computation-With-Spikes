@@ -59,8 +59,8 @@ rule nest_bitwise_reproduction:
         spikes=expand("{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
         weights=expand("{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json",folder=NEST_DATA_DIR)
     priority:1
+    threads: NUM_THREADS
     log: 'logs/nest_{experiment}_reproduction_{rep}.log'
-
     shell:
         """
         source {{input.nest}}

@@ -16,7 +16,7 @@ parser.add_argument('-r', '--repetition', type=int)
 args = parser.parse_args()
 
 cfg = helper.parse_config(args.config)
-
+print cfg
 
 def write_weights(neuron, fname):
     json_data = []
@@ -38,7 +38,7 @@ def write_weights(neuron, fname):
 def connect_network(ex_neuron, inh_neuron, conf):
 
     if conf["type"] == "reproduce":
-        file = helper.load_json(conf["from-file"])
+        file = helper.load_json(conf["from-file"].format(rep=args.repetition))
 
         delay = np.array([float(i['delay']) for i in file])
         pre = np.array([i['pre'] for i in file])
@@ -116,7 +116,7 @@ def set_stimulus(neurons, conf,sim_time):
 
     if conf["type"] == "reproduce":
         print 'use stimulus recorded from original cpp code'
-        stimulus = np.loadtxt(conf["from-file"])
+        stimulus = np.loadtxt(conf["from-file"].format(rep=args.repetition))
         stim_id = stimulus[:, 0].astype(int)
         stim_t = stimulus[:, 1] - 1
         del stimulus
@@ -147,7 +147,7 @@ def set_stimulus(neurons, conf,sim_time):
 def set_initial_conditions(neurons, conf):
     if conf["type"] == "reproduce":
         print 'using random numbers copied from original cpp code'
-        initials = np.loadtxt(conf["from-file"])
+        initials = np.loadtxt(conf["from-file"].format(rep=args.repetition))
         stim_id = initials[:, 0]
         stim_v = initials[:, 1]
         stim_u = initials[:, 2]
@@ -196,15 +196,15 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'd': 8.0})
 
 nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
-if cfg["plasticity"]["synapse-model"]=='stdp_izh_synapse':
-    nest.CopyModel(cfg["plasticity"]["synapse-model"], "EX", {
+if cfg["network-params"]["plasticity"]["synapse-model"]=='stdp_izh_synapse':
+    nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
         'weight': 6.,
         'consistent_integration': False,
-        "tau_syn_update_interval":cfg["plasticity"]["synapse-model"]["tau_syn_update_interval"],
-        "constant_additive_value":cfg["plasticity"]["synapse-model"]["constant_additive_value"]
+        "tau_syn_update_interval":cfg["network-params"]["plasticity"]["tau_syn_update_interval"],
+        "constant_additive_value":cfg["network-params"]["plasticity"]["constant_additive_value"]
     })
 else:
-    nest.CopyModel(cfg["network-params"]["connectivity"]["synapse-model"], "EX", {
+    nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
                    'weight': 6.,
                    'consistent_integration': False,
                     })

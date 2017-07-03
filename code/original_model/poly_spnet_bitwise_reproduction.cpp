@@ -777,7 +777,7 @@ int main()
 
 
 	
-	//srand(0);
+	srand(time(NULL));
 	initialize();
 
 
