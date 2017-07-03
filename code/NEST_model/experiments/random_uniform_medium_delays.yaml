@@ -3,7 +3,6 @@ simulation-params:
     resolution: 1. # (ms)
     synapse-update-interval: 1000
     sim-time: 18000000. # (ms) 5 hours: 5 * 60 * 60 * 1000
-    num-measurements: 1 
     data-prefix: random_uniform_medium_delays
     data-path: data/NEST_model/
 
@@ -13,7 +12,11 @@ network-params:
         type: generate
         delay-distribution: uniform-random
         delay-range: [1, 11] # excluding right boundary
+
+    plasticity:
         synapse-model: stdp_izh_synapse
+        tau_syn_update_interval: 0.9
+        constant_additive_value: 0.01
 
     stimulus:
         type: generate

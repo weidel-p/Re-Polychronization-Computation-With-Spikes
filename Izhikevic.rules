@@ -11,22 +11,23 @@ rule compile_model:
 rule original_bitwise_reproduction:
     input:
         '{folder}/poly_spnet_bitwise_reproduction'.format(folder=IZHI_EXEC_DIR)
-
     output:
-        mem='{folder}/bitwise_reproduction_vu.dat'.format(folder=IZHI_DATA_DIR),
-        stim='{folder}/bitwise_reproduction_stim.dat'.format(folder=IZHI_DATA_DIR),
-        init='{folder}/bitwise_reproduction_vuinit.dat'.format(folder=IZHI_DATA_DIR),
-        alldat='{folder}/bitwise_reproduction_all.dat'.format(folder=IZHI_DATA_DIR),
-        spk='{folder}/bitwise_reproduction_spikes.dat'.format(folder=IZHI_DATA_DIR)
-    log: os.path.join(CUR_DIR,'logs/run_poly_spnet_bitwise.log')
+        program='{folder}/{{rep}}/poly_spnet_bitwise_reproduction'.format(folder=IZHI_EXEC_DIR),
+        mem='{folder}/bitwise_reproduction/{{rep}}/vu.dat'.format(folder=IZHI_DATA_DIR),
+        stim='{folder}/bitwise_reproduction/{{rep}}/stim.dat'.format(folder=IZHI_DATA_DIR),
+        init='{folder}/bitwise_reproduction/{{rep}}/vuinit.dat'.format(folder=IZHI_DATA_DIR),
+        alldat='{folder}/bitwise_reproduction/{{rep}}/all.dat'.format(folder=IZHI_DATA_DIR),
+        spk='{folder}/bitwise_reproduction/{{rep}}/spikes.dat'.format(folder=IZHI_DATA_DIR)
+    log: os.path.join(CUR_DIR,'logs/run_poly_spnet_bitwise_{rep}.log')
     priority: 10
     shell:
         """
         cd {folder}
-
+        cp poly_spnet_bitwise_reproduction {{wildcards.rep}}
+        cd {{wildcards.rep}}
         ./poly_spnet_bitwise_reproduction &>{{log}}
         cd ..
-        mv bitwise_reproduction_*.dat {mv_folder}
+        mv *.dat {mv_folder}/bitwise_reproduction/{{wildcards.rep}}
         """.format(folder=IZHI_EXEC_DIR,mv_folder=os.path.join(CUR_DIR,IZHI_DATA_DIR))
 
 
@@ -37,6 +38,7 @@ rule compile_reformat:
         expand('{folder}/reformat',folder=ANA_DIR)
     shell:
         'g++ -o {output} {input} -ljsoncpp'
+
 
 rule run_poly_spnet:
     input:
@@ -59,10 +61,10 @@ rule run_poly_spnet:
 
 rule reformat_izhi:
     input:
-        alldat='{folder}/{{repro,.*}}all.dat'.format(folder=IZHI_DATA_DIR),
+        all_file='{folder}/bitwise_reproduction/{{rep}}/all.dat'.format(folder=IZHI_DATA_DIR),
         programm=rules.compile_reformat.output
     output:
-        expand('{folder}/reformat_{{repro,.*}}connectivity.json',folder=IZHI_DATA_DIR)
+        expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=IZHI_DATA_DIR),
     shell:
-        '{folder}/reformat {{input.alldat}} {{output}}'.format(folder=ANA_DIR)
+        '{folder}/reformat {{input.all_file}} {{output}}'.format(folder=ANA_DIR)
 

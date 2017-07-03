@@ -49,7 +49,7 @@ rule nest_bitwise_reproduction:
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output,
-        repro= expand('{folder}/reformat_bitwise_reproduction_connectivity.json',folder=IZHI_DATA_DIR),
+        repro= expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=IZHI_DATA_DIR),
         stim=rules.original_bitwise_reproduction.output.stim,
         init=rules.original_bitwise_reproduction.output.init,
         conf='{folder}/experiments/{{experiment}}_reproduction.yaml'.format(folder=NEST_CODE_DIR)

@@ -11,6 +11,8 @@ network-params:
     connectivity: 
         type: reproduce
         from-file: data/original_model/reformat_bitwise_reproduction_connectivity.json
+
+    plasticity:
         synapse-model: stdp_izh_naive_synapse
 
     stimulus:

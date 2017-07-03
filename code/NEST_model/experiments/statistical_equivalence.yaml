@@ -12,7 +12,11 @@ network-params:
         type: generate
         delay-distribution: uniform-non-random
         delay-range: [1, 21] # excluding right boundary
+
+    plasticity:
         synapse-model: stdp_izh_synapse
+        tau_syn_update_interval: 0.9
+        constant_additive_value: 0.01
 
     stimulus:
         type: generate

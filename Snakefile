@@ -44,10 +44,9 @@ rule all:
     input:
         #test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
         #test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
-        test_plot_5=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
-
-        weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #test_plot_5=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
+        #weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
@@ -55,7 +54,7 @@ rule all:
 
 
         #original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
-        original_weights=expand("{folder}/reformat_connectivity.json",folder=IZHI_DATA_DIR),
+        original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
 
 
 
@@ -119,9 +118,9 @@ rule plot_groups:
     output:
         '{folder}/{{experiment}}_plot_5.pdf'.format(folder=FIG_DIR)
     input:
-        connectivity='{folder}/{{experiment}}_connectivity.json'.format(folder=NEST_DATA_DIR),
-        groups='{folder}/{{experiment}}_groups.json'.format(folder=NEST_DATA_DIR),
-        spikes='{folder}/{{experiment}}_spikes-1001-0.gdf'.format(folder=NEST_DATA_DIR),
+        connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=[NEST_DATA_DIR]),
+        groups=expand('{folder}/{{experiment}}/{{rep}}/groups.json',folder=NEST_DATA_DIR),
+        spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     priority: 1
     run:
         shell("""
@@ -133,44 +132,3 @@ rule plot_groups:
         --prefix {wildcards.experiment}
         """)
 
-rule plot_dynamics:
-    output:
-        '{folder}/{{experiment}}/{{rep}}/dynamic_measures.png'.format(folder=FIG_DIR)
-    input:
-        connectivity='{folder}/{{experiment}}/{{rep}}/connectivity.json'.format(folder=NEST_DATA_DIR),
-        spikes='{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf'.format(folder=NEST_DATA_DIR),
-    priority:1
-    run:
-        shell("""
-        python code/analysis/plot_dynamic_statistics.py \
-        --spikefile {input.spikes}\
-        --weightfile {input.connectivity}\
-        --outfolder figures\
-        --prefix {wildcards.experiment}
-        """)
-
-"""
-
-
-
-rule create_pdf:
-    output:
-        expand('{folder}/main.pdf',folder=MAN_FOLDER)
-    input:added mpi threading for nest and collecting data,
-        'manuscript/8538120cqhctwxyjvvn/main.tex',
-        expand("{folder}/{fig_folder}/{file}",folder=MAN_FOLDER,fig_folder=FIG_FOLDER,file=PLOT_FILES)
-    shell:
-        "cd {folder};pdflatex main.tex".format(folder=MAN_FOLDER)
-
-
-rule move_to_manuscript:
-    output:
-         expand("{folder}/figures/{file}",folder=MAN_FOLDER,file=PLOT_FILES)
-    input:
-         expand("figures/{file}",file=PLOT_FILES)
-    run:
-        for move in zip(input,output):
-            shell("cp {} {}".format(move[0],move[1]))
-
-
-"""

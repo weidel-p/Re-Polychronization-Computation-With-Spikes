@@ -48,12 +48,8 @@ def connect_network(ex_neuron, inh_neuron, conf):
             idxes = np.where(pre_neuron == pre)[0]
             if pre_neuron in ex_neuron:
 
-                if pre_neuron < 801:
-                    nest.Connect([pre_neuron], post[idxes].tolist(),
-                                 conn_spec='all_to_all', syn_spec='EX')
-                else:
-                    nest.Connect([pre_neuron], post[idxes].tolist(),
-                                 conn_spec='all_to_all', syn_spec='EX_stat')
+                nest.Connect([pre_neuron], post[idxes].tolist(),
+                             conn_spec='all_to_all', syn_spec='EX')
 
             elif pre_neuron in inh_neuron:
                 nest.Connect([pre_neuron], post[idxes].tolist(),
@@ -200,9 +196,19 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'd': 8.0})
 
 nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
-nest.CopyModel(cfg["network-params"]["connectivity"]["synapse-model"], "EX", {
-               'weight': 6., 'consistent_integration': False})
-nest.CopyModel("static_synapse", "EX_stat", {'weight': 6.})
+if cfg["plasticity"]["synapse-model"]=='stdp_izh_synapse':
+    nest.CopyModel(cfg["plasticity"]["synapse-model"], "EX", {
+        'weight': 6.,
+        'consistent_integration': False,
+        "tau_syn_update_interval":cfg["plasticity"]["synapse-model"]["tau_syn_update_interval"],
+        "constant_additive_value":cfg["plasticity"]["synapse-model"]["constant_additive_value"]
+    })
+else:
+    nest.CopyModel(cfg["network-params"]["connectivity"]["synapse-model"], "EX", {
+                   'weight': 6.,
+                   'consistent_integration': False,
+                    })
+
 
 ex_neuron = nest.Create('ex_Izhi', N_ex)
 inh_neuron = nest.Create('inh_Izhi', N_inh)

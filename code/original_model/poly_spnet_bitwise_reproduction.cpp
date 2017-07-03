@@ -171,7 +171,7 @@ void initialize()
 //	u = 0.2.*v;                         % initial values for u
 	for (i=0;i<N;i++)	u[i]=0.2*v[i];
     FILE	*fvuinit;
-    fvuinit = fopen("..//bitwise_reproduction_vuinit.dat","w");
+    fvuinit = fopen("vuinit.dat","w");
 	for (i=0;i<N;i++)	fprintf(fvuinit, "%d\t%21.17f\t%21.17f\n",i+1,v[i],u[i]);
 	fclose(fvuinit);
 
@@ -727,7 +727,7 @@ void	all_polychronous()
 {
 	int	i;
 	N_polychronous=0;
-	fpoly = fopen("..//bitwise_reproduction_polyall.dat","w");
+	fpoly = fopen("polyall.dat","w");
    	for (i=0;i<polylenmax;i++) N_postspikes[i]=0;
 
 	for (i=0;i<Ne;i++) polychronous(i);
@@ -777,18 +777,18 @@ int main()
 
 
 	
-	srand(0);
+	//srand(0);
 	initialize();
 
 
-    fidx = fopen("..//bitwise_reproduction_stim.dat","a");
-    fvu = fopen("..//bitwise_reproduction_vu.dat","a");
-    fs = fopen("..//bitwise_reproduction_spikes.dat","a");
-    fssd = fopen("..//bitwise_reproduction_ssd.dat","a");
-
+    fidx = fopen("stim.dat","a");
+    fvu = fopen("vu.dat","a");
+    fs = fopen("spikes.dat","a");
+    fssd = fopen("ssd.dat","a");
+    int max_sec=18000;
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<5*60*60; sec++)
+	for (sec=0; sec<max_sec; sec++)
 	{
 	
 
@@ -919,8 +919,8 @@ int main()
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            if ((((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))&(sec==5*60*60-1))
-                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
+            if ((((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))&(sec>max_sec-2)&(t>=0))
+                      fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i]);
             }
 
 
@@ -956,7 +956,7 @@ int main()
 //		axis([0 1000 0 N]); drawnow;
 
         for (i=1;i<N_firings;i++)
-            if((firings[i][0] >=0)&&(sec==5*60*60-1))
+            if((firings[i][0] >=0)&(sec>max_sec-11))
                 fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
@@ -1005,14 +1005,14 @@ int main()
 //	end;
 
 	}
-    save_all("..//bitwise_reproduction_all.dat");
+    save_all("all.dat");
     fclose(fssd);
     fclose(fidx);
     fclose(fvu);
     fclose(fs);
 
 
-   all_polychronous(); k=N_polychronous;
+  // all_polychronous(); k=N_polychronous;
 
 //	shuffle();
 //	all_polychronous(); 
