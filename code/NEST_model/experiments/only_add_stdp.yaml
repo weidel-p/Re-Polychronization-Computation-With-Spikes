@@ -15,7 +15,7 @@ network-params:
 
     plasticity:
         synapse-model: stdp_izh_synapse
-        tau_syn_update_interval: 0.0
+        tau_syn_update_interval: 1.0
         constant_additive_value: 0.0
 
     stimulus:
