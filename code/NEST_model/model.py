@@ -201,9 +201,10 @@ nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
 if cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_izh_synapse':
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
         'weight': 6.,
-        'consistent_integration': False,
         "tau_syn_update_interval": cfg["network-params"]["plasticity"]["tau_syn_update_interval"],
-        "constant_additive_value": cfg["network-params"]["plasticity"]["constant_additive_value"]
+        "constant_additive_value": cfg["network-params"]["plasticity"]["constant_additive_value"],
+        "reset_weight_change_after_update": cfg["network-params"]["plasticity"]["reset_weight_change_after_update"]
+
     })
 else:
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {

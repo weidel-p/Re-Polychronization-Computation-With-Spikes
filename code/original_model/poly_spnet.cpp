@@ -775,7 +775,7 @@ int main()
 
 
 //	for sec=1:60*60*5
-	for (sec=0; sec<60*60*5; sec++)
+	for (sec=0; sec<5*60*60; sec++)
 	{
 	
 
@@ -900,7 +900,7 @@ int main()
    		fs = fopen("..//spikest.dat","w");
 		for (i=1;i<N_firings;i++)
 			if (firings[i][0] >=0)
-				fprintf(fs, "%d  %d\n", sec*000+firings[i][0], firings[i][1]);
+				fprintf(fs, "%d  %d\n", sec*1000+firings[i][0], firings[i][1]);
 		fclose(fs);
 		remove("..//spikes.dat"); 
 		rename( "..//spikest.dat", "..//spikes.dat" );
@@ -937,20 +937,21 @@ int main()
 //    if mod(sec,10)==0, 
 //        save all; 
 //    end;
-      if ( (sec%100==0) & (sec > 0)) 
-	  {
-		  save_all("..//all.dat");
-
-		  fs = fopen("..//s.dat", "w");
-		  for (i=0; i<Ne; i++)
-			  for (j=0;j<M; j++)
-				fprintf(fs, "%d %3.3f\n", post[i][j], s[i][j]);
-		  fclose(fs);
-	  }
+//      if ( (sec%10==0) & (sec > 0))
+//	  {
+//		  save_all("..//all.dat");
+//
+//		  fs = fopen("..//s.dat", "w");
+//		  for (i=0; i<Ne; i++)
+//			  for (j=0;j<M; j++)
+//				fprintf(fs, "%d %3.3f\n", post[i][j], s[i][j]);
+//		  fclose(fs);
+//	  }
 			
 //	end;
 
 	}
+    save_all("..//all.dat");
 
 //fpoly = fopen("..//polyall.dat","w");
 	all_polychronous(); k=N_polychronous;

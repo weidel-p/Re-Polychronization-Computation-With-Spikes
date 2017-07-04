@@ -34,7 +34,7 @@ FIG_DIR='figures'
 LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) or ('statistical' in file)]
 #repetition is used to set seed to get statistics for the experiemnts
 NUM_REP=range(5)
 include: "Izhikevic.rules"
@@ -47,13 +47,13 @@ rule all:
         #test_plot_5=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
         #weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         #delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 
         plot_files=expand('{folder}/{experiment}/{rep}/dynamics.png',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #original_groups=expand("{folder}/reformat_groups.json",folder=IZHI_DATA_DIR),
+        original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
         original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
 
 
@@ -81,11 +81,11 @@ rule compile_find_polychronous_groups:
 
 rule find_groups:
     output:
-        "{folder}/{experiment}/{pre}/groups.json"
+        "{folder}/{experiment}/{rep}/groups.json"
     input:
         connectivity="{folder}/{experiment}/{rep}/connectivity.json",
         program=rules.compile_find_polychronous_groups.output,
-    log: 'logs/find_groups_{experiment}_{pre}.log'
+    log: 'logs/find_groups_{experiment}_{rep}.log'
     run:
         shell('{input.program} {input.connectivity} {output} &>{log}')
 
@@ -136,7 +136,7 @@ rule plot_dynamics:
     output:
         file=expand('{folder}/{{experiment}}/{{rep}}/dynamics.png',folder=FIG_DIR),
     input:
-        connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=[NEST_DATA_DIR]),
+        connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     priority: 2
     run:
