@@ -1,4 +1,4 @@
-ruleorder: nest_bitwise_reproduction > run_model
+ruleorder: run_nest_reproduction > run__nest_model
 rule install_nest:
     output:
         expand('{nest_folder}/instl/bin/nest_vars.sh',nest_folder=NEST_SRC_DIR)
@@ -26,7 +26,7 @@ rule collect_data:
         rm {input}
         """
 
-rule run_model:
+rule run_nest_model:
     output:
         weights= "{folder}/{{experiment}}/{{rep}}/connectivity.json".format(folder=NEST_DATA_DIR),
         spikes=expand("{folder}/{{experiment}}/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
@@ -45,7 +45,7 @@ rule run_model:
         """.format(folder=NEST_CODE_DIR)
 
 
-rule nest_bitwise_reproduction:
+rule run_nest_reproduction:
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output,
@@ -55,7 +55,7 @@ rule nest_bitwise_reproduction:
         conf='{folder}/experiments/{{experiment}}_reproduction.yaml'.format(folder=NEST_CODE_DIR)
 
     output:
-        mem='{folder}/{{experiment}}_reproduction/{{rep}}/membrane_potential-1002-{threads}.dat'.format(folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
+        mem=expand('{folder}/{{experiment}}_reproduction/{{rep}}/membrane_potential-1002-{threads}.dat',folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
         spikes=expand("{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
         weights=expand("{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json",folder=NEST_DATA_DIR)
     priority:1
