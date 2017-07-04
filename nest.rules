@@ -1,4 +1,4 @@
-ruleorder: run_nest_reproduction > run__nest_model
+ruleorder: run_nest_reproduction > run_nest_model
 rule install_nest:
     output:
         expand('{nest_folder}/instl/bin/nest_vars.sh',nest_folder=NEST_SRC_DIR)
