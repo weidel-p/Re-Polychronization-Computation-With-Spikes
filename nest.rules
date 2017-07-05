@@ -38,6 +38,7 @@ rule run_nest_model:
         nest=rules.install_nest.output
     threads: NUM_THREADS
     log: 'logs/nest_{experiment}_{rep}.log'
+    benchmark: "benchmarks/nest_{{experiment}}_{threads}.log".format(threads=NUM_THREADS)
     shell:
         """
         source {{input.nest}}
@@ -60,6 +61,7 @@ rule run_nest_reproduction:
         weights=expand("{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json",folder=NEST_DATA_DIR)
     priority:1
     threads: NUM_THREADS
+    benchmark: "benchmarks/nest_{{experiment}}_reproduction_{threads}.log".format(threads=NUM_THREADS)
     log: 'logs/nest_{experiment}_reproduction_{rep}.log'
     shell:
         """

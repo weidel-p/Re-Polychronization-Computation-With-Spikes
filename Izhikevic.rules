@@ -19,7 +19,6 @@ rule original_bitwise_reproduction:
         alldat='{folder}/bitwise_reproduction/{{rep}}/all.dat'.format(folder=IZHI_DATA_DIR),
         spk='{folder}/bitwise_reproduction/{{rep}}/spikes.dat'.format(folder=IZHI_DATA_DIR)
     log: os.path.join(CUR_DIR,'logs/run_poly_spnet_bitwise_{rep}.log')
-    priority: 10
     shell:
         """
         cd {folder}
