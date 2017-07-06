@@ -777,7 +777,7 @@ int main(int argc, char **argv){
     if(argc == 1)
 	    {
 	    srand(time(NULL));
-        std::cout << "Using times as seed"<<std::endl;
+        std::cout << "Using time(NULL) as seed"<<std::endl;
         }
     else if(argc == 2)
         {

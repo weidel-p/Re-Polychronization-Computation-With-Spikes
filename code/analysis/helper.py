@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 import yaml
-
+import os
 
 def weight_dist(data,c):
     weight=[i['weight'] for i in data]
@@ -35,6 +35,12 @@ def delay_dist(data,c):
 def parse_config(config_file):
     with open(config_file, 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
+    base = os.path.basename(config_file)
+    base_and_extless=os.path.splitext(base)[0]
+    print base_and_extless
+    cfg['simulation-params']['data-prefix']=base_and_extless
+    print cfg
+
     return cfg
 
 
