@@ -28,7 +28,7 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-PLOT_FILES = ['plot_8.pdf','plot_5.pdf','plot_7.pdf']
+PLOT_FILES = ['plot_8.png','plot_7.png','dynamics.png']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 LOG_DIR='logs'
@@ -51,8 +51,12 @@ rule all:
         nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',folder=FIG_DIR,experiment=CONFIG_FILES),
+        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
+        plt_naive=expand('figures/bitwise_naive_{rep}.png',rep=NUM_REP),
+        plt_statistical=expand('figures/bitwise_statistical_{rep}.png',rep=NUM_REP),
 
-        plot_files=expand('{folder}/{experiment}/{rep}/dynamics.png',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        plot_files=expand('{folder}/{experiment}/{rep}/{plot}',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
         original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
         original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
 
@@ -88,49 +92,69 @@ rule find_groups:
     log: 'logs/find_groups_{experiment}_{rep}.log'
     run:
         shell('{input.program} {input.connectivity} {output} &>{log}')
-
-
-rule test_weights_and_delay:
+rule plot_test_statistical_reproduction:
     input:
-        nest=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=[NEST_DATA_DIR]),
+        stat_con=expand('{folder}/statistical_equivalence/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        bit_con=expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        stat_spk=expand('{folder}/statistical_equivalence/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+        bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+
     output:
-        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.pdf',folder=FIG_DIR),
-        delay=expand('{folder}/{{experiment}}/{{rep}}/delay_distribution.pdf',folder=FIG_DIR)
-    priority:1
-
+        'figures/bitwise_statistical_{rep}.png',
     shell:
-        'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
+        'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
-rule test_bitwise_reproduction:
+rule plot_test_naive_reproduction:
     input:
-        original_mem=expand('{folder}/bitwise_reproduction_vu.dat',folder=IZHI_DATA_DIR),
-        original_spk=expand('{folder}/bitwise_reproduction_spikes.dat',folder=IZHI_DATA_DIR),
-        nest_mem=expand('{folder}/bitwise_reproduction-1002-0.dat',folder=NEST_DATA_DIR),
-        nest_spk=expand('{folder}/bitwise_reproduction_spikes-1001-0.gdf',folder=NEST_DATA_DIR),
-    output:
-        'figures/test_bitwise_reproduction_spk.pdf',
-        'figures/test_bitwise_reproduction_mem.pdf',
-    shell:
-        'python {ANA_DIR}/test_bitwise_reproduction.py -i {{input.original_mem}} -n {{input.nest_mem}} -si {{input.original_spk}} -sn {{input.nest_spk}} -o {fig_dir} '.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+        naive_con=expand('{folder}/naive_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        bit_con=expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        naive_spk=expand('{folder}/naive_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+        bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
 
+    output:
+        'figures/bitwise_naive_{rep}.png',
+    shell:
+        'python {ANA_DIR}/plot_bitwise_naive.py -bs {{input.bit_spk}} -ns {{input.naive_spk}} -bw {{input.bit_con}} -nw {{input.naive_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+
+
+rule plot_test_bitwise_reproduction:
+    input:
+        original_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes.dat',folder=IZHI_DATA_DIR),
+        nest_mem=expand('{folder}/bitwise_reproduction/{{rep}}/membrane_potential-1002.dat',folder=NEST_DATA_DIR),
+        nest_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+    output:
+        'figures/bitwise_reproduction_{rep}.png',
+    shell:
+        'python {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule plot_groups:
     output:
-        '{folder}/{{experiment}}_plot_5.pdf'.format(folder=FIG_DIR)
+        plot_7=expand('{folder}/{{experiment}}/{{rep}}/plot_7.png',folder=FIG_DIR),
+        plot_8=expand('{folder}/{{experiment}}/{{rep}}/plot_8.png',folder=FIG_DIR),
+
     input:
-        connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=[NEST_DATA_DIR]),
         groups=expand('{folder}/{{experiment}}/{{rep}}/groups.json',folder=NEST_DATA_DIR),
-        spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     priority: 1
     run:
         shell("""
-        python code/analysis/make_plots.py \
-        --groupfile data/NEST_model/{wildcards.experiment}_groups.json \
-        --spikefile data/NEST_model/{wildcards.experiment}_spikes-1001-0.gdf\
-        --weightfile data/NEST_model/{wildcards.experiment}_connectivity.json\
-        --outfolder figures\
-        --prefix {wildcards.experiment}
+        python code/analysis/plot_group_statistics.py \
+        --groupfile {input.groups}\
+        --outfolder figures/{wildcards.experiment}/{wildcards.rep}\
         """)
+rule plot_combined_groups:
+    output:
+        plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.png',folder=FIG_DIR),
+
+    input:
+        groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
+    priority: 1
+    run:
+        shell("""
+        python code/analysis/plot_combined_group_statistics.py \
+        -gl {input.groups}\
+        -fn {output.plot_8}\
+        """)
+
 
 rule plot_dynamics:
     output:
@@ -142,8 +166,8 @@ rule plot_dynamics:
     run:
         shell("""
         python code/analysis/plot_dynamics.py \
-        --spikefile data/NEST_model/{wildcards.experiment}/{wildcards.rep}/spikes-1001.gdf\
-        --weightfile data/NEST_model/{wildcards.experiment}/{wildcards.rep}/connectivity.json\
+        --spikefile {input.spikes}\
+        --weightfile {input.connectivity}\
         --outfolder figures/{wildcards.experiment}/{wildcards.rep}\
         --filename dynamics.png
         """)

@@ -782,7 +782,7 @@ int main(int argc, char **argv){
     else if(argc == 2)
         {
         int val = atoi(argv[1]);
-        srand(val);
+        srand(val+1);
         std::cout << "Using "<< val <<" as seed"<<std::endl;
         }
 

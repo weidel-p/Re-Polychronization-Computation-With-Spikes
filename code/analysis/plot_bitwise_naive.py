@@ -21,7 +21,6 @@ parser.add_argument('-bs','--bitwise_spikefile', type=str)
 parser.add_argument('-nw','--naive_weightfile', type=str)
 parser.add_argument('-bw','--bitwise_weightfile', type=str)
 
-parser.add_argument('-o','--outfolder', type=str)
 parser.add_argument('-fn','--filename', type=str)
 
 
@@ -43,8 +42,6 @@ bitwise_weights = hf.read_weightfile(args.bitwise_weightfile)
 print 'loading weight data done'
 
 
-outfolder = args.outfolder
-outname = os.path.join(outfolder, args.filename)
 
 fig = plt.figure(figsize=(9, 8))
 gs0 = gridspec.GridSpec(2, 2)
@@ -102,7 +99,7 @@ set_box_color(bpexc, excolor) # colors are from http://colorbrewer2.org/
 set_box_color(bpinh, incolor)
 axin1.set_xlim([-1,3])
 axin1.set_yticks([0,25,50,75])
-
+axin1.set_ylabel('rate distribution')
 
 phf.plot_psd(naive_times, naive_senders,ax2,incolor=incolor,excolor=excolor)
 phf.plot_psd(bitwise_times, bitwise_senders,ax2,incolor=incolor+'--',excolor=excolor+'--')
@@ -120,5 +117,5 @@ for ax,letter in [(ax01,'A'),(ax1,'B'),(ax2,'C')]:
     ax.annotate(letter, xy=(0.01, 0.99), xycoords='axes fraction', fontsize=20,
                 horizontalalignment='left', verticalalignment='top')
 
-plt.savefig(outname)
+plt.savefig(args.filename)
 

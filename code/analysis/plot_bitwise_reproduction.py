@@ -21,7 +21,6 @@ parser.add_argument('-bmem','--bitwise_mem_pop_file', type=str)
 
 
 
-parser.add_argument('-o','--outfolder', type=str)
 parser.add_argument('-fn','--filename', type=str)
 
 
@@ -37,8 +36,6 @@ bitwise_mem_pop = np.loadtxt(args.bitwise_mem_pop_file)
 
 
 
-outfolder = args.outfolder
-outname = os.path.join(outfolder, args.filename)
 
 fig = plt.figure(figsize=(9, 8))
 gs0 = gridspec.GridSpec(2, 2)
@@ -67,5 +64,5 @@ ax2.legend([exc,inh],
            prop={'size': 12})
 
 
-plt.savefig(outname)
+plt.savefig(args.filename)
 

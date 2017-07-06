@@ -63,26 +63,30 @@ def plot_raster_rate(times,senders,ax01,ax02,incolor='b',excolor='k'):
     ax01.set_xticks([])
     # ax01.set_xticklabels(np.linspace(0, 5, num=6,endpoint=True))
     # ax01.set_xlabel('Time [s]')
-    ax01.set_ylabel('#Neuron')
+    ax01.set_ylabel('Neuron Id')
 
 
     ax02.plot(inh_bins - np.min(times), inh_rate, incolor)
     ax02.plot(exc_bins - np.min(times), exc_rate, excolor)
     ax02.set_xlabel('Time [s]')
-    ax02.set_ylabel('avg spk rate [spk/s]')
+    ax02.set_ylabel(r'$f_{pop}$ [spk/s]')
+    ax02.set_ylim([0,100])
+
+    ax02.set_yticks([0,50,100])
+    ax02.set_yticklabels([0,50,100])
+
     ax02.set_xlim([np.min(times) - np.min(times), np.max(times) - np.min(times)])
-    xticks=np.linspace(np.min(times) - np.min(times), np.max(times) - np.min(times)+2, num=5,
+    xticks=np.linspace(np.min(times) - np.min(times), np.max(times) - np.min(times)+1, num=5,
                                 endpoint=True)
     ax02.set_xticks(xticks)
-    ax02.set_xticklabels(xticks.astype(int)/1000)
+    ax02.set_xticklabels(xticks/1000)
 
-    ax02.set_yticks([np.min(inh_rate),(np.min(inh_rate)+np.max(inh_rate))/2,np.max(inh_rate)])
 def plot_weights(weights,ax,c='b',bins=40,normed=False,histtype='stepfilled',xlim=[0., 10.],ylim=[150., 50000],scale='log',linestyle='-',alpha=0.5):
     ax.hist(weights, bins=bins, normed=normed,histtype=histtype,color=c,linestyle=linestyle,alpha=alpha)
     ax.set_ylim(ylim)
     ax.set_xlim(xlim)
     ax.set_xlabel('Synaptic weight [mV]')
-    ax.set_ylabel('Frequency of Synaptic Weight')
+    ax.set_ylabel('Frequency')
     ax.set_yscale(scale)
 
 def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 250.],ylim=[1e-3,1e2],scale='log',incolor='r',excolor='k'):
@@ -102,64 +106,6 @@ def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 250.],ylim=[1e-3,1
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax.set_yticks([])
-
-
-def plot_specgram(times,senders,t_min,t_max,weights,outname):
-    idx=(times>t_min)&(times<=t_max)
-
-    exc_sender = senders[senders <= 800]
-    exc_times = times[senders <= 800]
-    inh_sender = senders[senders > 800]
-    inh_times = times[senders > 800]
-    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
-    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
-
-    fig = plt.figure(figsize=(9, 8))
-    gs0 = gridspec.GridSpec(2, 2)
-    gs0.update(left=0.1, right=0.97, top=0.97, bottom=0.06, hspace=0.15)
-
-    gs1 = gridspec.GridSpecFromSubplotSpec(5, 1, subplot_spec=gs0[0,:])
-
-    ax2 = plt.subplot(gs0[1,0])
-    ax3 = plt.subplot(gs0[1,1])
-
-    ax01 = plt.subplot(gs1[:4,0])
-    ax02 = plt.subplot(gs1[4, 0])
-
-    ax01.plot(times[idx],senders[idx],'k.',markersize=2)
-    ax01.set_xlim([np.min(times[idx]),np.max(times[idx])])
-    ax01.set_ylim([0, 1000])
-    ax01.set_xticks([])
-    #ax01.set_xticklabels(np.linspace(0, 5, num=6,endpoint=True))
-    #ax01.set_xlabel('Time [s]')
-    ax01.set_ylabel('#Neuron')
-    ax01.set_title('sec = {}, ex rate {} and cv {},  in rate {} and cv {} '.format(
-        int(np.min(times)/1000),
-        np.around(np.mean(exc_rate),1),
-        np.around(np.std(exc_rate)/np.mean(exc_rate),1),
-        np.around(np.mean(inh_rate), 1),
-        np.around(np.std(inh_rate) / np.mean(inh_rate), 1)),
-        loc='left')
-
-    ax02.plot(inh_bins-np.min(times[idx]), inh_rate, 'r')
-    ax02.plot(exc_bins-np.min(times[idx]), exc_rate, 'k')
-    ax02.set_xlim([np.min(times[idx])-np.min(times[idx]),np.max(times[idx])-np.min(times[idx])])
-    ax02.set_xticks(np.linspace(np.min(times[idx])-np.min(times[idx]),np.max(times[idx])-np.min(times[idx]), num=6, endpoint=True))
-
-    ax02.set_xlabel('Time [s]')
-    ax02.set_ylabel('avg spk rate [spk/s]')
-
-
-
-    ax3.psd(inh_rate-np.mean(inh_rate), NFFT=512, Fs=1000. / (inh_bins[1]-inh_bins[0]),noverlap=256)
-    ax3.psd(exc_rate-np.mean(exc_rate), NFFT=512, Fs=1000. / (exc_bins[1] - exc_bins[0]))
-
-    #ax3.plot(bins,freqs,Pxx)
-    ax3.set_xlabel('Frequency [Hz]')
-    ax3.set_ylabel('Power [a.u.]')
-    ax3.set_xlim([0,200.])
-    plt.savefig(outname)
-    plt.close()
 
 
 def plot_group(group, ax, LP=False, numbers=True):
@@ -232,14 +178,7 @@ def plot_group(group, ax, LP=False, numbers=True):
     ax.set_xlim(np.min(times) - 10, np.max(times) + 10)
     ax1.set_xlim(np.min(times) - 10, np.max(times) + 10)
 
-
-def plot_8(group_data, outname):
-    fig = plt.figure("plot 8")
-    ax0 = fig.add_subplot(221)
-    ax1 = fig.add_subplot(222)
-    ax2 = fig.add_subplot(223)
-    ax3 = fig.add_subplot(224)
-
+def return_NTL(group_data):
     N_list = []
     L_list = []
     T_list = []
@@ -251,38 +190,74 @@ def plot_8(group_data, outname):
         T_list.append(max(times))  # time span
 
         L_list.append(int(g["L_max"]))  # longest path
+    return N_list,T_list,L_list
+def plot_8(group_data, outname):
+    fig = plt.figure("plot 8")
+    ax0 = fig.add_subplot(221)
+    ax1 = fig.add_subplot(222)
+    ax2 = fig.add_subplot(223)
+    ax3 = fig.add_subplot(224)
+    N_list, T_list, L_list=return_NTL(group_data)
 
-    ax1.hist(N_list, 100)
+    ax1.hist(N_list, np.arange(0,100,5))
     ax1.set_title('# of neurons, total {}'.format(len(group_data)))
-    ax2.hist(T_list, 100)
+    ax2.hist(T_list,  np.arange(0,200,10))
     ax2.set_title('time span[ms]')
-    ax3.hist(L_list, 30)
+    ax3.hist(L_list, np.arange(0,30,2))
     ax3.set_title('length of longest path')
 
     if len(group_data) > 1:
-        plot_group(g, ax0, LP=True, numbers=False)
+        plot_group(group_data[0], ax0, LP=False, numbers=False)
 
     plt.savefig(outname)
+    return
+
+def plot_combined_groups_statstics(group_files_list,outname):
+    fig = plt.figure("plot 8")
+    ax0 = fig.add_subplot(221)
+    ax1 = fig.add_subplot(222)
+    ax2 = fig.add_subplot(223)
+    ax3 = fig.add_subplot(224)
+    N_combined = []
+    L_combined = []
+    T_combined = []
+    for group_data in group_files_list:
+        N_list, T_list, L_list = return_NTL(group_data)
+        N_combined+=N_list
+        T_combined+=T_list
+        L_combined+=L_list
+        print len(N_combined)
 
 
-def plot_5(times, senders, outname):
-    fig = plt.figure(figsize=(9, 12))
-    ax1 = fig.add_subplot(311)
-    ax2 = fig.add_subplot(312)
-    ax3 = fig.add_subplot(313)
-    tmin = np.min(times)
 
-    for t, ax in [(0, ax1), (100, ax2), (3600, ax3)]:
-        idx = (times > (t * 1000 + tmin)) & (times < (t * 1000 + 1000. + tmin))
-        sub_times = times[idx]
-        sub_senders = senders[idx]
-        ax.plot(sub_times, sub_senders, 'k.')
-        ax.set_xticks(np.min(times) + np.linspace(0, 1000, 6, endpoint=True))
-        ax.set_xticklabels(np.linspace(0, 1000, 6, endpoint=True).astype(int))
-        ax.set_xlim([np.min(times), np.min(times) + 1000])
-        ax.set_ylabel('#Neuron')
-        ax.set_title('sec = {}'.format(int(t)), loc='left')
-    ax3.set_xlabel('Time[ms]')
+
+
+    fig.suptitle('# groups in {} iterations: {}'.format(len(group_files_list),len(N_combined)))
+    ax1.hist(N_combined, np.arange(0,100,5))
+    ax1.set_xlabel('# of neurons')
+    ax2.hist(T_combined, np.arange(0,200,10))
+    ax2.set_xlabel('time span[ms]')
+    ax3.hist(L_combined, np.arange(0,30,2))
+    ax3.set_xlabel('length of longest path')
+    ax0.set_xticks([])
+    boxplot_kwargs = dict(positions=range(3),
+                          bootstrap=1000,
+                          showmeans=True,
+                          labels=['#neurons', 'timespan','longest path']
+                          )
+
+
+    def set_box_color(bp, color):
+        plt.setp(bp['boxes'], color=color)
+        plt.setp(bp['whiskers'], color=color)
+        plt.setp(bp['caps'], color=color)
+        plt.setp(bp['medians'], color=color)
+
+
+    bpexc = ax0.boxplot([N_combined, T_combined,L_combined],
+                          **boxplot_kwargs)
+
+    set_box_color(bpexc, 'b')  # colors are from http://colorbrewer2.org/
+
+
     plt.savefig(outname)
-    plt.close()
-

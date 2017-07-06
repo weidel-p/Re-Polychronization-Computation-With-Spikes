@@ -21,7 +21,6 @@ parser.add_argument('-bs','--bitwise_spikefile', type=str)
 parser.add_argument('-sw','--statistical_weightfile', type=str)
 parser.add_argument('-bw','--bitwise_weightfile', type=str)
 
-parser.add_argument('-o','--outfolder', type=str)
 parser.add_argument('-fn','--filename', type=str)
 
 
@@ -43,8 +42,6 @@ bitwise_weights = hf.read_weightfile(args.bitwise_weightfile)
 print 'loading weight data done'
 
 
-outfolder = args.outfolder
-outname = os.path.join(outfolder, args.filename)
 
 fig = plt.figure(figsize=(9, 8))
 gs0 = gridspec.GridSpec(2, 2)
@@ -120,4 +117,4 @@ for ax,letter in [(ax01,'A'),(ax1,'B'),(ax2,'C')]:
     ax.annotate(letter, xy=(0.01, 0.99), xycoords='axes fraction', fontsize=20,
                 horizontalalignment='left', verticalalignment='top')
 
-plt.savefig(outname)
+plt.savefig(args.filename)
