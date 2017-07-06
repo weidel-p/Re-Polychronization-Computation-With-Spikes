@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <time.h>
+#include <string>
 #define rand01 (0.9999999*double(rand())/RAND_MAX) 
 				
 #define getrandom(max1) (((rand())%(max1))) // random integer between 0 and max-1
@@ -767,17 +768,25 @@ void shuffle()
 			   
 
 // --------------------------------------------------------------------------
-int main()
-{
+int main(int argc, char **argv){
 	int		i,j,k;
 	int		sec, t;
 	int idx;
 	double	I[N];
 	FILE	*fs, *fx, *fd,*fidx,*fvu,*fssd;
-
+    if(argc == 1)
+	    {
+	    srand(time(NULL));
+        std::cout << "Using times as seed"<<std::endl;
+        }
+    else if(argc == 2)
+        {
+        int val = atoi(argv[1]);
+        srand(val);
+        std::cout << "Using "<< val <<" as seed"<<std::endl;
+        }
 
 	
-	srand(time(NULL));
 	initialize();
 
 
