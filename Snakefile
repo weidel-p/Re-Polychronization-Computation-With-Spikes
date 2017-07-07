@@ -35,6 +35,7 @@ LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) ]
+repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if 'reproduction' in file]
 #repetition is used to set seed to get statistics for the experiemnts
 NUM_REP=range(5)
 include: "Izhikevic.rules"
@@ -49,7 +50,7 @@ rule all:
         plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',folder=FIG_DIR,experiment=CONFIG_FILES),
         plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
         plt_naive=expand('figures/bitwise_naive_{rep}.png',rep=NUM_REP),
-        plt_statistical=expand('figures/bitwise_statistical_{rep}.png',rep=NUM_REP),
+        plt_statistical=expand('figures/bitwise_tidy_numerics_{rep}.png',rep=NUM_REP),
         plot_files=expand('{folder}/{experiment}/{rep}/{plot}',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
         original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
         original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
@@ -89,26 +90,13 @@ rule find_groups:
 rule plot_test_statistical_reproduction:
     input:
         stat_con=expand('{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-        bit_con=expand('{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        bit_con=expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         stat_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
-        bit_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
-
+        bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_{{experiment}}_{rep}.png',
+        'figures/bitwise_{experiment}_{rep}.png',
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
-
-rule plot_test_naive_reproduction:
-    input:
-        naive_con=expand('{folder}/naive_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-        bit_con=expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-        naive_spk=expand('{folder}/naive_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
-        bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
-
-    output:
-        'figures/bitwise_naive_{rep}.png',
-    shell:
-        'python {ANA_DIR}/plot_bitwise_naive.py -bs {{input.bit_spk}} -ns {{input.naive_spk}} -bw {{input.bit_con}} -nw {{input.naive_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule plot_test_bitwise_reproduction:
     input:
