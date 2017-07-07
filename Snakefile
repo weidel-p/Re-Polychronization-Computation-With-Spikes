@@ -28,7 +28,7 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-PLOT_FILES = ['plot_8.png','plot_7.png','dynamics.png']
+PLOT_FILES = ['plot_8.png','weight_distribution.pvng','dynamics.png']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 LOG_DIR='logs'
@@ -42,24 +42,20 @@ include: "nest.rules"
 
 rule all:
     input:
-        #test_plot_mem='figures/test_bitwise_reproduction_mem.pdf',
-        #test_plot_spk='figures/test_bitwise_reproduction_spk.pdf',
-        #test_plot_5=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
-        #weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',folder=FIG_DIR,experiment=CONFIG_FILES),
-        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
-        #plt_naive=expand('figures/bitwise_naive_{rep}.png',rep=NUM_REP),
-        #plt_statistical=expand('figures/bitwise_statistical_{rep}.png',rep=NUM_REP),
-        weight=expand('{folder}/{experiment}/{rep}/weight_distribution.png',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        delay= expand('{folder}/{experiment}/{rep}/delay_distribution.png',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
-        #original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
-        #original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
+        plot_dynamcis=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
+        weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',folder=FIG_DIR,experiment=CONFIG_FILES),
+        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
+        plt_naive=expand('figures/bitwise_naive_{rep}.png',rep=NUM_REP),
+        plt_statistical=expand('figures/bitwise_statistical_{rep}.png',rep=NUM_REP),
+        plot_files=expand('{folder}/{experiment}/{rep}/{plot}',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
+        original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
+        original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",folder=IZHI_DATA_DIR,rep=NUM_REP),
 
 
 
