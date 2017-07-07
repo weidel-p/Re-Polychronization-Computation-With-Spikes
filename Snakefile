@@ -28,7 +28,7 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-PLOT_FILES = ['plot_8.png','weight_distribution.pvng','dynamics.png']
+PLOT_FILES = ['plot_8.png','weight_distribution.png','dynamic_measures.png']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 LOG_DIR='logs'
@@ -42,9 +42,6 @@ include: "nest.rules"
 
 rule all:
     input:
-        plot_dynamcis=expand('figures/{experiment}/{rep}/dynamic_measures.png',experiment=CONFIG_FILES,rep=NUM_REP),
-        weight_distributions=expand('{folder}/{experiment}/{rep}/weight_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        delay_distributions=expand('{folder}/{experiment}/{rep}/delay_distribution.pdf',folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
@@ -91,13 +88,13 @@ rule find_groups:
         shell('{input.program} {input.connectivity} {output} &>{log}')
 rule plot_test_statistical_reproduction:
     input:
-        stat_con=expand('{folder}/statistical_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-        bit_con=expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-        stat_spk=expand('{folder}/statistical_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
-        bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+        stat_con=expand('{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        bit_con=expand('{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        stat_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+        bit_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
 
     output:
-        'figures/bitwise_statistical_{rep}.png',
+        'figures/bitwise_{{experiment}}_{rep}.png',
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
@@ -112,7 +109,6 @@ rule plot_test_naive_reproduction:
         'figures/bitwise_naive_{rep}.png',
     shell:
         'python {ANA_DIR}/plot_bitwise_naive.py -bs {{input.bit_spk}} -ns {{input.naive_spk}} -bw {{input.bit_con}} -nw {{input.naive_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
-
 
 rule plot_test_bitwise_reproduction:
     input:
@@ -164,7 +160,7 @@ rule test_weights_and_delay:
 
 rule plot_dynamics:
     output:
-        file=expand('{folder}/{{experiment}}/{{rep}}/dynamics.png',folder=FIG_DIR),
+        file=expand('{folder}/{{experiment}}/{{rep}}/dynamic_measures.png',folder=FIG_DIR),
     input:
         connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
