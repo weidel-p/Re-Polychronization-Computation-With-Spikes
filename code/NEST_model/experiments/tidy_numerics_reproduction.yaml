@@ -7,24 +7,21 @@ simulation-params:
 
 # Network Parameter
 network-params:
-    connectivity:
-        type: generate
-        delay-distribution: uniform-non-random
-        delay-range: [1, 21] # excluding right boundary
+    connectivity: 
+        type: reproduce
+        from-file: data/original_model/bitwise_reproduction/{rep}/connectivity.json
 
     plasticity:
         synapse-model: stdp_izh_synapse
         tau_syn_update_interval: 10000.
-        constant_additive_value: 0.0
+        constant_additive_value: 0.01
         reset_weight_change_after_update: False
 
     stimulus:
-        type: generate
-        distribution: original
+        type: reproduce
+        from-file: data/original_model/bitwise_reproduction/{rep}/stim.dat
 
     initial-state:
-        type: generate
-        distribution: uniform
-        V_m-range: [-65, -55] # excluding right boundary
-
+        type: reproduce
+        from-file: data/original_model/bitwise_reproduction/{rep}/vuinit.dat
 
