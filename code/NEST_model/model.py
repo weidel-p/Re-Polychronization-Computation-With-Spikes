@@ -74,13 +74,15 @@ def connect_network(ex_neuron, inh_neuron, conf):
             print 'using uniform NON RANDOM delay distribution with min {} and max {} delays ' \
                 .format(conf["delay-range"][0], conf["delay-range"][1])
             delay_range = range(int(conf["delay-range"][0]), int(conf["delay-range"][1]))
+            print delay_range
             delay_list = [[j for i in range(100 / len(delay_range))] for j in delay_range]
+            print delay_list
             delay_list = np.reshape(
                 np.array(delay_list).astype(float), (1, 100))[0]
-
+            print delay_list
             for n in ex_neuron:
-                nest.SetStatus(nest.GetConnections(
-                    source=[n], target=np.random.permutation(ex_neuron + inh_neuron)), 'delay', delay_list)
+                conns=nest.GetConnections(source=[n], target=ex_neuron + inh_neuron)
+                nest.SetStatus(nest.random.permutation(conns), 'delay', delay_list)
 
         elif conf["delay-distribution"] == "uniform-random":
             print 'using randomly generated uniform distribution of delays with min {} and max {} delays' \
