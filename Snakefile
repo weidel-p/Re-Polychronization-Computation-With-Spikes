@@ -85,8 +85,9 @@ rule find_groups:
         connectivity="{folder}/{experiment}/{rep}/connectivity.json",
         program=rules.compile_find_polychronous_groups.output,
     log: 'logs/find_groups_{experiment}_{rep}.log'
-    run:
-        shell('{input.program} {input.connectivity} {output} &>{log}')
+    shell:
+        '{input.program} {input.connectivity} {output} &>{log}'
+
 rule plot_test_statistical_reproduction:
     input:
         stat_con=expand('{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
@@ -95,6 +96,7 @@ rule plot_test_statistical_reproduction:
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
         'figures/bitwise_{experiment}_{rep}.png',
+    priority: 2
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
@@ -105,6 +107,7 @@ rule plot_test_bitwise_reproduction:
         nest_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
         'figures/bitwise_reproduction_{rep}.png',
+    priority: 2
     shell:
         'python {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
@@ -115,7 +118,7 @@ rule plot_groups:
 
     input:
         groups=expand('{folder}/{{experiment}}/{{rep}}/groups.json',folder=NEST_DATA_DIR),
-    priority: 1
+    priority: 2
     run:
         shell("""
         python code/analysis/plot_group_statistics.py \
@@ -128,7 +131,7 @@ rule plot_combined_groups:
 
     input:
         groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
-    priority: 1
+    priority: 2
     run:
         shell("""
         python code/analysis/plot_combined_group_statistics.py \
@@ -143,6 +146,7 @@ rule test_weights_and_delay:
     output:
         weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.png',folder=FIG_DIR),
         delay=expand('{folder}/{{experiment}}/{{rep}}/delay_distribution.png',folder=FIG_DIR),
+    priority: 2
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
 
@@ -158,6 +162,5 @@ rule plot_dynamics:
         python code/analysis/plot_dynamics.py \
         --spikefile {input.spikes}\
         --weightfile {input.connectivity}\
-        --outfolder figures/{wildcards.experiment}/{wildcards.rep}\
-        --filename dynamics.png
+        --filename {output}
         """)

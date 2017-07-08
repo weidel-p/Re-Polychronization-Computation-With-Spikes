@@ -29,7 +29,7 @@ print 'plot 8 done'
 fig=plt.figure()
 ax=fig.add_subplot(111)
 if len(groups)>1:
-    phf.plot_group(groups[1], ax, LP=False, numbers=True)
+    phf.plot_group(groups[1], ax, LP=False, numbers=False)
 plt.savefig(os.path.join(outfolder,'plot_7.png'))
 print 'plot 7 done'
 
