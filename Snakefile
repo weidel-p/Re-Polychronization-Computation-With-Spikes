@@ -34,9 +34,9 @@ FIG_DIR='figures'
 LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) ]
+CONFIG_FILES=['connectivity_reproduction']#[file[:-5] for file in os.listdir(CONFIG_DIR) ]
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if 'reproduction' in file]
-repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
+repro_CONFIG_FILES='connectivity'#[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
 NUM_REP=range(5)
 include: "Izhikevic.rules"
