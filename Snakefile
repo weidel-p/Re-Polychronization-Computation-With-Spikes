@@ -96,7 +96,7 @@ rule plot_test_statistical_reproduction:
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
         'figures/bitwise_{experiment}_{rep}.png',
-    priority: 2
+    priority: 10
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
@@ -107,7 +107,7 @@ rule plot_test_bitwise_reproduction:
         nest_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
         'figures/bitwise_reproduction_{rep}.png',
-    priority: 2
+    priority: 10
     shell:
         'python {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
@@ -146,7 +146,7 @@ rule test_weights_and_delay:
     output:
         weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.png',folder=FIG_DIR),
         delay=expand('{folder}/{{experiment}}/{{rep}}/delay_distribution.png',folder=FIG_DIR),
-    priority: 2
+    priority: 10
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
 
