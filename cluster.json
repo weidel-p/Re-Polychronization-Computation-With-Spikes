@@ -8,6 +8,11 @@
         "time": "24:00:00",
         "N":1,
         "n": 8
+    },
+        "run_model_reproduction": {
+        "time": "24:00:00",
+        "N":1,
+        "n": 8
     }
 
 
