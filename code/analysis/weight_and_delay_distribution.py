@@ -58,5 +58,5 @@ print X.shape,Y.shape,X,Y
 plt.pcolormesh( (H.T))
 plt.colorbar()
 
-plt.savefig(args.wo)
+plt.savefig(args.o)
 plt.close()
