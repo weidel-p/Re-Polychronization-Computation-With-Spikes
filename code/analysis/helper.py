@@ -15,6 +15,22 @@ def weight_dist(data,c):
     all_w=weight
     return all_w,ex_ex_w,ex_in_w,in_ex_w
 
+def weight_dist(data,c):
+    weight=[i['weight'] for i in data]
+    delay =np.array( [i['delay'] for i in data])
+    pre = np.array([i['pre'] for i in data])
+    post = np.array([i['post'] for i in data])
+    ex_ex_w = [i['weight'] for i in data if (i['pre']<800 and i['post']<800)]
+    ex_in_w = [i['weight'] for i in data if (i['pre']<800 and i['post']>=800)]
+    in_ex_w = [i['weight'] for i in data if (i['pre']>=800 and i['post']<800)]
+    all_w=weight
+    outdegree=[np.sort(delay[pre==i]).size for i in pre if i <800]
+    print outdegree[:3]
+    outdegree=[np.sort(delay[post==i]).size for i in post if i<800]
+    print outdegree[:3]
+
+    return all_w,ex_ex_w,ex_in_w,in_ex_w
+
 
 def delay_dist(data,c):
     weight=[i['weight'] for i in data]
