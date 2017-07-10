@@ -10,8 +10,7 @@ import helper as hf
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', type=str)
-parser.add_argument('-wo', type=str)
-parser.add_argument('-do', type=str)
+parser.add_argument('-o', type=str)
 
 
 args = parser.parse_args()

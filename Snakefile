@@ -154,10 +154,9 @@ rule test_weights_and_delay:
         nest=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
     output:
         weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.png',folder=FIG_DIR),
-        delay=expand('{folder}/{{experiment}}/{{rep}}/delay_distribution.png',folder=FIG_DIR),
     priority: 10
     shell:
-        'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -wo {{output.weight}} -do {{output.delay}}'.format(ANA_DIR=ANA_DIR)
+        'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -o {{output.weight}} '.format(ANA_DIR=ANA_DIR)
 
 rule plot_dynamics:
     output:
