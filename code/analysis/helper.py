@@ -4,16 +4,6 @@ import json
 import yaml
 import os
 
-def weight_dist(data,c):
-    weight=[i['weight'] for i in data]
-    delay = [i['delay'] for i in data]
-    pre = [i['pre'] for i in data]
-    post = [i['post'] for i in data]
-    ex_ex_w = [i['weight'] for i in data if (i['pre']<800 and i['post']<800)]
-    ex_in_w = [i['weight'] for i in data if (i['pre']<800 and i['post']>=800)]
-    in_ex_w = [i['weight'] for i in data if (i['pre']>=800 and i['post']<800)]
-    all_w=weight
-    return all_w,ex_ex_w,ex_in_w,in_ex_w
 
 def weight_dist(data,c):
     weight=[i['weight'] for i in data]

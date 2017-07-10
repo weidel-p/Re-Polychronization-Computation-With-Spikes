@@ -23,8 +23,8 @@ all_w,ex_ex_w,ex_in_w,in_ex_w=hf.weight_dist(connectivity,'r')
 
 blue_patch = mpatches.Patch(color='blue', label='NEST Model')
 
-
-
+fig = plt.figure(figsize=(18, 6))
+plt.subplot(1,3,1)
 plt.hist(all_w, bins=np.linspace(-0.5, 10.5, 11), histtype='step', color='k')
 plt.title('all weights')
 plt.hist(ex_ex_w, bins=np.linspace(-0.5, 10.5, 11), histtype='step', color='r')
@@ -34,11 +34,9 @@ plt.title('ex-in')
 plt.hist(in_ex_w, bins=np.linspace(-0.5, 10.5, 11), histtype='step', color='b')
 plt.title('in_ex')
 
-plt.savefig(args.wo)
-plt.close()
-
 
 all_d,ex_ex_d, ex_in_d, in_ex_d=hf.delay_dist(connectivity,'b')
+plt.subplot(1,3,3)
 
 plt.hist(all_d, bins=np.linspace(-0.5, 20.5, 22), histtype='step', color='k')
 plt.title('all weights')
@@ -51,6 +49,15 @@ plt.title('ex-in')
 
 plt.hist(in_ex_d, bins=np.linspace(-0.5, 20.5, 22), histtype='step', color='b')
 plt.title('in-ex')
+plt.subplot(1,3,2)
+print np.min(ex_in_w+ex_ex_w),np.max(ex_in_w+ex_ex_w)
+print np.min(ex_in_d+ex_ex_d),np.max(ex_in_d+ex_ex_d)
 
-plt.savefig(args.do)
+H, xedges, yedges = np.histogram2d(ex_ex_w,ex_ex_d, bins= (np.linspace(-0.5, 10.5, 12),np.linspace(0.5, 20.5, 21)))
+X, Y = np.meshgrid(xedges[:-1]+0.5*(xedges[1]-xedges[0]),yedges[:-1]+0.5*(yedges[1]-yedges[0]) )
+print X.shape,Y.shape,X,Y
+plt.pcolormesh( (H.T))
+plt.colorbar()
+
+plt.savefig(args.wo)
 plt.close()
