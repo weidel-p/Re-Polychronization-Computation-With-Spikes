@@ -28,7 +28,7 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-PLOT_FILES = ['weight_distribution.png','dynamic_measures.png']
+PLOT_FILES = ['weight_distribution.png','dynamic_measures.png','plot_8.png']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 LOG_DIR='logs'
@@ -44,16 +44,16 @@ include: "nest.rules"
 
 rule all:
     input:
-        #nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",
-        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",
                                     folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
-        #                        folder=FIG_DIR,experiment=CONFIG_FILES),
+        plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
+                                folder=FIG_DIR,experiment=CONFIG_FILES),
         plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
                             experiment=repro_CONFIG_FILES,rep=NUM_REP),
         plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),

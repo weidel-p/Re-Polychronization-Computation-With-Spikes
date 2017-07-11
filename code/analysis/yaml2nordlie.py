@@ -42,12 +42,12 @@ def end_table(caption, label):
               """
     
 labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]
-
-fns = os.listdir(".")
+folder="../NEST_model/experiments"
+fns = os.listdir(folder)
 for fn in fns:
     if fn.endswith("yaml"):
         
-        with open(fn, "r+") as f:
+        with open(os.path.join(folder,fn), "r+") as f:
             cfg = yaml.load(f)
 
 
