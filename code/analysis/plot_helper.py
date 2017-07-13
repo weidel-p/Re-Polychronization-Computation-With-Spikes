@@ -28,7 +28,7 @@ def mem_spk_plot(data,times,sender,subplotspec):
         ax1.plot(t[id == ex_idx], v[id == ex_idx], 'k', linewidth=0.2)
         ax1.plot(times[sender == ex_idx-1], sender[sender == ex_idx-1] * 0, 'b*', markersize=10)
         for ax in [ax0,ax1]:
-            ax.set_xlim([t_max-1000, t_max])
+            ax.set_xlim([t_max-1000, t_max-000])
             ax.set_ylim([-100,100])
             ax.set_yticklabels([-50, 0, 50])
             ax.set_yticks([-50, 0, 50])

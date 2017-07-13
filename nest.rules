@@ -22,14 +22,14 @@ rule collect_data:
     shell:
         """
         cat {input} > {output}
-        sort --key 2 --numeric-sort {output} -o {output}
+        sort -k2,2 -k1,1 -V {output} -o {output}
         """
 
 rule run_nest_model:
     output:
         weights= "{folder}/{{experiment}}/{{rep}}/connectivity.json".format(folder=NEST_DATA_DIR),
-        spikes=temp(expand("{folder}/{{experiment}}/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS))),
-        membrane_potential=temp(expand("{folder}/{{experiment}}/{{rep}}/membrane_potential-1002-{threads}.dat",folder=NEST_DATA_DIR,threads=range(NUM_THREADS))),
+        spikes=expand("{folder}/{{experiment}}/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
+        membrane_potential=expand("{folder}/{{experiment}}/{{rep}}/membrane_potential-1002-{threads}.dat",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
 
     input:
         model='{folder}/model.py'.format(folder=NEST_CODE_DIR),
@@ -55,8 +55,8 @@ rule run_nest_reproduction:
         conf='{folder}/experiments/{{experiment}}_reproduction.yaml'.format(folder=NEST_CODE_DIR)
 
     output:
-        mem=temp(expand('{folder}/{{experiment}}_reproduction/{{rep}}/membrane_potential-1002-{threads}.dat',folder=NEST_DATA_DIR,threads=range(NUM_THREADS))),
-        spikes=temp(expand("{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS))),
+        mem=expand('{folder}/{{experiment}}_reproduction/{{rep}}/membrane_potential-1002-{threads}.dat',folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
+        spikes=expand("{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001-{threads}.gdf",folder=NEST_DATA_DIR,threads=range(NUM_THREADS)),
         weights=expand("{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json",folder=NEST_DATA_DIR)
     priority:1
     threads: NUM_THREADS

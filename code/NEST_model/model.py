@@ -82,6 +82,7 @@ def connect_network(ex_neuron, inh_neuron, conf):
             print delay_list
             for n in ex_neuron:
                 conns=nest.GetConnections(source=[n], target=np.random.permutation(ex_neuron + inh_neuron).tolist())
+
                 nest.SetStatus(conns, 'delay', delay_list)
 
         elif conf["delay-distribution"] == "uniform-random":
@@ -221,7 +222,7 @@ label = os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-para
 label = os.path.join(label, str(args.repetition))
 
 spikedetector = nest.Create("spike_detector", params={
-    'start': cfg["simulation-params"]["sim-time"] - 10001.,
+    'start': cfg["simulation-params"]["sim-time"] - 2000.,
     'withgid': True,
     'withtime': True,
     'to_memory': False,
@@ -237,10 +238,10 @@ mm = nest.Create("multimeter", params={
     'to_memory': False,
     'to_file': True,
     'precision': 17,
-    'start': cfg["simulation-params"]["sim-time"] - 10001,
+    'start': cfg["simulation-params"]["sim-time"] - 2000,
     # 'stop': 1000. * 100.,
     'label': os.path.join(label, 'membrane_potential')})
-nest.Connect(mm, [699, 705, 731, 831], 'all_to_all')
+nest.Connect(mm, neurons, 'all_to_all')
 
 set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
 

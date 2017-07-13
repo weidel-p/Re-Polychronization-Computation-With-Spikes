@@ -4,9 +4,9 @@ sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handl
 import socket
 if "cluster" in socket.gethostname():
     shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;')
-    NUM_THREADS=8
+    NUM_THREADS=1
 else:
-    NUM_THREADS=3
+    NUM_THREADS=1
 
 #Define folders:
 CUR_DIR=os.getcwd()
@@ -105,7 +105,7 @@ rule plot_test_statistical_reproduction:
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
         'figures/bitwise_{experiment}_{rep}.png',
-    priority: 10
+    priority: 9
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 

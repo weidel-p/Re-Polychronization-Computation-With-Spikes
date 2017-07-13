@@ -773,7 +773,7 @@ int main(int argc, char **argv){
 	int		sec, t;
 	int idx;
 	double	I[N];
-	FILE	*fs, *fx, *fd,*fidx,*fvu,*fssd;
+	FILE	*fs, *fx, *fd,*fidx,*fvu;//,*fssd;
     if(argc == 1)
 	    {
 	    srand(time(NULL));
@@ -793,7 +793,7 @@ int main(int argc, char **argv){
     fidx = fopen("stim.dat","a");
     fvu = fopen("vu.dat","a");
     fs = fopen("spikes.dat","a");
-    fssd = fopen("ssd.dat","a");
+//    fssd = fopen("ssd.dat","a");
     int max_sec=18000;
 
 //	for sec=1:60*60*5
@@ -928,7 +928,7 @@ int main(int argc, char **argv){
 //
 //            if (i==931)
 //                    fprintf(fvu, "%d\t%d\t%9.5f\t%9.5f\t%9.5f\n",i+1,t+1+1000*sec,v[i],u[i],I[i]);
-            if ((((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))&(sec>max_sec-2)&(t>=0))
+            if ((sec>max_sec-3)&(t>=0))//((((i+1==705)|(i+1==731))|((i+1==699)|(i+1==831)))&(sec>max_sec-11)&(t>=0))
                       fprintf(fvu, "%d\t%d\t%21.17f\t%21.17f\n",i+1,t+1+1000*sec,v[i],u[i]);
             }
 
@@ -965,7 +965,7 @@ int main(int argc, char **argv){
 //		axis([0 1000 0 N]); drawnow;
 
         for (i=1;i<N_firings;i++)
-            if((firings[i][0] >=0)&(sec>max_sec-11))
+            if((firings[i][0] >=0)&(sec>max_sec-3))
                 fprintf(fs, "%d  %d\n", firings[i][1], sec*1000+firings[i][0]);
 
 
@@ -1015,7 +1015,7 @@ int main(int argc, char **argv){
 
 	}
     save_all("all.dat");
-    fclose(fssd);
+//    fclose(fssd);
     fclose(fidx);
     fclose(fvu);
     fclose(fs);
