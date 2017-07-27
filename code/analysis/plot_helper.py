@@ -89,7 +89,7 @@ def plot_weights(weights,ax,c='b',bins=40,normed=False,histtype='stepfilled',xli
     ax.set_ylabel('Frequency')
     ax.set_yscale(scale)
 
-def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 250.],ylim=[1e-3,1e2],scale='log',incolor='r',excolor='k'):
+def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 150.],ylim=[1e-3,1e2],scale='log',incolor='r',excolor='k'):
     exc_times, exc_sender,inh_times, inh_sender=hf.split_in_ex(times, senders)
 
     inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
@@ -107,6 +107,13 @@ def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 250.],ylim=[1e-3,1
     ax.set_ylim(ylim)
     ax.set_yticks([])
 
+def plot_2D_weights(weights,delays,counts,ax,range=None,cmap='gray_r'):
+    if range is None:
+        range=[[-0.5,10.5],[0.5,20.5]]
+    ax.pcolor(weights, delays, counts, cmap=cmap)
+
+    ax.set_xlim(range[0])
+    ax.set_ylim(range[1])
 
 def plot_group(group, ax, LP=False, numbers=True):
     N_fired = group['N_fired']

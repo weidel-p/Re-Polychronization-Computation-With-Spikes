@@ -63,7 +63,14 @@ def match_pattern(times, senders, t, group, threshold=0.4):
         return True, count * 1.0 / group['N']
     else:
         return False, count * 1.0 / group['N']
+def weight_delay_histograms(weights,delays,bins=(11,20),range=None):
+    if range is None:
+        range=[[-0.5,10.5],[0.5,20.5]]
+    H, xedges, yedges = np.histogram2d(weights, delays, bins=bins,
+                                       range=range)
+    X, Y = np.meshgrid(xedges, yedges)
 
+    return X,Y,H.T
 
 def bin_pop_rate(times, senders, binwidth=1.):
     t_min = np.min(times)
