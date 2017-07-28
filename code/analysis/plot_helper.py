@@ -89,15 +89,18 @@ def plot_weights(weights,ax,c='b',bins=40,normed=False,histtype='stepfilled',xli
     ax.set_ylabel('Frequency')
     ax.set_yscale(scale)
 
-def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 150.],ylim=[1e-3,1e2],scale='log',incolor='r',excolor='k'):
-    exc_times, exc_sender,inh_times, inh_sender=hf.split_in_ex(times, senders)
+def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 150.],ylim=[1e-3,1e2],scale='log',incolor='r',excolor='k',linewidth=2):
 
-    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
-    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
-    inh_Pxx, inh_freqs = mlab.psd(inh_rate-np.mean(inh_rate), NFFT=NFFT, Fs=1000. / (inh_bins[1] - inh_bins[0]),noverlap=noverlap)
-    exc_Pxx, exc_freqs = mlab.psd(exc_rate-np.mean(exc_rate), NFFT=NFFT, Fs=1000. / (exc_bins[1] - exc_bins[0]),noverlap=noverlap)
-    ax.plot(inh_freqs,inh_Pxx,incolor)
-    ax.plot( exc_freqs,exc_Pxx, excolor)
+    exc_times, exc_sender,inh_times, inh_sender=hf.split_in_ex(times, senders)
+    print incolor,excolor
+    if incolor is not None:
+        inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
+        inh_Pxx, inh_freqs = mlab.psd(inh_rate-np.mean(inh_rate), NFFT=NFFT, Fs=1000. / (inh_bins[1] - inh_bins[0]),noverlap=noverlap)
+        ax.plot(inh_freqs, inh_Pxx, incolor,linewidth=linewidth)
+    if excolor is not None:
+        exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
+        exc_Pxx, exc_freqs = mlab.psd(exc_rate-np.mean(exc_rate), NFFT=NFFT, Fs=1000. / (exc_bins[1] - exc_bins[0]),noverlap=noverlap)
+        ax.plot( exc_freqs,exc_Pxx, excolor,linewidth=linewidth)
 
     #ax3.plot(bins,freqs,Pxx)
     ax.set_xlabel('Frequency [Hz]')

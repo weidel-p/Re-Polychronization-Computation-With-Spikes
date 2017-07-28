@@ -7,6 +7,7 @@ import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import mpl_toolkits.axes_grid.inset_locator
 import helper as hf
 import plot_helper as phf
 parser = argparse.ArgumentParser()
@@ -25,15 +26,10 @@ ax=plt.subplot(gs0[0,0])
 ax_lowdelay=plt.subplot(gs0[0,1])
 ax_highdelay=plt.subplot(gs0[0,2])
 
-for file in args.spikelist:
-    times, senders = hf.read_spikefile(file)
 
-    phf.plot_psd(times,senders,ax)
-
-
-low_delay=False
-high_delay=False
-for connectivity,spikes in zip(range(len(args.spikelist)),args.connectivitylist,args.spikelist):
+low_delay=0
+high_delay=0
+for i,connectivity,spikes in zip(range(len(args.spikelist)),args.connectivitylist,args.spikelist):
     connectivity = hf.load_json(connectivity)
     all_w, ex_ex_w, ex_in_w, in_ex_w = hf.weight_dist(connectivity, 'r')
     all_d, ex_ex_d, ex_in_d, in_ex_d = hf.delay_dist(connectivity, 'b')
@@ -44,19 +40,33 @@ for connectivity,spikes in zip(range(len(args.spikelist)),args.connectivitylist,
     if delays[idx[0],idx[1]]>15:
         color='k'
 
-        if not high_delay:
+        if high_delay==0:
             phf.plot_2D_weights(weights, delays, counts, ax_highdelay)
-            high_delay = True
+        high_delay+=1
 
-    if delays[idx[0], idx[1]] < 15 and not low_delay:
+    if delays[idx[0], idx[1]] < 15:
         color='b'
 
-        if not high_delay:
+        if low_delay:
             phf.plot_2D_weights(weights, delays, counts, ax_lowdelay)
-            low_delay = True
-
+        low_delay += 1
     times, senders = hf.read_spikefile(spikes)
-    phf.plot_psd(times, senders, ax,incolor=color,excolor=color)
+    phf.plot_psd(times, senders, ax,incolor=None,excolor=color)
+
+axin1 = mpl_toolkits.axes_grid.inset_locator.inset_axes(ax,
+                                                        width="45%",  # width = 30% of parent_bbox
+                                                        height=1.5,  # height : 1 inch
+                                                        borderpad=1.5
+                                                        )
+
+
+
+labels = 'low gamma', 'high gamma'
+fracs = [low_delay, high_delay]
+explode=( 0.05, 0)
+
+plt.pie(fracs, explode=explode, labels=labels,
+                autopct='%1.1f%%', shadow=True, startangle=-45)
 
 plt.savefig(args.o)
 
