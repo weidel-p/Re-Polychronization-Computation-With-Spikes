@@ -34,7 +34,9 @@ FIG_DIR='figures'
 LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
+#CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
+
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file) ]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
@@ -63,11 +65,10 @@ rule all:
 
         #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
-        plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
-                            experiment=repro_CONFIG_FILES,rep=NUM_REP),
+        #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
+        #                    experiment=repro_CONFIG_FILES,rep=NUM_REP),
         plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma.png',experiment=CONFIG_FILES),
-        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
-
+        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
         #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
         #                    folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
         #original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",

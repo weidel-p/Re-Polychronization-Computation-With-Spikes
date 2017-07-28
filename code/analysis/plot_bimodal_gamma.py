@@ -52,6 +52,25 @@ for i,connectivity,spikes in zip(range(len(args.spikelist)),args.connectivitylis
         low_delay += 1
     times, senders = hf.read_spikefile(spikes)
     phf.plot_psd(times, senders, ax,incolor=None,excolor=color)
+    print 'gamma plot {}'.format(i)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 axin1 = mpl_toolkits.axes_grid.inset_locator.inset_axes(ax,
                                                         width="45%",  # width = 30% of parent_bbox
