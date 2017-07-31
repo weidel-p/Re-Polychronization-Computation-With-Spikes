@@ -22,11 +22,11 @@ network-params:
 
     stimulus:
         type: reproduce
-        from-file: data/original_model/bitwise_reproduction/{rep}/stim.dat
+        from-file: data/original_model/bitwise_reproduction/0/stim.dat
 
     initial-state:
         type: reproduce
-        from-file: data/original_model/bitwise_reproduction/{rep}/vuinit.dat
+        from-file: data/original_model/bitwise_reproduction/0/vuinit.dat
 
 
 
