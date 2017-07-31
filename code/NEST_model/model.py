@@ -222,7 +222,7 @@ label = os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-para
 label = os.path.join(label, str(args.repetition))
 
 spikedetector = nest.Create("spike_detector", params={
-    'start': cfg["simulation-params"]["sim-time"] - cfg["simulation-params"]["rec_spike"],
+    'start': cfg["simulation-params"]["sim-time"] - cfg["simulation-params"]["rec_spikes"],
     'withgid': True,
     'withtime': True,
     'to_memory': False,
