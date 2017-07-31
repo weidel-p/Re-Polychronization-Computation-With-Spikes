@@ -222,7 +222,7 @@ label = os.path.join(cfg["simulation-params"]["data-path"], cfg["simulation-para
 label = os.path.join(label, str(args.repetition))
 
 spikedetector = nest.Create("spike_detector", params={
-    'start': cfg["simulation-params"]["sim-time"] - 10000.,
+    'start': cfg["simulation-params"]["sim-time"] - cfg["simulation-params"]["rec_spike"],
     'withgid': True,
     'withtime': True,
     'to_memory': False,
@@ -238,7 +238,7 @@ mm = nest.Create("multimeter", params={
     'to_memory': False,
     'to_file': True,
     'precision': 17,
-    'start': cfg["simulation-params"]["sim-time"] - 2000,
+    'start': cfg["simulation-params"]["sim-time"] - cfg["simulation-params"]["rec_mem"],
     # 'stop': 1000. * 100.,
     'label': os.path.join(label, 'membrane_potential')})
 nest.Connect(mm, neurons, 'all_to_all')

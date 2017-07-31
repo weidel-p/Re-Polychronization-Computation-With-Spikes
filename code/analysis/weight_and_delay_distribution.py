@@ -34,8 +34,8 @@ axHisty = plt.subplot(gs0[1:, N-1])
 
 
 connectivity=hf.load_json(args.c)
-all_w, ex_ex_w, ex_in_w, in_ex_w = hf.weight_dist(connectivity, 'r')
-all_d, ex_ex_d, ex_in_d, in_ex_d = hf.delay_dist(connectivity, 'b')
+all_w, ex_ex_w, ex_in_w = hf.conn_dist(connectivity,'weight')
+all_d, ex_ex_d, ex_in_d = hf.conn_dist(connectivity,'delay')
 
 
 

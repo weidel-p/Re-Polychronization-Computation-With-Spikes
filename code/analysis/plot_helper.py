@@ -5,7 +5,9 @@ import pylab as plt
 import helper as hf
 import numpy as np
 import matplotlib.mlab as mlab
-
+import matplotlib as mpl
+mpl.style.use('seaborn-colorblind')
+import seaborn as sns
 def mem_spk_plot(data,times,sender,subplotspec):
     id=data[:,0]
     t=data[:,1]
@@ -89,18 +91,18 @@ def plot_weights(weights,ax,c='b',bins=40,normed=False,histtype='stepfilled',xli
     ax.set_ylabel('Frequency')
     ax.set_yscale(scale)
 
-def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 150.],ylim=[1e-3,1e2],scale='log',incolor='r',excolor='k',linewidth=2):
+def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 150.],ylim=[1e-3,1e2],scale='log',incolor='C0',excolor='C1',linewidth=2):
 
     exc_times, exc_sender,inh_times, inh_sender=hf.split_in_ex(times, senders)
     print incolor,excolor
     if incolor is not None:
         inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
         inh_Pxx, inh_freqs = mlab.psd(inh_rate-np.mean(inh_rate), NFFT=NFFT, Fs=1000. / (inh_bins[1] - inh_bins[0]),noverlap=noverlap)
-        ax.plot(inh_freqs, inh_Pxx, incolor,linewidth=linewidth)
+        ax.plot(inh_freqs, inh_Pxx, color=incolor,linewidth=linewidth)
     if excolor is not None:
         exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
         exc_Pxx, exc_freqs = mlab.psd(exc_rate-np.mean(exc_rate), NFFT=NFFT, Fs=1000. / (exc_bins[1] - exc_bins[0]),noverlap=noverlap)
-        ax.plot( exc_freqs,exc_Pxx, excolor,linewidth=linewidth)
+        ax.plot( exc_freqs,exc_Pxx, color=excolor,linewidth=linewidth)
 
     #ax3.plot(bins,freqs,Pxx)
     ax.set_xlabel('Frequency [Hz]')
@@ -113,8 +115,8 @@ def plot_psd(times,senders,ax,NFFT=512,noverlap=256,xlim=[0., 150.],ylim=[1e-3,1
 def plot_2D_weights(weights,delays,counts,ax,range=None,cmap='gray_r'):
     if range is None:
         range=[[-0.5,10.5],[0.5,20.5]]
+    #sns.jointplot(x=weights, y=delays, data=np.array([weights,delays]), kind="kde");
     ax.pcolor(weights, delays, counts, cmap=cmap)
-
     ax.set_xlim(range[0])
     ax.set_ylim(range[1])
 

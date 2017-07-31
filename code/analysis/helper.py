@@ -5,38 +5,26 @@ import yaml
 import os
 
 
-def weight_dist(data,c):
-    weight=[i['weight'] for i in data]
-    delay =np.array( [i['delay'] for i in data])
+
+
+
+def conn_dist(data,delay_or_weight):
+    delay = np.array([i[delay_or_weight] for i in data])
     pre = np.array([i['pre'] for i in data])
     post = np.array([i['post'] for i in data])
-    ex_ex_w = [i['weight'] for i in data if (i['pre']<800 and i['post']<800)]
-    ex_in_w = [i['weight'] for i in data if (i['pre']<800 and i['post']>=800)]
-    in_ex_w = [i['weight'] for i in data if (i['pre']>=800 and i['post']<800)]
-    all_w=weight
-    outdegree=[np.sort(delay[pre==i]).size for i in pre if i <800]
-    print outdegree[:3]
-    outdegree=[np.sort(delay[post==i]).size for i in post if i<800]
-    print outdegree[:3]
 
-    return all_w,ex_ex_w,ex_in_w,in_ex_w
+    idx_pre_ex=pre<800
 
+    idx_post_ex=post<800
+    idx_post_in=post>=800
+    ex_ex = delay[idx_pre_ex&idx_post_ex]
+    ex_in = delay[idx_pre_ex&idx_post_in]
 
-def delay_dist(data,c):
-    weight=[i['weight'] for i in data]
-    delay = [i['delay'] for i in data]
-    pre = [i['pre'] for i in data]
-    post = [i['post'] for i in data]
+    all= delay[idx_pre_ex]
 
 
-    ex_ex_d = [i['delay'] for i in data if (i['pre']<800 and i['post']<800)]
-    ex_in_d = [i['delay'] for i in data if (i['pre']<800 and i['post']>=800)]
-    in_ex_d = [i['delay'] for i in data if (i['pre']>=800 and i['post']<800)]
-    all_d=delay
 
-
-    return all_d,ex_ex_d, ex_in_d, in_ex_d
-
+    return all,ex_ex, ex_in
 
 def parse_config(config_file):
     with open(config_file, 'r') as ymlfile:
