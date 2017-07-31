@@ -35,16 +35,19 @@ for i,connectivity,spikes in zip(range(len(args.spikelist)),args.connectivitylis
     all_d, ex_ex_d, ex_in_d, in_ex_d = hf.delay_dist(connectivity, 'b')
 
     weights,delays,counts=hf.weight_delay_histograms(ex_ex_w + ex_in_w, ex_ex_d+ ex_in_d)
-    idx=np.where(counts==np.max(counts))
+    max_idx=np.argmax(counts)
+    idx=np.unravel_index(max_idx, counts.shape)
     print delays[idx[0],idx[1]],weights[idx[0],idx[1]],counts[idx[0],idx[1]]
-    if delays[idx[0],idx[1]]>15:
+    delay_of_max=delays[idx[0],idx[1]]
+
+    if delay_of_max>15:
         color='k'
 
         if high_delay==0:
             phf.plot_2D_weights(weights, delays, counts, ax_highdelay)
         high_delay+=1
 
-    if delays[idx[0], idx[1]] < 15:
+    if delay_of_max < 15:
         color='b'
 
         if low_delay:
@@ -53,20 +56,6 @@ for i,connectivity,spikes in zip(range(len(args.spikelist)),args.connectivitylis
     times, senders = hf.read_spikefile(spikes)
     phf.plot_psd(times, senders, ax,incolor=None,excolor=color)
     print 'gamma plot {}'.format(i)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
