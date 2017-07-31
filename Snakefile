@@ -43,7 +43,7 @@ repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #low_NUM_REP=range(10)
 #low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
 
-high_NUM_REP=range(10)
+high_NUM_REP=range(100)
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('initialstate' in file)]
 NUM_REP=high_NUM_REP
 
@@ -67,7 +67,7 @@ rule all:
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
         #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
         #                    experiment=repro_CONFIG_FILES,rep=NUM_REP),
-        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma.png',experiment=CONFIG_FILES),
+        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma.png',experiment=CONFIG_FILES),
         #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
         #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
         #                    folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
