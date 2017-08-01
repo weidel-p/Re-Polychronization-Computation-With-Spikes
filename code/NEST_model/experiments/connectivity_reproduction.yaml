@@ -14,11 +14,7 @@ network-params:
         delay-range: [1, 21] # excluding right boundary
 
     plasticity:
-        synapse-model: stdp_izh_synapse
-        tau_syn_update_interval: 10000.
-        constant_additive_value: 0.01
-        reset_weight_change_after_update: False
-
+        synapse-model: stdp_izh_bitwise_correct_synapse
 
     stimulus:
         type: reproduce

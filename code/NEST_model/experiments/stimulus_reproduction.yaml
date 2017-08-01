@@ -13,10 +13,7 @@ network-params:
         from-file: data/original_model/bitwise_reproduction/0/connectivity.json
 
     plasticity:
-        synapse-model: stdp_izh_synapse
-        tau_syn_update_interval: 10000.
-        constant_additive_value: 0.01
-        reset_weight_change_after_update: False
+        synapse-model: stdp_izh_bitwise_correct_synapse
 
     stimulus:
         type: generate
