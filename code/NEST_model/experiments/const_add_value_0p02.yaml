@@ -8,7 +8,7 @@ simulation-params:
     rec_spikes: 10000. # (ms)
 # Network Parameter
 network-params:
-    connectivity: 
+    connectivity:
         type: generate
         delay-distribution: uniform-non-random
         delay-range: [1, 21] # excluding right boundary
@@ -16,14 +16,12 @@ network-params:
     plasticity:
         synapse-model: stdp_izh_synapse
         tau_syn_update_interval: 10000.
-        constant_additive_value: 0.01
+        constant_additive_value: 0.02
         reset_weight_change_after_update: False
 
     stimulus:
         type: generate
-        distribution: poisson
-        rate: 40. # (spikes/sec) per neuron
-        weight: 10. # (mV)
+        distribution: original
 
     initial-state:
         type: generate

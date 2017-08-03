@@ -11,7 +11,14 @@ import plot_helper as phf
 import argparse
 import matplotlib.patches as mpatches
 import mpl_toolkits.axes_grid.inset_locator
-
+import seaborn as sns
+flatui = [ sns.xkcd_rgb["denim blue"],sns.xkcd_rgb["medium green"],sns.xkcd_rgb["pale red"]]
+plt.figure()
+current_palette = sns.color_palette(flatui)
+sns.palplot(current_palette)
+sns.set_palette(current_palette)
+plt.savefig('palette.png')
+plt.close()
 
 
 parser = argparse.ArgumentParser()
@@ -26,9 +33,8 @@ parser.add_argument('-fn','--filename', type=str)
 
 args = parser.parse_args()
 
-incolor='b'
-excolor='k'
-
+excolor='C0'
+incolor='C1'
 
 naive_spikefile = args.naive_spikefile
 naive_times, naive_senders = hf.read_spikefile(naive_spikefile)
@@ -101,8 +107,8 @@ axin1.set_xlim([-1,3])
 axin1.set_yticks([0,25,50,75])
 axin1.set_ylabel('rate distribution')
 
-phf.plot_psd(naive_times, naive_senders,ax2,incolor=incolor,excolor=excolor)
-phf.plot_psd(bitwise_times, bitwise_senders,ax2,incolor=incolor+'--',excolor=excolor+'--')
+phf.plot_psd(naive_times, naive_senders,ax2,incolor=None,excolor=excolor)
+phf.plot_psd(bitwise_times, bitwise_senders,ax2,incolor=None,excolor='C2')
 
 # exc = plt.Line2D((0, 1), (0, 0), color='k', linestyle='-')
 # inh = plt.Line2D((0, 1), (0, 0), color='b', linestyle='-')

@@ -28,55 +28,60 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-PLOT_FILES = ['weight_distribution.png','dynamic_measures.png','plot_8.png']
+PLOT_FILES = ['dynamic_measures.png']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)   ]
 
-repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file) ]
+repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
-#low_NUM_REP=range(10)
-#low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
+low_NUM_REP=range(2)
+low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file)]
 
 high_NUM_REP=range(100)
-high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('initialstate' in file)]
+high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) ]
 NUM_REP=high_NUM_REP
 
-high_CONFIG_FILES=repro_CONFIG_FILES
 include: "Izhikevic.rules"
 include: "nest.rules"
 
 rule all:
     input:
-        nest_groups=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        nest_connectivity=expand("{folder}/{experiment}/{rep}/connectivity.json",
-                                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
+                                    folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
+        nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
+                                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
 
-        nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 
+        #nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",
+        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",
+        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
         #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
-        #                    experiment=repro_CONFIG_FILES,rep=NUM_REP),
-        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma.png',experiment=CONFIG_FILES),
-        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=NUM_REP),
-        #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
-        #                    folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
+        #                    experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
+        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.png',experiment=CONFIG_FILES),
+        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=low_NUM_REP),
+        plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
+                            folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
+
+
         #original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",
         #                        folder=IZHI_DATA_DIR,rep=NUM_REP),
         original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",
                             folder=IZHI_DATA_DIR,rep=NUM_REP),
-        original_code=expand("{folder}/{rep}/poly_spnet_bitwise_reproduction",
-                            folder=IZHI_EXEC_DIR,rep=NUM_REP),
+        #original_code=expand("{folder}/{rep}/poly_spnet_bitwise_reproduction",
+        #                    folder=IZHI_EXEC_DIR,rep=NUM_REP),
 
 
 
@@ -162,11 +167,13 @@ rule plot_combined_groups:
         """)
 rule plot_bimodal_gamma:
     output:
-        plot=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma.png',folder=FIG_DIR),
+        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.png',folder=FIG_DIR),
+        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.png',folder=FIG_DIR),
 
     input:
         connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
         spikes=expand('{folder}/{{experiment}}/{rep}/spikes-1001.gdf',folder=NEST_DATA_DIR,rep=NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
 
     priority: 2
     run:
@@ -174,7 +181,10 @@ rule plot_bimodal_gamma:
         python code/analysis/plot_bimodal_gamma.py \
         -cl {input.connectivity}\
         -sl {input.spikes}\
-        -o {output.plot}\
+        -gl {input.groups}\
+        --group_plot {output.groups}\
+        --gamma_plot {output.weight}\
+
         """)
 
 rule test_weights_and_delay:

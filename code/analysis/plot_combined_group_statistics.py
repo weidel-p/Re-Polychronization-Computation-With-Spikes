@@ -10,6 +10,7 @@ import pylab as plt
 import helper as hf
 import argparse
 import plot_helper as phf
+import seaborn as sns
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-fn', '--filename', type=str)

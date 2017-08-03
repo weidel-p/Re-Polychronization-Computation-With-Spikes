@@ -8,7 +8,7 @@ simulation-params:
     rec_spikes: 10000. # (ms)
 # Network Parameter
 network-params:
-    connectivity: 
+    connectivity:
         type: generate
         delay-distribution: uniform-non-random
         delay-range: [1, 21] # excluding right boundary
@@ -21,10 +21,7 @@ network-params:
 
     stimulus:
         type: generate
-        distribution: poisson
-        rate: 40. # (spikes/sec) per neuron
-        weight: 10. # (mV)
-
+        distribution: original
     initial-state:
         type: generate
         distribution: uniform
