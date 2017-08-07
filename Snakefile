@@ -72,8 +72,8 @@ rule all:
         #                    experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
         #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.png',experiment=low_CONFIG_FILES),
         #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=low_NUM_REP),
-        plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
-                            folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
+        #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
+        #                    folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
 
 
         #original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",
