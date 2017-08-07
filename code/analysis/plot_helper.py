@@ -203,6 +203,7 @@ def return_NTL(groupfile):
     N_list = []
     L_list = []
     T_list = []
+    i=0
     for i,g in enumerate(groups):
         if i%1000==0:
             print i
@@ -228,13 +229,13 @@ def return_NTL(groupfile):
 #
 #         L_list.append(int(g["L_max"]))  # longest path
 #     return N_list,T_list,L_list
-def plot_8(group_data, outname):
+def plot_8(group_data,filename, outname):
     fig = plt.figure("plot 8")
     ax0 = fig.add_subplot(221)
     ax1 = fig.add_subplot(222)
     ax2 = fig.add_subplot(223)
     ax3 = fig.add_subplot(224)
-    N_list, T_list, L_list=return_NTL(group_data)
+    N_list, T_list, L_list=return_NTL(filename)
 
     ax1.hist(N_list, np.arange(0,100,5))
     ax1.set_title('# of neurons, total {}'.format(len(group_data)))

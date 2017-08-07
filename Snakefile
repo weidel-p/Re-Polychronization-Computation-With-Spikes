@@ -28,7 +28,7 @@ ANA_DIR=os.path.join(CODE_DIR,'analysis')
 NEST_SRC_DIR=os.path.join(CUR_DIR,os.path.join(
             CODE_DIR,'nest/nest-simulator'))
 
-PLOT_FILES = ['dynamic_measures.png']
+PLOT_FILES = ['dynamic_measures.png','plot_8.png']
 MAN_DIR='manuscript/8538120cqhctwxyjvvn'
 FIG_DIR='figures'
 LOG_DIR='logs'
@@ -41,7 +41,7 @@ repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproducti
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
 low_NUM_REP=range(2)
-low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file)]
+low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) and ('stdp' not in file)]
 
 high_NUM_REP=range(100)
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) ]
@@ -70,7 +70,7 @@ rule all:
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
         #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
         #                    experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
-        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.png',experiment=CONFIG_FILES),
+        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.png',experiment=low_CONFIG_FILES),
         #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=low_NUM_REP),
         plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
                             folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),

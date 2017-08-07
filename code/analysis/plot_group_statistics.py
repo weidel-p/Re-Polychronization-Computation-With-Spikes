@@ -24,7 +24,7 @@ print 'found {} groups'.format(len(groups))
 
 outfolder=args.outfolder
 outname='plot_8.png'
-phf.plot_8(groups,os.path.join(outfolder,outname))
+phf.plot_8(groups,args.groupfile,os.path.join(outfolder,outname))
 print 'plot 8 done'
 fig=plt.figure()
 ax=fig.add_subplot(111)
