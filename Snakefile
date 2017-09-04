@@ -122,7 +122,7 @@ rule plot_test_statistical_reproduction:
         stat_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_{experiment}_{rep}.{{ext,(eps|png)}}',
+        'figures/bitwise_{experiment}_{rep}.{ext,(eps|png)}',
     priority: 9
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
@@ -133,7 +133,7 @@ rule plot_test_bitwise_reproduction:
         nest_mem=expand('{folder}/bitwise_reproduction/{{rep}}/membrane_potential-1002.dat',folder=NEST_DATA_DIR),
         nest_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_reproduction_{rep}.png',
+        'figures/bitwise_reproduction_{rep}.{ext,(eps|png)}',
     priority: 10
     shell:
         'python {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
