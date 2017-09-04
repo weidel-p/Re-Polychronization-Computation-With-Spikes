@@ -122,7 +122,7 @@ rule plot_test_statistical_reproduction:
         stat_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_{experiment}_{rep}.png',
+        'figures/bitwise_{experiment}_{rep}.{{ext,(eps|png)}}',
     priority: 9
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
@@ -140,8 +140,8 @@ rule plot_test_bitwise_reproduction:
 
 rule plot_groups:
     output:
-        plot_7=expand('{folder}/{{experiment}}/{{rep}}/plot_7.png',folder=FIG_DIR),
-        plot_8=expand('{folder}/{{experiment}}/{{rep}}/plot_8.png',folder=FIG_DIR),
+        plot_7=expand('{folder}/{{experiment}}/{{rep}}/plot_7.{{ext,(eps|png)}}',folder=FIG_DIR),
+        plot_8=expand('{folder}/{{experiment}}/{{rep}}/plot_8.{{ext,(eps|png)}}',folder=FIG_DIR),
 
     input:
         groups=expand('{folder}/{{experiment}}/{{rep}}/groups.json',folder=NEST_DATA_DIR),
@@ -154,7 +154,7 @@ rule plot_groups:
         """)
 rule plot_combined_groups:
     output:
-        plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.png',folder=FIG_DIR),
+        plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
 
     input:
         groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
@@ -167,8 +167,8 @@ rule plot_combined_groups:
         """)
 rule plot_bimodal_gamma:
     output:
-        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.png',folder=FIG_DIR),
-        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.png',folder=FIG_DIR),
+        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png)}}',folder=FIG_DIR),
+        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
 
     input:
         connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
@@ -191,14 +191,14 @@ rule test_weights_and_delay:
     input:
         nest=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
     output:
-        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.png',folder=FIG_DIR),
+        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.{{ext,(eps|png)}}',folder=FIG_DIR),
     priority: 10
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -o {{output.weight}} '.format(ANA_DIR=ANA_DIR)
 
 rule plot_dynamics:
     output:
-        file=expand('{folder}/{{experiment}}/{{rep}}/dynamic_measures.png',folder=FIG_DIR),
+        file=expand('{folder}/{{experiment}}/{{rep}}/dynamic_measures.{{ext,(eps|png)}}',folder=FIG_DIR),
     input:
         connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
