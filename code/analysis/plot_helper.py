@@ -5,7 +5,7 @@ import pylab as plt
 import helper as hf
 import numpy as np
 import matplotlib.mlab as mlab
-import ijson.backends.yajl2_cffi as ijson
+import ijson
 import os
 
 def mem_spk_plot(data,times,sender,subplotspec,mem_color,spk_inh_color,spk_exc_color):
