@@ -56,10 +56,10 @@ rule all:
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
         nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
                                     folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-        nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
-        nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
-                                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
+        #nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
+        #                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
+        #nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
+        #                            folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
 
 
         #nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",
@@ -70,7 +70,7 @@ rule all:
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
         plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
                             experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
-        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=low_CONFIG_FILES),
+        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=connectivity),
         plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
         #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
         #                    folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
