@@ -151,7 +151,7 @@ ax_L = plt.subplot(gs0[0, 2])
 ax_T = plt.subplot(gs0[0, 3])
 
 print('violin')
-ax_N_groups = sns.boxplot(x="gamma", y="N_groups", data=N_data, ax=ax_N_groups)
+ax_N_groups = sns.boxplot(x="gamma", y="N_groups", data=N_data, ax=ax_N_groups,showfliers=False)
 print('swarm')
 
 ax_N_groups = sns.swarmplot(x="gamma", y="N_groups", data=N_data,
@@ -160,19 +160,19 @@ ax_N_groups.set_ylabel('number of groups found')
 
 #plt.suptitle('Number of groups: high gamma {0:5.1f}+-{1:5.1f} low gamma {2:5.1f}+-{3:5.1f}'.format(np.mean(N_groups_high),np.std(N_groups_high),np.mean(N_groups_low),np.std(N_groups_low)))
 print('1.')
-ax_N = sns.boxplot(x='gamma',y='N',data=data,ax=ax_N
+ax_N = sns.boxplot(x='gamma',y='N',data=data,ax=ax_N,showfliers=False
                    )
 ax_N.set_ylabel('groupsize')
 
 print('2.')
 
-ax_L = sns.boxplot(x='gamma', y='L', data=data,ax=ax_L
+ax_L = sns.boxplot(x='gamma', y='L', data=data,ax=ax_L,showfliers=False
                 )
 ax_L.set_ylabel('longest path')
 
 print('3.')
 
-ax_T = sns.boxplot(x='gamma', y='T', data=data,ax=ax_T
+ax_T = sns.boxplot(x='gamma', y='T', data=data,ax=ax_T,showfliers=False
                 )
 ax_T.set_ylabel('timespan')
 
