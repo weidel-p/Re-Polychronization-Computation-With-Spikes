@@ -123,8 +123,8 @@ def plot_2D_weights(weights,delays,counts,ax,range=None,cmap='gray_r'):
     ax.pcolor(weights, delays, counts, cmap=cmap)
     ax.set_xlim(range[0])
     ax.set_ylim(range[1])
-    ax.set_ylabel('delay [ms]')
-    ax.set_xlabel('weight [mV]')
+    ax.set_ylabel('Delay [ms]')
+    ax.set_xlabel('Weight [mV]')
 
 
 def plot_group(group, ax, LP=False, numbers=True):
@@ -277,9 +277,9 @@ def plot_combined_groups_statstics(group_files_list,outname):
     ax1.hist(N_combined, np.arange(0,100,5))
     ax1.set_xlabel('# of neurons')
     ax2.hist(T_combined, np.arange(0,200,10))
-    ax2.set_xlabel('time span[ms]')
+    ax2.set_xlabel('Time span[ms]')
     ax3.hist(L_combined, np.arange(0,30,2))
-    ax3.set_xlabel('length of longest path')
+    ax3.set_xlabel('Longest path')
     ax0.set_xticks([])
     boxplot_kwargs = dict(positions=range(3),
                           bootstrap=1000,

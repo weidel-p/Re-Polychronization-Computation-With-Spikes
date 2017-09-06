@@ -155,26 +155,32 @@ print('swarm')
 
 ax_N_groups = sns.swarmplot(x="gamma", y="N_groups", data=N_data,
                 color="black", edgecolor="gray",ax=ax_N_groups)
-ax_N_groups.set_ylabel('number of groups found')
+ax_N_groups.set_ylabel('Number of groups found')
+ax_N_groups.set_xlabel('Spectral peak')
 
 #plt.suptitle('Number of groups: high gamma {0:5.1f}+-{1:5.1f} low gamma {2:5.1f}+-{3:5.1f}'.format(np.mean(N_groups_high),np.std(N_groups_high),np.mean(N_groups_low),np.std(N_groups_low)))
 print('1.')
 ax_N = sns.boxplot(x='gamma',y='N',data=data,ax=ax_N,showfliers=False
                    )
-ax_N.set_ylabel('groupsize')
+ax_N.set_ylabel('Groupsize')
 ax_N.set_ylim([0,200])
+ax_N.set_xlabel('Spectral peak')
+
 print('2.')
 
 ax_L = sns.boxplot(x='gamma', y='L', data=data,ax=ax_L,showfliers=False
                 )
-ax_L.set_ylabel('longest path')
+ax_L.set_ylabel('Longest path')
 ax_L.set_ylim([0,15])
+ax_L.set_xlabel('Spectral peak')
+
 
 print('3.')
 
 ax_T = sns.boxplot(x='gamma', y='T', data=data,ax=ax_T,showfliers=False
                 )
-ax_T.set_ylabel('timespan')
+ax_T.set_ylabel('Timespan')
+ax_T.set_xlabel('Spectral peak')
 ax_T.set_ylim([0,200])
 
 
