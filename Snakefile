@@ -40,7 +40,7 @@ CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)   ]
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
-low_NUM_REP=range(2)
+low_NUM_REP=range(10)
 low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) and ('stdp' not in file)]
 
 high_NUM_REP=range(100)
