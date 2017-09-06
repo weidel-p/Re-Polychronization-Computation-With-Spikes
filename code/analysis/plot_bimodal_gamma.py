@@ -166,7 +166,7 @@ ax_T = sns.boxplot(x='gamma', y='T', data=data,ax=ax_T
 
 
 print('violin')
-ax_N_groups = sns.violinplot(x="gamma", y="N_groups", data=N_data, inner=None,ax=ax_N_groups)
+ax_N_groups = sns.boxplot(x="gamma", y="N_groups", data=N_data, inner=None,ax=ax_N_groups)
 print('swarm')
 
 ax_N_groups = sns.swarmplot(x="gamma", y="N_groups", data=N_data,
