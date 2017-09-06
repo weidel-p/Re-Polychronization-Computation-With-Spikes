@@ -163,18 +163,20 @@ print('1.')
 ax_N = sns.boxplot(x='gamma',y='N',data=data,ax=ax_N,showfliers=False
                    )
 ax_N.set_ylabel('groupsize')
-
+ax_N.set_ylim([0,200])
 print('2.')
 
 ax_L = sns.boxplot(x='gamma', y='L', data=data,ax=ax_L,showfliers=False
                 )
 ax_L.set_ylabel('longest path')
+ax_L.set_ylim([0,15])
 
 print('3.')
 
 ax_T = sns.boxplot(x='gamma', y='T', data=data,ax=ax_T,showfliers=False
                 )
 ax_T.set_ylabel('timespan')
+ax_T.set_ylim([0,200])
 
 
 
