@@ -123,6 +123,9 @@ def plot_2D_weights(weights,delays,counts,ax,range=None,cmap='gray_r'):
     ax.pcolor(weights, delays, counts, cmap=cmap)
     ax.set_xlim(range[0])
     ax.set_ylim(range[1])
+    ax.set_ylabel('delay [ms]')
+    ax.set_xlabel('weight [mV]')
+
 
 def plot_group(group, ax, LP=False, numbers=True):
     N_fired = group['N_fired']

@@ -91,7 +91,7 @@ for i,connectivity,spikes,groupfile in zip(range(len(args.spikelist)),args.conne
     times, senders = hf.read_spikefile(spikes)
     phf.plot_psd(times, senders, ax=ax,incolor=None,excolor=color)
     del times,senders,weights,delays,connectivity,all_d, ex_ex_d, ex_in_d,all_w, ex_ex_w, ex_in_w,N_list,L_list,T_list
-    print 'gamma plot {}'.format(i)
+    print('gamma plot {}'.format(i))
 
 
 
@@ -137,7 +137,6 @@ N_data=pd.DataFrame(N_group_dict)
 
 
 
-print data
 fig=plt.figure(figsize=(20,6))
 
 
