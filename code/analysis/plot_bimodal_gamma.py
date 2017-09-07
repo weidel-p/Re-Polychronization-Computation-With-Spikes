@@ -11,7 +11,7 @@ import helper as hf
 import plot_helper as phf
 import seaborn as sns
 import scipy.stats as stat
-flatui = [ sns.xkcd_rgb["pale red"],sns.xkcd_rgb["dark lilac"]]
+flatui = [ sns.xkcd_rgb["dusty purple"],sns.xkcd_rgb["faded green"]]
 plt.figure()
 current_palette = sns.color_palette(flatui)
 sns.palplot(current_palette)
