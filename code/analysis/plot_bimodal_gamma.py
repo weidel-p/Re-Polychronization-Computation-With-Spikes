@@ -145,7 +145,7 @@ fig=plt.figure(figsize=(20,6))
 
 
 gs0 = gridspec.GridSpec(1, 4)
-gs0.update(left=0.05, right=0.97, top=0.93, bottom=0.1, hspace=0.15)
+gs0.update(left=0.05, right=0.95, top=0.95, bottom=0.15, hspace=0.2,wspace=0.25)
 
 ax_N_groups = plt.subplot(gs0[0, 0])
 
