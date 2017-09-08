@@ -37,7 +37,7 @@ fig=plt.figure(figsize=(15,6))
 
 
 gs0 = gridspec.GridSpec(1, 3)
-gs0.update(left=0.05, right=0.97, top=0.97, bottom=0.1, hspace=0.15)
+gs0.update(left=0.07, right=0.95, top=0.95, bottom=0.1, hspace=0.2,wspace=0.35)
 
 ax = plt.subplot(gs0[0, 0])
 
