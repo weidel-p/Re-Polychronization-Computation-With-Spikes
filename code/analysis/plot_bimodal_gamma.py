@@ -11,6 +11,10 @@ import helper as hf
 import plot_helper as phf
 import seaborn as sns
 import scipy.stats as stat
+matplotlib.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+font = {'family':'serif','size':18}
+plt.rc('font',**font)
+plt.rc('legend',**{'fontsize':16})
 flatui = [ sns.xkcd_rgb["dusty purple"],sns.xkcd_rgb["faded green"]]
 plt.figure()
 current_palette = sns.color_palette(flatui)

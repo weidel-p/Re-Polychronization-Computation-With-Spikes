@@ -12,6 +12,10 @@ import argparse
 import matplotlib.patches as mpatches
 import mpl_toolkits.axes_grid.inset_locator
 import seaborn as sns
+matplotlib.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+font = {'family':'serif','size':18}
+plt.rc('font',**font)
+plt.rc('legend',**{'fontsize':16})
 flatui = [ sns.xkcd_rgb["denim blue"],sns.xkcd_rgb["medium green"],sns.xkcd_rgb["pale red"]]
 plt.figure()
 current_palette = sns.color_palette(flatui)
