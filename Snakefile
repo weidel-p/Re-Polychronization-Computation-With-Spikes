@@ -37,14 +37,14 @@ CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)   ]
 
-repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file)]
+repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
 low_NUM_REP=range(10)
 low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) and ('stdp' not in file)]
 
 high_NUM_REP=range(100)
-high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) ]
+high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
 NUM_REP=high_NUM_REP
 
 include: "Izhikevic.rules"
@@ -52,6 +52,8 @@ include: "nest.rules"
 
 rule all:
     input:
+        polytest_data=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
         nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
         nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
