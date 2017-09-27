@@ -114,6 +114,28 @@ def get_t_s(group):
         senders.append(i['neuron_id'])
 
     return np.array(times).astype(float),np.array(senders).astype(float)
+def format_spiketrains(times,senders):
+    '''
+
+    Parameters
+    ----------
+    times   : array of float
+            spike times
+    senders : array of float
+            id corresponding to spike times
+
+    Returns
+    spiketrains: dictionary
+        dictionary of spiketrains,
+        keys are ids
+        correspondint items are spike times of that id
+    -------
+
+    '''
+    spiketrains=dict()
+    for id in np.unique(senders):
+        spiketrains[id-1]=times[senders==id].tolist()
+    return spiketrains
 
 def read_spikefile(filename):
     if '.dat' in filename:
@@ -135,8 +157,7 @@ def read_weightfile(filename):
     with open(filename, "r") as f:
         all_data = json.load(f)
     weights=[i['weight'] for i in all_data]
-    pre_weight=[i['weight'] for i in all_data if (i['pre']==2 and i['post']<100)]
-    print pre_weight
+
     return np.array(weights)
 
 def read_group_file(filename):
@@ -148,3 +169,6 @@ def read_group_file(filename):
             for line in f.readlines():
                 groups.append(convert_line(line))
     return groups
+def save_json(fname,json_data):
+    with open(fname, "w") as f:
+        json.dump(json_data, f)
