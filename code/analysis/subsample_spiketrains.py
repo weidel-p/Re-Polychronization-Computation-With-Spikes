@@ -7,8 +7,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import mpl_toolkits.axes_grid.inset_locator
-import helper as hf
-import plot_helper as phf
+import json
 import seaborn as sns
 import scipy.stats as stat
 
@@ -21,6 +20,58 @@ parser.add_argument("-c", '--connectivityfile', help="connectivity files", type=
 
 parser.add_argument('-o','--outname', type=str)
 args = parser.parse_args()
+def save_json(fname,json_data):
+    with open(fname, "w") as f:
+        json.dump(json_data, f)
+
+def read_group_file(filename):
+    with open(filename, "r") as f:
+       groups = json.load(f)
+
+    return groups
+
+def get_t_s(group):
+    '''
+
+    Parameters
+    ----------
+    group: group in format as retunred by original algorithm
+
+    Returns
+    times: array of spike times
+    senders: array of neuron ids ordered to match times
+    -------
+
+    '''
+    times=[]
+    senders=[]
+    for i in group['fired']:
+        times.append(i['t_fired'])
+        senders.append(i['neuron_id'])
+
+    return np.array(times).astype(float),np.array(senders).astype(float)
+def format_spiketrains(times,senders):
+    '''
+
+    Parameters
+    ----------
+    times   : array of float
+            spike times
+    senders : array of float
+            id corresponding to spike times
+
+    Returns
+    spiketrains: dictionary
+        dictionary of spiketrains,
+        keys are ids
+        correspondint items are spike times of that id
+    -------
+
+    '''
+    spiketrains=dict()
+    for id in np.unique(senders):
+        spiketrains[id-1]=times[senders==id].tolist()
+    return spiketrains
 
 def get_occurances_in_group(groups):
     '''
@@ -41,7 +92,7 @@ def get_occurances_in_group(groups):
     '''
     all_occurances=[]
     for group in groups:
-        all_occurances+=np.unique(hf.get_t_s(group)[1]).tolist()
+        all_occurances+=np.unique(get_t_s(group)[1]).tolist()
     id,count=np.unique(np.array(all_occurances).flatten(),return_counts=True)
     return id,count
 def split_exc_and_inh(id,count):
@@ -143,10 +194,11 @@ def select_spiketrains(exc_id,inh_id,spk_trains,N_exc=100,N_inh=25):
 
 
 spikefile = args.spikefile
-times,senders = hf.read_spikefile(spikefile)
-
-spiketrains = hf.format_spiketrains(times,senders)
-groups = hf.read_group_file(args.groupfile)
+spikes = np.loadtxt(spikefile)
+times = spikes[:, 1]
+senders = spikes[:, 0]
+spiketrains = format_spiketrains(times,senders)
+groups = read_group_file(args.groupfile)
 #incase a neuron fires twice in a group
 id,count=get_occurances_in_group(groups)
 exc_id,exc_count,inh_id,inh_count=split_exc_and_inh(id,count)
@@ -163,6 +215,6 @@ low_sorted=select_spiketrains(exc_id,inh_id,spk_trains=spiketrains)
 
 
 
-hf.save_json('unsorted_spk_trains.json',unsorted)
-hf.save_json('high_sorted_spk_trains.json',high_sorted)
-hf.save_json('low_sorted_spk_trains.json',low_sorted)
+save_json('unsorted_spk_trains.json',unsorted)
+save_json('high_sorted_spk_trains.json',high_sorted)
+save_json('low_sorted_spk_trains.json',low_sorted)
