@@ -19,14 +19,10 @@ parser.add_argument("-gl", help="list of group files", nargs="+")
 
 
 args = parser.parse_args()
-print args.gl
 groups=[]
 for groupfile in args.gl:
     groups.append(hf.read_group_file(groupfile))
-print 'loading group data done'
-print 'found {} group files'.format(len(groups))
 
 outname='plot_8.png'
 phf.plot_combined_groups_statstics(groups,args.filename)
-print 'plot combined 8 done'
 

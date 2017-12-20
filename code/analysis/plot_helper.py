@@ -5,7 +5,7 @@ import pylab as plt
 import helper as hf
 import numpy as np
 import matplotlib.mlab as mlab
-import ijson
+import json
 import os
 
 def mem_spk_plot(data,times,sender,subplotspec,mem_color,spk_inh_color,spk_exc_color):
@@ -197,7 +197,6 @@ def plot_group(group, ax, LP=False, numbers=True):
     ax.set_xlim(np.min(times) - 10, np.max(times) + 10)
     ax1.set_xlim(np.min(times) - 10, np.max(times) + 10)
 def return_NTL(groupfile):
-    print os.path.getsize(groupfile)
     if os.path.getsize(groupfile)<422099208*1.1:
         groups = hf.read_group_file(groupfile)
     else:
@@ -208,8 +207,6 @@ def return_NTL(groupfile):
     T_list = []
     i=0
     for i,g in enumerate(groups):
-        if i%1000==0:
-            print i
         times, senders = hf.get_t_s(g)
 
         N_list.append(int(g["N_fired"]))
@@ -217,7 +214,6 @@ def return_NTL(groupfile):
         T_list.append(max(times))  # time span
 
         L_list.append(int(g["L_max"]))  # longest path
-    print i
     return N_list,T_list,L_list
 # def return_NTL(group_data):
 #     N_list = []
@@ -267,7 +263,6 @@ def plot_combined_groups_statstics(group_files_list,outname):
         N_combined+=N_list
         T_combined+=T_list
         L_combined+=L_list
-        print len(N_combined)
 
 
 

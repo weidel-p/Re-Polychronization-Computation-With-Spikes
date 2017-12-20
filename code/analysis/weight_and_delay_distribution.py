@@ -55,11 +55,6 @@ xhist_ex_ex=np.mean(counts_ex_ex,axis=0)
 yhist_ex_ex=np.mean(counts_ex_ex,axis=1)
 
 yedges_mean,xedges_mean=np.mean(delays,axis=1)[1:]-0.5,np.mean(weights,axis=0)[:-1]+0.5
-print xedges_mean,yedges_mean
-print xhist,yhist
-print xedges_mean.shape,yedges_mean.shape
-
-print xhist.shape,yhist.shape
 axHistx.bar(xedges_mean,xhist, color='k',orientation='vertical')
 axHistx.bar(xedges_mean,xhist, color='m',orientation='vertical')
 

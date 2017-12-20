@@ -141,7 +141,6 @@ def plot_6(folder,timestep,matching=0.4):
                         sub_sub_senders=sub_senders[gr_senders]
                         sub_sub_times = sub_times[gr_senders]
 
-                        print( '{}, {} \n {}'. format (t,s,group,count))
                         plt.plot(group['times']+t,group['senders'],'ro')
                         plt.plot(sub_sub_times,sub_sub_senders,'bx')
                         #plt.plot(sub_times,sub_senders,'bo',mfc='none')
@@ -154,7 +153,6 @@ def plot_6(folder,timestep,matching=0.4):
                     else:
                         if maximum< count and count > 0.1:
                             maximum= count
-                            print(t,s,count,group['N'])
 
 
 def plot_5(folder,t1,t2,t3):
@@ -256,7 +254,6 @@ def weight_convergence(folder):
     plt.savefig('../../figures/weight_corr.png')
     plt.close()
 
-    print ''
 
 
 weight_convergence('../../data')

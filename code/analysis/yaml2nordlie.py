@@ -66,7 +66,6 @@ for fn in fns:
         
                 for j, subsec in enumerate(subsections):
                     if depth(cfg[sec][subsec]) > 1:
-                        print "error: too deep config file"
                         exit()
                     else:
                         table += add_section(subsec, labels[labelcounter])
@@ -89,6 +88,5 @@ for fn in fns:
         
         table += end_table("Parameter for experiment " + fn, fn)
         
-        print table
 
 

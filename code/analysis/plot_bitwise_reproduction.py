@@ -1,3 +1,5 @@
+import sys
+print(sys.version_info)
 import numpy as np
 import json
 import sys

@@ -30,10 +30,8 @@ spikefile = args.spikefile
 times, senders = hf.read_spikefile(spikefile)
 
 
-print 'loading spikes data done'
 weights = hf.read_weightfile(args.weightfile)
 
-print 'loading weight data done'
 
 
 
