@@ -40,10 +40,10 @@ CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)   ]
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
-low_NUM_REP=range(10)
+low_NUM_REP=range(1)
 low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) ]
 
-high_NUM_REP=range(100)
+high_NUM_REP=range(1)
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
 NUM_REP=high_NUM_REP
 
@@ -54,10 +54,31 @@ rule all:
     input:
         polytest_data=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
+
+        polytest_data_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
+
+
+
         nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
+        nest_groups_repro_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
         nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
                                     folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
+        plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
+                            experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
+
+        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=high_CONFIG_FILES),
+
+        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
+
+
+
+
         #nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
         #                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
         #nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
@@ -70,10 +91,7 @@ rule all:
         #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
-        plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
-                            experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
-        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=high_CONFIG_FILES),
-        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
+      
         #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
         #                    folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
 
@@ -106,6 +124,18 @@ rule compile_find_polychronous_groups:
 	    expand('{folder}/find_polychronous_groups.cpp',folder=ANA_DIR)
 	shell:
 	    'g++ -o {output} {input} -ljsoncpp'
+
+
+rule find_groups_nest:
+    input:
+        "{folder}/{experiment}/{rep}/connectivity.json",
+    output:
+        "{folder}/{experiment}/{rep}/groups_nest.json"
+    log: 'logs/find_groups_{experiment}_{rep}.log'
+    shell:
+        'python code/analysis/find_polychronous_groups_nest.py {input} 4 1.0 1. 20. {output} &> {log}'
+
+
 
 rule find_groups:
     output:
