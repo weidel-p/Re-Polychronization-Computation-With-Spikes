@@ -201,7 +201,8 @@ def plot_group(group, ax, LP=False, numbers=True):
 
 
 def return_NTL(groupfile):
-    if os.path.getsize(groupfile) < 422099208 * 1.1:
+    print os.path.getsize(groupfile)
+    if os.path.getsize(groupfile)<422099208*1.1:
         groups = hf.read_group_file(groupfile)
     else:
         f = open(groupfile)
@@ -209,8 +210,10 @@ def return_NTL(groupfile):
     N_list = []
     L_list = []
     T_list = []
-    i = 0
-    for i, g in enumerate(groups):
+    i=0
+    for i,g in enumerate(groups):
+        if i%1000==0:
+            print i
         times, senders = hf.get_t_s(g)
 
         N_list.append(int(g["N_fired"]))
@@ -218,7 +221,8 @@ def return_NTL(groupfile):
         T_list.append(max(times))  # time span
 
         L_list.append(int(g["L_max"]))  # longest path
-    return N_list, T_list, L_list
+    print i
+    return N_list,T_list,L_list
 # def return_NTL(group_data):
 #     N_list = []
 #     L_list = []
