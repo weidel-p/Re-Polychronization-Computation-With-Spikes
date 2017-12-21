@@ -10,22 +10,20 @@ import helper as hf
 import argparse
 import plot_helper as phf
 parser = argparse.ArgumentParser()
-parser.add_argument('-g','--groupfile', type=str)
-parser.add_argument('-o','--outfolder', type=str)
+parser.add_argument('-g', '--groupfile', type=str)
+parser.add_argument('-o', '--outfolder', type=str)
 
 
 args = parser.parse_args()
 
 
-
 groups = hf.read_group_file(args.groupfile)
 
-outfolder=args.outfolder
-outname='plot_8.png'
-phf.plot_8(groups,args.groupfile,os.path.join(outfolder,outname))
-fig=plt.figure()
-ax=fig.add_subplot(111)
-if len(groups)>1:
+outfolder = args.outfolder
+outname = 'plot_8.png'
+phf.plot_8(groups, args.groupfile, os.path.join(outfolder, outname))
+fig = plt.figure()
+ax = fig.add_subplot(111)
+if len(groups) > 1:
     phf.plot_group(groups[1], ax, LP=False, numbers=False)
-plt.savefig(os.path.join(outfolder,'plot_7.png'))
-
+plt.savefig(os.path.join(outfolder, 'plot_7.png'))

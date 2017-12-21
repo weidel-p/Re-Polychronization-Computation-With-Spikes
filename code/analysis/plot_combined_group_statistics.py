@@ -17,12 +17,10 @@ parser.add_argument('-fn', '--filename', type=str)
 parser.add_argument("-gl", help="list of group files", nargs="+")
 
 
-
 args = parser.parse_args()
-groups=[]
+groups = []
 for groupfile in args.gl:
     groups.append(hf.read_group_file(groupfile))
 
-outname='plot_8.png'
-phf.plot_combined_groups_statstics(groups,args.filename)
-
+outname = 'plot_8.png'
+phf.plot_combined_groups_statstics(groups, args.filename)

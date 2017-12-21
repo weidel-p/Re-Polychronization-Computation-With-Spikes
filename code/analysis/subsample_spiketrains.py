@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
-import os,sys
+import os
+import sys
 import matplotlib
 matplotlib.use('Agg')
 
@@ -12,23 +13,27 @@ import seaborn as sns
 import scipy.stats as stat
 
 
-#sns.set_palette(sns.light_palette("blue"))
+# sns.set_palette(sns.light_palette("blue"))
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", '--spikefile', help="spike file", type=str)
-parser.add_argument("-g", '--groupfile',help="group file", type=str)
+parser.add_argument("-g", '--groupfile', help="group file", type=str)
 parser.add_argument("-c", '--connectivityfile', help="connectivity files", type=str)
 
-parser.add_argument('-o','--outname', type=str)
+parser.add_argument('-o', '--outname', type=str)
 args = parser.parse_args()
-def save_json(fname,json_data):
+
+
+def save_json(fname, json_data):
     with open(fname, "w") as f:
         json.dump(json_data, f)
 
+
 def read_group_file(filename):
     with open(filename, "r") as f:
-       groups = json.load(f)
+        groups = json.load(f)
 
     return groups
+
 
 def get_t_s(group):
     '''
@@ -43,14 +48,16 @@ def get_t_s(group):
     -------
 
     '''
-    times=[]
-    senders=[]
+    times = []
+    senders = []
     for i in group['fired']:
         times.append(i['t_fired'])
         senders.append(i['neuron_id'])
 
-    return np.array(times).astype(float),np.array(senders).astype(float)
-def format_spiketrains(times,senders):
+    return np.array(times).astype(float), np.array(senders).astype(float)
+
+
+def format_spiketrains(times, senders):
     '''
 
     Parameters
@@ -68,10 +75,11 @@ def format_spiketrains(times,senders):
     -------
 
     '''
-    spiketrains=dict()
+    spiketrains = dict()
     for id in np.unique(senders):
-        spiketrains[id-1]=times[senders==id].tolist()
+        spiketrains[id - 1] = times[senders == id].tolist()
     return spiketrains
+
 
 def get_occurances_in_group(groups):
     '''
@@ -90,12 +98,14 @@ def get_occurances_in_group(groups):
     -------
 
     '''
-    all_occurances=[]
+    all_occurances = []
     for group in groups:
-        all_occurances+=np.unique(get_t_s(group)[1]).tolist()
-    id,count=np.unique(np.array(all_occurances).flatten(),return_counts=True)
-    return id,count
-def split_exc_and_inh(id,count):
+        all_occurances += np.unique(get_t_s(group)[1]).tolist()
+    id, count = np.unique(np.array(all_occurances).flatten(), return_counts=True)
+    return id, count
+
+
+def split_exc_and_inh(id, count):
     '''
 
     Parameters
@@ -122,12 +132,14 @@ def split_exc_and_inh(id,count):
     -------
 
     '''
-    exc_id=id[id<800]
-    exc_count=count[id<800]
-    inh_id=id[id>=800]
-    inh_count=count[id>=800]
-    return exc_id,exc_count,inh_id,inh_count
-def sort_by_occurance(id,count,high=True):
+    exc_id = id[id < 800]
+    exc_count = count[id < 800]
+    inh_id = id[id >= 800]
+    inh_count = count[id >= 800]
+    return exc_id, exc_count, inh_id, inh_count
+
+
+def sort_by_occurance(id, count, high=True):
     '''
     Parameters
     ----------
@@ -150,14 +162,13 @@ def sort_by_occurance(id,count,high=True):
     idx = np.argsort(count)
 
     if not high:
-        idx=idx[::-1]
-    sorted_id=id[idx]
-    sorted_count=count[idx]
-    return sorted_id,sorted_count
+        idx = idx[::-1]
+    sorted_id = id[idx]
+    sorted_count = count[idx]
+    return sorted_id, sorted_count
 
 
-
-def select_spiketrains(exc_id,inh_id,spk_trains,N_exc=100,N_inh=25):
+def select_spiketrains(exc_id, inh_id, spk_trains, N_exc=100, N_inh=25):
     '''
 
     Parameters
@@ -185,10 +196,10 @@ def select_spiketrains(exc_id,inh_id,spk_trains,N_exc=100,N_inh=25):
                 returns dict of spiketrains for
 
     '''
-    selected_id=inh_id[:N_inh].tolist()+exc_id[:N_exc].tolist()
-    selected_spiketrains=dict()
+    selected_id = inh_id[:N_inh].tolist() + exc_id[:N_exc].tolist()
+    selected_spiketrains = dict()
     for id in selected_id:
-        selected_spiketrains.update({id:spk_trains[id]})
+        selected_spiketrains.update({id: spk_trains[id]})
 
     return selected_spiketrains
 
@@ -197,24 +208,23 @@ spikefile = args.spikefile
 spikes = np.loadtxt(spikefile)
 times = spikes[:, 1]
 senders = spikes[:, 0]
-spiketrains = format_spiketrains(times,senders)
+spiketrains = format_spiketrains(times, senders)
 groups = read_group_file(args.groupfile)
-#incase a neuron fires twice in a group
-id,count=get_occurances_in_group(groups)
-exc_id,exc_count,inh_id,inh_count=split_exc_and_inh(id,count)
+# incase a neuron fires twice in a group
+id, count = get_occurances_in_group(groups)
+exc_id, exc_count, inh_id, inh_count = split_exc_and_inh(id, count)
 
-unsorted=select_spiketrains(exc_id,inh_id,spk_trains=spiketrains)
+unsorted = select_spiketrains(exc_id, inh_id, spk_trains=spiketrains)
 
-exc_id,exc_count=sort_by_occurance(exc_id,exc_count,True)
-inh_id,inh_count=sort_by_occurance(inh_id,inh_count,True)
-high_sorted=select_spiketrains(exc_id,inh_id,spk_trains=spiketrains)
+exc_id, exc_count = sort_by_occurance(exc_id, exc_count, True)
+inh_id, inh_count = sort_by_occurance(inh_id, inh_count, True)
+high_sorted = select_spiketrains(exc_id, inh_id, spk_trains=spiketrains)
 
-exc_id,exc_count=sort_by_occurance(exc_id,exc_count,False)
-inh_id,inh_count=sort_by_occurance(inh_id,inh_count,False)
-low_sorted=select_spiketrains(exc_id,inh_id,spk_trains=spiketrains)
+exc_id, exc_count = sort_by_occurance(exc_id, exc_count, False)
+inh_id, inh_count = sort_by_occurance(inh_id, inh_count, False)
+low_sorted = select_spiketrains(exc_id, inh_id, spk_trains=spiketrains)
 
 
-
-save_json('unsorted_spk_trains.json',unsorted)
-save_json('high_sorted_spk_trains.json',high_sorted)
-save_json('low_sorted_spk_trains.json',low_sorted)
+save_json('unsorted_spk_trains.json', unsorted)
+save_json('high_sorted_spk_trains.json', high_sorted)
+save_json('low_sorted_spk_trains.json', low_sorted)

@@ -74,7 +74,7 @@ def connect_network(ex_neuron, inh_neuron, conf):
             delay_list = np.reshape(
                 np.array(delay_list).astype(float), (1, 100))[0]
             for n in ex_neuron:
-                conns=nest.GetConnections(source=[n], target=np.random.permutation(ex_neuron + inh_neuron).tolist())
+                conns = nest.GetConnections(source=[n], target=np.random.permutation(ex_neuron + inh_neuron).tolist())
 
                 nest.SetStatus(conns, 'delay', delay_list)
 
@@ -125,12 +125,12 @@ def set_stimulus(neurons, conf, sim_time):
 
         elif conf["distribution"] == "original":
 
-            stim_id, stim_t = np.random.choice(1000, int(sim_time)), np.array(np.linspace(0, int(sim_time), int(sim_time) + 1))
+            stim_id, stim_t = np.random.choice(1000, int(sim_time)), np.array(
+                np.linspace(0, int(sim_time), int(sim_time) + 1))
             stim_t = stim_t[:-1]
             set_stimulus_times(stim_t, stim_id)
         else:
             pass
-
 
     else:
         pass
@@ -178,7 +178,7 @@ nest.CopyModel(neuron_model, 'inh_Izhi', {'consistent_integration': False,
                                           'c': -65.0,
                                           'a': 0.1,
                                           'd': 2.0,
-                                          'tau_minus':20.})
+                                          'tau_minus': 20.})
 nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'U_m': -0.2 * 65.0,
                                          'b': 0.2,
@@ -199,11 +199,11 @@ if cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_izh_synapse':
 elif cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_synapse':
     mu_plus = None
     mu_minus = None
-    if cfg["network-params"]["plasticity"]["stdp-type"]=='additive':
-        mu_plus=.0
+    if cfg["network-params"]["plasticity"]["stdp-type"] == 'additive':
+        mu_plus = .0
         mu_minus = 0.0
-    elif cfg["network-params"]["plasticity"]["stdp-type"]=='multiplicative':
-        mu_plus  = 1.0
+    elif cfg["network-params"]["plasticity"]["stdp-type"] == 'multiplicative':
+        mu_plus = 1.0
         mu_minus = 1.0
     else:
         pass
@@ -211,11 +211,11 @@ elif cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_synapse':
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
         'weight': 6.,
         'tau_plus': 20.0,
-        'lambda':cfg["network-params"]["plasticity"]['lambda'],
-        'alpha':cfg["network-params"]["plasticity"]['alpha'],
-        'mu_plus':mu_plus,
+        'lambda': cfg["network-params"]["plasticity"]['lambda'],
+        'alpha': cfg["network-params"]["plasticity"]['alpha'],
+        'mu_plus': mu_plus,
         'mu_minus': mu_minus,
-        'Wmax':10.
+        'Wmax': 10.
     })
 
 else:
