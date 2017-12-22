@@ -183,7 +183,7 @@ def worker(pivot_neuron, q):
     global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
     global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
 
-    print pivot_neuron
+    print(pivot_neuron)
     inc_exc_conns = exc_conns[np.where(exc_post == pivot_neuron)[0]]
     for stim_triplet in itertools.combinations(inc_exc_conns, 3):
         stim_target_gids = []
@@ -219,7 +219,7 @@ def worker(pivot_neuron, q):
     processes_running.release()
 
 
-for pivot_neuron in range(4, 9):  # (1, Ne+1)
+for pivot_neuron in range(1, Ne+1):  # (1, Ne+1)
     while processes_running.value >= max_num_processes:
         print("wait...", processes_running.value)
         try:

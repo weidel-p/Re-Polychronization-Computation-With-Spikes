@@ -67,3 +67,20 @@ rule run_nest_reproduction:
         source {{input.nest}}
         python3 {folder}/model.py -c {{input.conf}}  -r {{wildcards.rep}} -n {{threads}} &>{{log}}
         """.format(folder=NEST_CODE_DIR)
+
+
+
+rule find_groups_nest:
+    threads: 48
+    input:
+        "{folder}/{experiment}/{rep}/connectivity.json",
+    output:
+        "{folder}/{experiment}/{rep}/groups_nest.json"
+    log: 'logs/find_groups_nest_{experiment}_{rep}.log'
+    shell:
+        """
+        source {rules.install_nest.output}
+        python3 code/analysis/find_polychronous_groups_nest.py {input} 48 1.0 1. 20. {output} &> {log}
+        """
+
+

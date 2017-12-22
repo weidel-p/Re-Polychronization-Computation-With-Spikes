@@ -126,16 +126,6 @@ rule compile_find_polychronous_groups:
 	    'g++ -o {output} {input} -ljsoncpp'
 
 
-rule find_groups_nest:
-    input:
-        "{folder}/{experiment}/{rep}/connectivity.json",
-    output:
-        "{folder}/{experiment}/{rep}/groups_nest.json"
-    log: 'logs/find_groups_{experiment}_{rep}.log'
-    shell:
-        'python code/analysis/find_polychronous_groups_nest.py {input} 4 1.0 1. 20. {output} &> {log}'
-
-
 
 rule find_groups:
     output:
