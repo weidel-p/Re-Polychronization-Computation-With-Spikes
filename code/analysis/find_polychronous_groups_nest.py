@@ -1,11 +1,10 @@
 import json
 import numpy as np
 import itertools
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Pool, TimeoutError 
 import time
 import sys
 
-global processes_running, json_data
 global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
 global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
 global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
@@ -25,12 +24,6 @@ with open(in_fn, "r+") as f:
     final_stdw = json.load(f)
 
 
-q = Queue()
-processes_running = Value('i', 0)
-
-json_data = []
-
-
 # and select the relevant connections
 # only strong exc. and all inh connections
 exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > 9.5])
@@ -48,7 +41,7 @@ inh_weight = np.array([float(c['weight']) for c in inh_conns])
 inh_delay = np.array([float(c['delay']) for c in inh_conns])
 
 
-t_sim = 100.0  # simulate only the first second
+t_sim = 1000.0  # simulate only the first second
 
 N = 1000  # total number of neurons
 Ne = 800  # number of excitatory neurons
@@ -60,7 +53,6 @@ def build_simulate(stim_target_gids, stim_times, stim_weights, group, t_fired):
 
     import nest
 
-    global processes_running, json_data
     global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
     global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
     global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
@@ -176,14 +168,16 @@ def build_simulate(stim_target_gids, stim_times, stim_weights, group, t_fired):
 
 # for every excitatory neuron and each possible triplet of excitatory presynaptic neurons
 # define the connections that are initially activated and trigger the simulation
-def worker(pivot_neuron, q):
+def worker(pivot_neuron):
 
-    global processes_running, lock, json_data
     global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
     global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
     global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
 
+    local_json_data = []
+
     print(pivot_neuron)
+
     inc_exc_conns = exc_conns[np.where(exc_post == pivot_neuron)[0]]
     for stim_triplet in itertools.combinations(inc_exc_conns, 3):
         stim_target_gids = []
@@ -212,40 +206,18 @@ def worker(pivot_neuron, q):
         json_group = build_simulate(np.array(stim_target_gids), np.array(
             stim_times), np.array(stim_weights), group, t_fired)
         if not json_group == None:
-            q.put(json_group)
+            local_json_data.append(json_group)
 
-    processes_running.acquire()
-    processes_running.value -= 1
-    processes_running.release()
+    return local_json_data
 
 
-for pivot_neuron in range(1, Ne+1):  # (1, Ne+1)
-    while processes_running.value >= max_num_processes:
-        print("wait...", processes_running.value)
-        try:
-            json_data.append(q.get(False))
-            print(json_data[-1])
-        except:
-            time.sleep(10.0)
+json_data = []
 
-    print("submit process")
+pool = Pool(processes=max_num_processes)
 
-    processes_running.acquire()
-    processes_running.value += 1
-    processes_running.release()
-    process = Process(target=worker, args=[pivot_neuron, q, ])
-    process.start()
-
-
-# wait for last processes
-while processes_running.value >= max_num_processes:
-    print("wait...", processes_running.value)
-    try:
-        json_data.append(q.get(False))
-        print(json_data[-1])
-    except:
-        time.sleep(10.0)
-
+for found_groups in pool.imap_unordered(worker, range(1, Ne+1)):
+    json_data += found_groups
 
 with open(out_fn, "w+") as f:
     json.dump(json_data, f)
+
