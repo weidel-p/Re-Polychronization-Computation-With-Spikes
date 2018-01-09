@@ -278,35 +278,32 @@ def build_simulate(stim_target_gids, stim_times, stim_weights, stim_delay, group
    #                             L_max = layer
    #                 links.append([group[j], group[i], d, layer])
 
-        if L_max >= 7:
-            # save group in JSON format
-            json_group = {}
-            json_group["N_fired"] = N_fired
-            json_group["L_max"] = L_max
+    if L_max >= 7:
+        # save group in JSON format
+        json_group = {}
+        json_group["N_fired"] = int(N_fired)
+        json_group["L_max"] = int(L_max)
 
-            json_fired = []
-            for i in range(N_fired):
-                json_fire = {}
-                json_fire["neuron_id"] = group[i]
-                json_fire["t_fired"] = t_fired[i]
-                json_fired.append(json_fire)
-            json_group["fired"] = json_fired
+        json_fired = []
+        for i in range(N_fired):
+            json_fire = {}
+            json_fire["neuron_id"] = int(group[i])
+            json_fire["t_fired"] = float(t_fired[i])
+            json_fired.append(json_fire)
+        json_group["fired"] = json_fired
 
-            json_links = []
-            for j in range(len(links)):
-                #### TODO pre and post are reversed in order?
-                json_link = {}
-                json_link["pre"] = links[j][0]-1
-                json_link["post"] = links[j][1]-1
-                json_link["delay"] = links[j][2]-1
-                json_link["layer"] = links[j][3]
-                json_links.append(json_link)
-            json_group["links"] = json_links
+        json_links = []
+        for j in range(len(links)):
+            json_link = {}
+            json_link["pre"] = int(links[j][0]-1)
+            json_link["post"] = int(links[j][1]-1)
+            json_link["delay"] = float(links[j][2]-1)
+            json_link["layer"] = int(links[j][3])
+            json_links.append(json_link)
+        json_group["links"] = json_links
 
-            #print("group found")
-            #for l in json_group['links']:
-                #print l
-            return json_group
+        print("group found", json_group)
+        return json_group
 
     return None
 
