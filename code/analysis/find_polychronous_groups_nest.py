@@ -129,11 +129,11 @@ def worker(pivot_neuron):
     for stim_triplet_id, stim_triplet in enumerate(itertools.combinations(inc_exc_conns, 3)):
 
 
-        #if not stim_triplet[0]['pre'] in [166, 416, 684]:
+        #if not stim_triplet[0]['pre'] in [151, 527, 684]:
         #    continue
-        #if not stim_triplet[1]['pre'] in [166, 416, 684]:
+        #if not stim_triplet[1]['pre'] in [151, 527, 684]:
         #    continue
-        #if not stim_triplet[2]['pre'] in [166, 416, 684]:
+        #if not stim_triplet[2]['pre'] in [151, 527, 684]:
         #    continue
 
         if stim_triplet_id % 100 == 0:
@@ -263,19 +263,17 @@ def worker(pivot_neuron):
         i = 2 
 
         #for i, t in enumerate(t_fired):
-        while t < t_last and i+1 < len(t_fired):
+        while t <= t_last+1 and i+1 < len(t_fired):
+
 
             i += 1
             t = t_fired[i]
 
-            relevant_spikes = np.where(np.array(all_t_fired) < t_last)[0]
+            relevant_spikes = np.where(np.array(all_t_fired) <= t_last + 1)[0]
             t_fired = np.array(all_t_fired)[relevant_spikes].tolist()
             group = np.array(all_group)[relevant_spikes].tolist()
 
-
-
-        
-            #print("SPIKE at ", t, "id", group[i])
+            #print("SPIKE at ", t, "id", group[i], "t_last", t_last, all_t_fired)
             for d in range(21):
 
 
