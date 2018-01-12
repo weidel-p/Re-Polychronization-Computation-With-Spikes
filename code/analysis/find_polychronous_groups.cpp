@@ -296,7 +296,7 @@ void all_polychronous(char *argv[])
     N_postspikes[i] = 0;
 
   fpoly = fopen(argv[2],"w");
-  for ( i=0; i<Ne; i++ )
+  for ( i=0; i<40; i++ )
     polychronous(i);
 
   //std::cout << writer.write(json_data).c_str() << std::endl;

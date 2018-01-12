@@ -168,7 +168,7 @@ def worker(pivot_neuron):
             stim_weights.extend(stim_weight)
             # store triplet as first three neurons that fire in this group
             group.append(int(st['pre']))
-            #print ("extend t stim", stim_offset+1-1)
+            #print("extend t stim", stim_offset+1-1)
             t_fired.append(stim_offset+1)
             group_delays.append(st['delay'])
             order = np.argsort(group)
@@ -206,7 +206,7 @@ def worker(pivot_neuron):
         # create a spike generator for each stim time
 
         if not sgs == None:
-            nest.SetStatus(sgs.values(), {"spike_times": []})
+            nest.SetStatus(list(sgs.values()), {"spike_times": []})
 
         stim_times_unique = np.unique(stim_times)
         sgs = dict(zip(stim_times_unique, nest.Create('spike_generator', len(stim_times_unique))))
@@ -225,7 +225,7 @@ def worker(pivot_neuron):
         J_postspikes = np.zeros([1000, 1000])
         D_postspikes = np.zeros([1000, 1000])
         C_postspikes = np.zeros([1000, 1000])
-        #print group, stim_delay, t_fired 
+        #print(group, stim_delay, t_fired)
 
         for i, t in enumerate(t_fired):
             for d in range(21):
@@ -275,7 +275,7 @@ def worker(pivot_neuron):
 
 
         
-            #print "SPIKE at ", t, "id", group[i]
+            #print("SPIKE at ", t, "id", group[i])
             for d in range(21):
 
 
@@ -301,7 +301,7 @@ def worker(pivot_neuron):
                     idxs = np.where(np.logical_and(inh_pre == group[i], inh_delay == d))[0]
                     for j, p in enumerate(inh_post[idxs].astype('int')):
 
-                        #print "INHIBITORY", idxs, group[i], d, p#, np.where(inh_delay == d)[0], np.where(inh_pre == group[i])[0]
+                        #print("INHIBITORY", idxs, group[i], d, p#, np.where(inh_delay == d)[0], np.where(inh_pre == group[i])[0])
 
                         timing = int(t + d) -1 ### WHY +1
                             
@@ -330,8 +330,8 @@ def worker(pivot_neuron):
         L_max = 0
         links = []
         json_group = None
-        #print t_fired
-        #print "N Fired", N_fired
+        #print(t_fired)
+        #print("N Fired", N_fired)
 
         if N_fired > 6:
             for i, t in enumerate(t_fired):
@@ -339,17 +339,17 @@ def worker(pivot_neuron):
                 if i < 3:
                     continue
                 layer[i] = 0
-                #print "I", i, "T", t
+                #print("I", i, "T", t)
 #               for ( p=t_fired[i]; (p>t_fired[i]-latency) & (p>=0); p-- ) // latency=D=20
                 for p in np.arange(t, t-20, -1).astype('int'):
                     if p < 0:
                         break
 
-                    #print "P", p, " len N postspikes", N_postspikes[p]
+                    #print("P", p, " len N postspikes", N_postspikes[p])
                     
 #                 for ( j=0; j<N_postspikes[p]; j++ )
                     for j in range(N_postspikes[p]):
-                        #print "J", j
+                        #print("J", j)
 #                   if ( (I_postspikes[p][j]==group[i]) & (J_postspikes[p][j]<Ne) )
 #                   {
 
@@ -370,7 +370,7 @@ def worker(pivot_neuron):
 
 
                             links.append([J_postspikes[p][j], I_postspikes[p][j], D_postspikes[p][j], layer[i]])
-                            #print "new link", t, J_postspikes[p][j], I_postspikes[p][j], D_postspikes[p][j], layer[i]
+                            #print("new link", t, J_postspikes[p][j], I_postspikes[p][j], D_postspikes[p][j], layer[i])
 
 
 
@@ -430,9 +430,9 @@ def worker(pivot_neuron):
                 print("group found", json_group["N_fired"], json_group["L_max"])
 
                 for f in json_group['fired']:
-                    print f
+                    print(f)
                 for l in json_group['links']:
-                    print l
+                    print(l)
         
         #json_group = build_simulate(np.array(stim_target_gids), np.array(
         #    stim_times), np.array(stim_weights), np.array(sorted_stim_delay), sorted_group, sorted_t_fired, sd)
@@ -446,7 +446,7 @@ json_data = []
 
 pool = Pool(processes=max_num_processes)
 
-for found_groups in pool.imap_unordered(worker, range(1, Ne+1)):
+for found_groups in pool.imap_unordered(worker, range(1, 4)):# Ne+1)):
     json_data += found_groups
 
 with open(out_fn, "w+") as f:
