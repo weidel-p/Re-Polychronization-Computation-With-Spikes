@@ -263,7 +263,7 @@ def worker(pivot_neuron):
         i = 2 
 
         #for i, t in enumerate(t_fired):
-        while t <= t_last+1 and i+1 < len(t_fired):
+        while t <= t_last+1 and i+1 < len(t_fired) and len(t_fired) < 1000:
 
 
             i += 1
@@ -272,6 +272,10 @@ def worker(pivot_neuron):
             relevant_spikes = np.where(np.array(all_t_fired) <= t_last + 1)[0]
             t_fired = np.array(all_t_fired)[relevant_spikes].tolist()
             group = np.array(all_group)[relevant_spikes].tolist()
+
+            if len(t_fired) >= 1000:
+                continue
+
 
             #print("SPIKE at ", t, "id", group[i], "t_last", t_last, all_t_fired)
             for d in range(21):
@@ -283,6 +287,11 @@ def worker(pivot_neuron):
 
 
                         if (exc_weight[idxs][j] > 9.5 or p > Ne):
+
+                            # TODO check this. this could be wrong
+                            if N_postspikes[timing] >= 1000:
+                                continue
+
                             timing = int(t + d) -1 ### WHY +1
 
                             J_postspikes[timing][N_postspikes[timing]] = group[i]
@@ -300,6 +309,10 @@ def worker(pivot_neuron):
                     for j, p in enumerate(inh_post[idxs].astype('int')):
 
                         #print("INHIBITORY", idxs, group[i], d, p#, np.where(inh_delay == d)[0], np.where(inh_pre == group[i])[0])
+
+                        # TODO check this. this could be wrong
+                        if N_postspikes[timing] >= 1000:
+                            continue
 
                         timing = int(t + d) -1 ### WHY +1
                             
@@ -444,7 +457,7 @@ json_data = []
 
 pool = Pool(processes=max_num_processes)
 
-for found_groups in pool.imap_unordered(worker, range(1, 4)):# Ne+1)):
+for found_groups in pool.imap_unordered(worker, range(1, 41)):# Ne+1)):
     json_data += found_groups
 
 with open(out_fn, "w+") as f:
