@@ -14,21 +14,20 @@ with open(groups_izh_fn, "r+") as f:
     groups_izh = json.load(f)
 
 
-
 def compare(g0, g1):
 
-#    if not g0["L_max"] == g1["L_max"]:
-#        return False
-#
-#    if not g0["N_fired"] == g1["N_fired"]:
-#        return False
+    #    if not g0["L_max"] == g1["L_max"]:
+    #        return False
+    #
+    #    if not g0["N_fired"] == g1["N_fired"]:
+    #        return False
 
     if not all([f in g1['fired'] for f in g0['fired']]):
         return False
 
 #    if not all([f in g0['fired'] for f in g1['fired']]):
 #        return False
-#    
+#
 #    if not all([l in g1['links'] for l in g0['links']]):
 #        return False
 #
@@ -41,15 +40,14 @@ def compare(g0, g1):
 def contains_group(g, groups, i):
     for g0 in groups[i:]:
         if compare(g, g0):
-            return i 
-        i += 1 
+            return i
+        i += 1
 
-    
     j = 0
     for g0 in groups[:i]:
         if compare(g, g0):
-            return j 
-        j += 1 
+            return j
+        j += 1
 
     return False
 
@@ -67,8 +65,3 @@ for g_nest in groups_nest:
     i = contains_group(g_nest, groups_izh, i)
     result_nest.append(i)
     print len(result_nest) / float(len(groups_nest))
-
-
-
-
-

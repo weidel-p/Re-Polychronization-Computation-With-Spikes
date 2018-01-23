@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import itertools
-from multiprocessing import Pool, TimeoutError 
+from multiprocessing import Pool, TimeoutError
 import time
 import sys
 import nest
@@ -21,7 +21,6 @@ out_fn = sys.argv[6]
 
 
 # load connectivity data
-#final_stdw = np.loadtxt("final_stwd_izh.dat")
 with open(in_fn, "r+") as f:
     final_stdw = json.load(f)
 
@@ -51,11 +50,7 @@ Ni = 200  # number of inhibitory neurons
 M = 100  # number of outgoing connections per neuron
 
 
-#def build_simulate(stim_target_gids, stim_times, stim_weights, stim_delay, group, t_fired, sd):
-
 def create_network():
-
-    #print("CREATE NETWORK")
 
     global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
     global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
@@ -84,8 +79,6 @@ def create_network():
     # create list with global ids of all neurons
     all_neurons = exc_neurons + inh_neurons
 
-
-
     # create spike detectors for excitatory and inhibitory neurons
     sd = nest.Create('spike_detector', 1, {'to_file': False, 'label': 'spikes'})
 
@@ -103,9 +96,7 @@ def create_network():
     # connect neurons to spike detector
     nest.Connect(all_neurons, sd, 'all_to_all')
 
-
     return [exc_neurons, inh_neurons, sd]
-
 
 
 # for every excitatory neuron and each possible triplet of excitatory presynaptic neurons
@@ -123,23 +114,14 @@ def worker(pivot_neuron):
     sgs = None
 
     inc_exc_conns = exc_conns[np.where(exc_post == pivot_neuron)[0]]
-#    print("exc conns", inc_exc_conns)
+
     for stim_triplet_id, stim_triplet in enumerate(itertools.combinations(inc_exc_conns, 3)):
 
-#        print(" STIM TRIP", pivot_neuron, stim_triplet)
-
-        #if not stim_triplet[0]['pre'] in [55, 458, 800]:
-        #    continue
-        #if not stim_triplet[1]['pre'] in [55, 458, 800]:
-        #    continue
-        #if not stim_triplet[2]['pre'] in [55, 458, 800]:
-        #    continue
-
         if stim_triplet_id % 100 == 0:
-            print("progress", pivot_neuron, stim_triplet_id, float(stim_triplet_id) / len(list(itertools.combinations(inc_exc_conns, 3))))
+            print("progress", pivot_neuron, stim_triplet_id, float(stim_triplet_id) /
+                  len(list(itertools.combinations(inc_exc_conns, 3))))
             exc_neurons, inh_neurons, sd = create_network()
             sgs = None
-
 
         stim_target_gids = []
         stim_times = []
@@ -147,7 +129,6 @@ def worker(pivot_neuron):
 
         group = []
         t_fired = []
-
 
         group_delays = []
         max_delay_triplet = np.max(np.array([c['delay'] for c in stim_triplet]))
@@ -166,22 +147,20 @@ def worker(pivot_neuron):
             stim_weights.extend(stim_weight)
             # store triplet as first three neurons that fire in this group
             group.append(int(st['pre']))
-            #print("extend t stim", stim_offset+1-1)
-            t_fired.append(stim_offset+1)
+            t_fired.append(stim_offset + 1)
             group_delays.append(st['delay'])
             order = np.argsort(group)
             sorted_group = np.array(group)[order].tolist()
             sorted_t_fired = np.array(t_fired)[order].tolist()
             sorted_stim_delay = np.array(group_delays)[order].tolist()
 
-
             nest.SetStatus(exc_neurons + inh_neurons, {'b':                       0.2,
-                                            'c': -65.0,
-                                            'V_m': -70.0,
-                                            'U_m': -70.0 * 0.2,
-                                            'V_th':                   30.0,
-                                            'consistent_integration': False})
-        
+                                                       'c': -65.0,
+                                                       'V_m': -70.0,
+                                                       'U_m': -70.0 * 0.2,
+                                                       'V_th':                   30.0,
+                                                       'consistent_integration': False})
+
             nest.SetStatus(exc_neurons, {'a': 0.02, 'd': 8.0})
             nest.SetStatus(inh_neurons, {'a': 0.1,  'd': 2.0})
 
@@ -191,9 +170,8 @@ def worker(pivot_neuron):
         stim_delay = np.array(sorted_stim_delay)
         group = sorted_group
         t_fired = sorted_t_fired
- 
 
-        #### STIM AND FIND GROUPS ###
+        #### FIND GROUPS ###
 
         nest.ResetNetwork()
         nest.SetKernelStatus({"time": 0.0})
@@ -208,15 +186,12 @@ def worker(pivot_neuron):
         sgs = dict(zip(stim_times_unique, nest.Create('spike_generator', len(stim_times_unique))))
         # and connect it to the respective targets using the corresponding weights
         for t_stim in sgs.keys():
-            #print("TSTIM", t_stim)
             nest.SetStatus([sgs[t_stim]], {"spike_times": [t_stim]})
             idxs = np.where(stim_times == t_stim)[0]
             if idxs.size:
                 nest.Connect(np.array(len(idxs) * [sgs[t_stim]], np.int64), stim_target_gids[idxs], {'rule': 'one_to_one'}, syn_spec={
                              'model': 'static_synapse', "weight": stim_weights[idxs], "delay": len(idxs) * [min_delay]})
 
-        #print(zip(stim_target_gids, stim_times))
-    
         # simulate for sim_time in steps of rec_time
         nest.Simulate(t_sim)
 
@@ -224,15 +199,11 @@ def worker(pivot_neuron):
         t_fired.extend(nest.GetStatus(sd, 'events')[0]['times'])
         group.extend(nest.GetStatus(sd, 'events')[0]['senders'])
 
-
         # find the links and determine the layers
         N_fired = len(group)
         L_max = 0
         links = []
         json_group = None
-        #print(t_fired)
-        #print("N Fired", N_fired)
-
 
         # drop huge groups for computational reasons
         if N_fired > 1000:
@@ -254,17 +225,14 @@ def worker(pivot_neuron):
                                 L_max = layer
                     links.append([group[j], group[i], d, layer])
 
-
         discard = 0
         used = np.zeros(3)
         for i in range(len(used)):
             for j in range(len(links)):
                 if links[j][0] == group[i] and links[j][1] <= Ne:
-      	            used[i] += 1;
+                    used[i] += 1
             if used[i] == 1:
-      	        discard = 1;
-        
-        #print("LMAX", L_max, "discard", discard, "len links", len(links))
+                discard = 1
 
         if L_max >= 7 and discard == 0:
             # save group in JSON format
@@ -283,22 +251,15 @@ def worker(pivot_neuron):
             json_links = []
             for j in range(len(links)):
                 json_link = {}
-                json_link["pre"] = int(links[j][0])-1
-                json_link["post"] = int(links[j][1])-1
-                json_link["delay"] = float(links[j][2])-1
+                json_link["pre"] = int(links[j][0]) - 1
+                json_link["post"] = int(links[j][1]) - 1
+                json_link["delay"] = float(links[j][2]) - 1
                 json_link["layer"] = int(links[j][3])
                 json_links.append(json_link)
             json_group["links"] = json_links
 
             print("group found", pivot_neuron, json_group["N_fired"], json_group["L_max"])
 
-            #for f in json_group['fired']:
-            #    print(f)
-            #for l in json_group['links']:
-            #    print(l)
-        
-        #json_group = build_simulate(np.array(stim_target_gids), np.array(
-        #    stim_times), np.array(stim_weights), np.array(sorted_stim_delay), sorted_group, sorted_t_fired, sd)
         if not json_group == None:
             local_json_data.append(json_group)
 
@@ -309,10 +270,8 @@ json_data = []
 
 pool = Pool(processes=max_num_processes)
 
-for found_groups in pool.imap_unordered(worker, range(1, Ne+1)):# Ne+1)):
+for found_groups in pool.imap_unordered(worker, range(1, Ne + 1)):
     json_data += found_groups
 
 with open(out_fn, "w+") as f:
     json.dump(json_data, f)
-
-

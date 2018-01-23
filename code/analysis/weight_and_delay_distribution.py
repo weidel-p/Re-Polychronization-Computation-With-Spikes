@@ -57,9 +57,9 @@ axHisty.bar(yhist, yedges_mean, color='k', orientation='vertical')
 axHistx.bar(xedges_mean, xhist_ex_ex, color='r', orientation='vertical')
 axHisty.bar(yhist_ex_ex, yedges_mean, color='r', orientation='vertical')
 
-print xhist.shape,yhist.shape
-axHistx.bar(xedges_mean,xhist, color='k',orientation='vertical')
-axHistx.bar(xedges_mean,xhist, color='m',orientation='vertical')
+print xhist.shape, yhist.shape
+axHistx.bar(xedges_mean, xhist, color='k', orientation='vertical')
+axHistx.bar(xedges_mean, xhist, color='m', orientation='vertical')
 
 axHistx.bar(xedges_mean, xhist_ex_in, color='b', orientation='vertical')
 axHisty.bar(yhist_ex_in, yedges_mean, color='b', orientation='vertical')

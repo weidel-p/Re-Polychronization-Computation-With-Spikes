@@ -17,7 +17,6 @@ parser.add_argument('-o', '--outfolder', type=str)
 args = parser.parse_args()
 
 
-
 groups = hf.read_group_file(args.groupfile)
 print 'loading group data done'
 print 'found {} groups'.format(len(groups))
