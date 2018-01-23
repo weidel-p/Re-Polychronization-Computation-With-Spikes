@@ -41,11 +41,8 @@ naive_times, naive_senders = hf.read_spikefile(naive_spikefile)
 bitwise_spikefile = args.bitwise_spikefile
 bitwise_times, bitwise_senders = hf.read_spikefile(bitwise_spikefile)
 
-print 'loading spikes data done'
 naive_weights = hf.read_weightfile(args.naive_weightfile)
 bitwise_weights = hf.read_weightfile(args.bitwise_weightfile)
-
-print 'loading weight data done'
 
 
 fig = plt.figure(figsize=(9, 8))
@@ -92,12 +89,12 @@ def set_box_color(bp, color):
 
 
 bpexc = axin1.boxplot([bitwise_exc_rate, naive_exc_rate],
-                      positions=np.array(xrange(2)) * 2.0 - 0.4,
+                      positions=np.array(range(2)) * 2.0 - 0.4,
                       sym='',
                       widths=0.6,
                       labels=['original', 'NEST'])
 bpinh = axin1.boxplot([bitwise_inh_rate, naive_inh_rate],
-                      positions=np.array(xrange(2)) * 2.0 + 0.4,
+                      positions=np.array(range(2)) * 2.0 + 0.4,
                       sym='',
                       widths=0.6,
                       labels=['original', 'NEST'])

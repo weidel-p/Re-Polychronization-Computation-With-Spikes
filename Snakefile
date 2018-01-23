@@ -126,16 +126,6 @@ rule compile_find_polychronous_groups:
 	    'g++ -o {output} {input} -ljsoncpp'
 
 
-rule find_groups_nest:
-    input:
-        "{folder}/{experiment}/{rep}/connectivity.json",
-    output:
-        "{folder}/{experiment}/{rep}/groups_nest.json"
-    log: 'logs/find_groups_{experiment}_{rep}.log'
-    shell:
-        'python code/analysis/find_polychronous_groups_nest.py {input} 4 1.0 1. 20. {output} &> {log}'
-
-
 
 rule find_groups:
     output:
@@ -157,7 +147,7 @@ rule plot_test_statistical_reproduction:
         'figures/bitwise_{experiment}_{rep}.{ext,(eps|png)}',
     priority: 9
     shell:
-        'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+        'python3 {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule plot_test_bitwise_reproduction:
     input:
@@ -168,7 +158,7 @@ rule plot_test_bitwise_reproduction:
         'figures/bitwise_reproduction_{rep}.{ext,(eps|png)}',
     priority: 10
     shell:
-        'python {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+        'python3 {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule plot_groups:
     output:
@@ -180,10 +170,11 @@ rule plot_groups:
     priority: 2
     run:
         shell("""
-        python code/analysis/plot_group_statistics.py \
+        python3 code/analysis/plot_group_statistics.py \
         --groupfile {input.groups}\
         --outfolder figures/{wildcards.experiment}/{wildcards.rep}\
         """)
+
 rule plot_combined_groups:
     output:
         plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
@@ -193,10 +184,11 @@ rule plot_combined_groups:
     priority: 2
     run:
         shell("""
-        python code/analysis/plot_combined_group_statistics.py \
+        python3 code/analysis/plot_combined_group_statistics.py \
         -gl {input.groups}\
         -fn {output.plot_8}\
         """)
+
 rule plot_bimodal_gamma:
     output:
         weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png)}}',folder=FIG_DIR),
@@ -210,7 +202,7 @@ rule plot_bimodal_gamma:
     priority: 2
     run:
         shell("""
-        python code/analysis/plot_bimodal_gamma.py \
+        python3 code/analysis/plot_bimodal_gamma.py \
         -cl {input.connectivity}\
         -sl {input.spikes}\
         -gl {input.groups}\
@@ -226,7 +218,7 @@ rule test_weights_and_delay:
         weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.{{ext,(eps|png)}}',folder=FIG_DIR),
     priority: 10
     shell:
-        'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -o {{output.weight}} '.format(ANA_DIR=ANA_DIR)
+        'python3 {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -o {{output.weight}} '.format(ANA_DIR=ANA_DIR)
 
 rule plot_dynamics:
     output:
@@ -237,7 +229,7 @@ rule plot_dynamics:
     priority: 2
     run:
         shell("""
-        python code/analysis/plot_dynamics.py \
+        python3 code/analysis/plot_dynamics.py \
         --spikefile {input.spikes}\
         --weightfile {input.connectivity}\
         --filename {output}
