@@ -224,6 +224,7 @@ def worker(pivot_neuron):
         t_fired.extend(nest.GetStatus(sd, 'events')[0]['times'])
         group.extend(nest.GetStatus(sd, 'events')[0]['senders'])
 
+
         # find the links and determine the layers
         N_fired = len(group)
         L_max = 0
@@ -231,6 +232,11 @@ def worker(pivot_neuron):
         json_group = None
         #print(t_fired)
         #print("N Fired", N_fired)
+
+
+        # drop huge groups for computational reasons
+        if N_fired > 1000:
+            continue
 
         for i in range(3, N_fired):
             for j in range(i):
@@ -309,10 +315,4 @@ for found_groups in pool.imap_unordered(worker, range(1, Ne+1)):# Ne+1)):
 with open(out_fn, "w+") as f:
     json.dump(json_data, f)
 
-
-stwd_data = []
-for c in final_stdw:
-    stwd_data.append([c['pre'], c['post'], c['weight'], c['delay']]) 
-
-np.savetxt("stwd_data.dat", stwd_data) 
 
