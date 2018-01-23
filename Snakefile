@@ -37,14 +37,14 @@ CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)   ]
 
-repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file)]
+repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 #repetition is used to set seed to get statistics for the experiemnts
-low_NUM_REP=range(2)
-low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) and ('stdp' not in file)]
+low_NUM_REP=range(1)
+low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) ]
 
-high_NUM_REP=range(100)
-high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) ]
+high_NUM_REP=range(1)
+high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
 NUM_REP=high_NUM_REP
 
 include: "Izhikevic.rules"
@@ -52,14 +52,37 @@ include: "nest.rules"
 
 rule all:
     input:
+        polytest_data=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
+
+        polytest_data_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
+
+
+
         nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
+        nest_groups_repro_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
         nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
                                     folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-        nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
-        nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
-                                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
+
+        plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
+                            experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
+
+        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=high_CONFIG_FILES),
+
+        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
+
+
+
+
+        #nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
+        #                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
+        #nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
+        #                            folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
 
 
         #nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",
@@ -68,10 +91,7 @@ rule all:
         #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
         #                        folder=FIG_DIR,experiment=CONFIG_FILES),
-        #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.png',
-        #                    experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
-        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.png',experiment=low_CONFIG_FILES),
-        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.png',rep=low_NUM_REP),
+      
         #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
         #                    folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
 
@@ -105,6 +125,18 @@ rule compile_find_polychronous_groups:
 	shell:
 	    'g++ -o {output} {input} -ljsoncpp'
 
+
+rule find_groups_nest:
+    input:
+        "{folder}/{experiment}/{rep}/connectivity.json",
+    output:
+        "{folder}/{experiment}/{rep}/groups_nest.json"
+    log: 'logs/find_groups_{experiment}_{rep}.log'
+    shell:
+        'python code/analysis/find_polychronous_groups_nest.py {input} 4 1.0 1. 20. {output} &> {log}'
+
+
+
 rule find_groups:
     output:
         "{folder}/{experiment}/{rep}/groups.json"
@@ -122,7 +154,7 @@ rule plot_test_statistical_reproduction:
         stat_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_{experiment}_{rep}.png',
+        'figures/bitwise_{experiment}_{rep}.{ext,(eps|png)}',
     priority: 9
     shell:
         'python {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
@@ -133,15 +165,15 @@ rule plot_test_bitwise_reproduction:
         nest_mem=expand('{folder}/bitwise_reproduction/{{rep}}/membrane_potential-1002.dat',folder=NEST_DATA_DIR),
         nest_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_reproduction_{rep}.png',
+        'figures/bitwise_reproduction_{rep}.{ext,(eps|png)}',
     priority: 10
     shell:
         'python {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule plot_groups:
     output:
-        plot_7=expand('{folder}/{{experiment}}/{{rep}}/plot_7.png',folder=FIG_DIR),
-        plot_8=expand('{folder}/{{experiment}}/{{rep}}/plot_8.png',folder=FIG_DIR),
+        plot_7=expand('{folder}/{{experiment}}/{{rep}}/plot_7.{{ext,(eps|png)}}',folder=FIG_DIR),
+        plot_8=expand('{folder}/{{experiment}}/{{rep}}/plot_8.{{ext,(eps|png)}}',folder=FIG_DIR),
 
     input:
         groups=expand('{folder}/{{experiment}}/{{rep}}/groups.json',folder=NEST_DATA_DIR),
@@ -154,7 +186,7 @@ rule plot_groups:
         """)
 rule plot_combined_groups:
     output:
-        plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.png',folder=FIG_DIR),
+        plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
 
     input:
         groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
@@ -167,8 +199,8 @@ rule plot_combined_groups:
         """)
 rule plot_bimodal_gamma:
     output:
-        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.png',folder=FIG_DIR),
-        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.png',folder=FIG_DIR),
+        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png)}}',folder=FIG_DIR),
+        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
 
     input:
         connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
@@ -191,14 +223,14 @@ rule test_weights_and_delay:
     input:
         nest=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
     output:
-        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.png',folder=FIG_DIR),
+        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.{{ext,(eps|png)}}',folder=FIG_DIR),
     priority: 10
     shell:
         'python {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -o {{output.weight}} '.format(ANA_DIR=ANA_DIR)
 
 rule plot_dynamics:
     output:
-        file=expand('{folder}/{{experiment}}/{{rep}}/dynamic_measures.png',folder=FIG_DIR),
+        file=expand('{folder}/{{experiment}}/{{rep}}/dynamic_measures.{{ext,(eps|png)}}',folder=FIG_DIR),
     input:
         connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),

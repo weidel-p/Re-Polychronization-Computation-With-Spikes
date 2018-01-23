@@ -79,8 +79,7 @@ def compare_weight(neuron, time):
     return [w, dw]
 
 
-
-if len(sys.argv) >2:
+if len(sys.argv) > 2:
     izh_mem = np.loadtxt(sys.argv[1])
     nest_mem = np.loadtxt(sys.argv[2])
     print 'read in mem_pot'
@@ -104,7 +103,7 @@ if len(sys.argv) >2:
         wrong_neurons = np.unique([izh_mem[ids_mismatch[i]][0] for i in range(len(ids_mismatch))])
         wrong_neuron = int(wrong_neurons[-1])
 
-if len(sys.argv) >4:
+if len(sys.argv) > 4:
 
     izh_spikes = np.loadtxt(sys.argv[3])
     nest_spikes = np.loadtxt(sys.argv[4])
@@ -119,31 +118,23 @@ if len(sys.argv) >4:
     spk_plot(izh_senders, izh_times, '.r', 'izh')
     plt.savefig('plot.png')
     plt.close()
-if len(sys.argv) >6:
+if len(sys.argv) > 6:
 
     izh_ssd = np.loadtxt(sys.argv[5])
     nest_ssd = np.loadtxt(sys.argv[6])
-    print 'read in ssd',izh_ssd.shape,nest_ssd.shape
+    print 'read in ssd', izh_ssd.shape, nest_ssd.shape
 
     izh_ssd = np.reshape(izh_ssd, [800, 100, 50, 2])  # Format: neuron, synapse, time in sec, [w, w_dev]
     nest_ssd = np.reshape(nest_ssd, [800, 100, 50, 2])
-
 
     ws = []
     dws = []
     for n in range(800):
         for time in range(5):
-            w, dw = compare_weight(n,time)
-            if w!=0 or dw!=0:
-                print n,time,w,dw
+            w, dw = compare_weight(n, time)
+            if w != 0 or dw != 0:
+                print n, time, w, dw
             ws.append(w)
             dws.append(dw)
 
     print "max error w / dw", max(ws), max(dws)
-
-
-
-
-
-
-
