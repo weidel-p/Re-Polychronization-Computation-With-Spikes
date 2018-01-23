@@ -10,7 +10,7 @@ rule install_nest:
         mkdir -p bld
         mkdir -p instl
         cd bld
-        cmake3 -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python3=ON {params.nest_dir} -Dwith-mpi=ON
+        cmake -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python3=ON {params.nest_dir} -Dwith-mpi=ON
         make -j8
         make install
         """
@@ -73,14 +73,17 @@ rule run_nest_reproduction:
 rule find_groups_nest:
     threads: 48
     input:
-        "{folder}/{experiment}/{rep}/connectivity.json",
+        connectivity="{folder}/{experiment}/{rep}/connectivity.json",
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+
     output:
         "{folder}/{experiment}/{rep}/groups_nest.json"
     log: 'logs/find_groups_nest_{experiment}_{rep}.log'
+
     shell:
         """
         source {rules.install_nest.output}
-        python3 code/analysis/find_polychronous_groups_nest.py {input} 48 1.0 1. 20. {output} &> {log}
+        python3 code/analysis/find_polychronous_groups_nest.py {input.connectivity} {threads}  {input.conf}. {output} &> {log}
         """
 
 

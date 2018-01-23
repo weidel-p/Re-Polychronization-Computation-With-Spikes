@@ -3,7 +3,7 @@ sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handl
 
 import socket
 if "cluster" in socket.gethostname():
-    shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;')
+    shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;source activate ICA')
     NUM_THREADS=1
 else:
     NUM_THREADS=1
@@ -53,28 +53,28 @@ include: "nest.rules"
 rule all:
     input:
         polytest_data=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
+                            folder=NEST_DATA_DIR,experiment=['bitwise_reproduction'],rep=[5]),
 
         polytest_data_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=['polychrony_reproduction'],rep=[0]),
+                            folder=NEST_DATA_DIR,experiment=['bitwise_reproduction'],rep=[5]),
 
 
 
-        nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        #nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
+        #                    folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
 
-        nest_groups_repro_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        #nest_groups_repro_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+        #                    folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
 
-        nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
-                                    folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        #nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
+        #                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
 
-        plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
-                            experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
+        #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
+        #                    experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
 
-        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=high_CONFIG_FILES),
+        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=high_CONFIG_FILES),
 
-        plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
+        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
 
 
 
@@ -98,8 +98,8 @@ rule all:
 
         #original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",
         #                        folder=IZHI_DATA_DIR,rep=NUM_REP),
-        original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",
-                            folder=IZHI_DATA_DIR,rep=NUM_REP),
+        #original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",
+        #                    folder=IZHI_DATA_DIR,rep=NUM_REP),
         #original_code=expand("{folder}/{rep}/poly_spnet_bitwise_reproduction",
         #                    folder=IZHI_EXEC_DIR,rep=NUM_REP),
 

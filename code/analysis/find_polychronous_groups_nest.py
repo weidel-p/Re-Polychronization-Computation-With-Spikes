@@ -6,19 +6,36 @@ import time
 import sys
 import nest
 import copy
+import argparse
+import helper
+
 
 global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
 global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
 global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
 
 
-in_fn = sys.argv[1]
-max_num_processes = int(sys.argv[2])
-sim_resolution = float(sys.argv[3])
-min_delay = float(sys.argv[4])
-max_delay = float(sys.argv[5])
-out_fn = sys.argv[6]
 
+
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--config', type=str)
+parser.add_argument('-o', '--output', type=str)
+parser.add_argument('-n', '--num_threads', type=int)
+parser.add_argument('-i', '--connectivity', type=int)
+
+args = parser.parse_args()
+
+cfg = helper.parse_config(args.config)
+
+
+
+in_fn = args.connectivity
+max_num_processes = args.num_threads
+sim_resolution = cfg["simulation-params"]["resolution"]
+min_delay, max_delay = cfg["network-params"]["connectivity"]["delay-range"]
+out_fn = args.output
 
 # load connectivity data
 with open(in_fn, "r+") as f:
