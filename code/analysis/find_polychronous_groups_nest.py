@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', type=str)
 parser.add_argument('-o', '--output', type=str)
 parser.add_argument('-n', '--num_threads', type=int)
-parser.add_argument('-i', '--connectivity', type=int)
+parser.add_argument('-i', '--connectivity', type=str)
 
 args = parser.parse_args()
 
@@ -34,7 +34,6 @@ cfg = helper.parse_config(args.config)
 in_fn = args.connectivity
 max_num_processes = args.num_threads
 sim_resolution = cfg["simulation-params"]["resolution"]
-min_delay, max_delay = cfg["network-params"]["connectivity"]["delay-range"]
 out_fn = args.output
 
 # load connectivity data
@@ -52,6 +51,7 @@ exc_pre = np.array([int(c['pre']) for c in exc_conns])
 exc_post = np.array([int(c['post']) for c in exc_conns])
 exc_weight = np.array([float(c['weight']) for c in exc_conns])
 exc_delay = np.array([float(c['delay']) for c in exc_conns])
+min_delay, max_delay = np.min(exc_delay),np.max(exc_delay)
 
 inh_pre = np.array([int(c['pre']) for c in inh_conns])
 inh_post = np.array([int(c['post']) for c in inh_conns])
@@ -74,7 +74,7 @@ def create_network():
     global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
 
     nest.ResetKernel()
-    nest.sr("M_ERROR setverbosity")
+    #nest.sr("M_ERROR setverbosity")
     nest.SetKernelStatus({'resolution': sim_resolution})
 
     # build all neurons but only selected connections exc_conns, inh_conns
