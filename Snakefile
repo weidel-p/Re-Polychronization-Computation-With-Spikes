@@ -52,11 +52,10 @@ include: "nest.rules"
 
 rule all:
     input:
-        polytest_data=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=['bitwise_reproduction'],rep=range(10)),
-
-        polytest_data_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=['bitwise_reproduction'],rep=range(10)),
+        polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=range(20)),
+        polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=range(20)),
 
 
 
