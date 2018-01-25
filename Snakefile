@@ -3,7 +3,7 @@ sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handl
 
 import socket
 if "cluster" in socket.gethostname():
-    shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;source activate ICA')
+    shell.prefix('module load autotools;module load pystuff_new; module load mpi/openmpi/1.10.0;source activate poly-python3;')
     NUM_THREADS=1
 else:
     NUM_THREADS=1
