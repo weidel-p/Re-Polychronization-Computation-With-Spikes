@@ -83,7 +83,7 @@ rule find_groups_nest:
     shell:
         """
         source {rules.install_nest.output}
-        python3 code/analysis/find_polychronous_groups_nest.py {input.connectivity} {threads}  {input.conf} {output} &> {log}
+        python3 code/analysis/find_polychronous_groups_nest.py --input {input.connectivity} --num_threads {threads}  --config {input.conf} --output {output} &> {log}
         """
 
 
