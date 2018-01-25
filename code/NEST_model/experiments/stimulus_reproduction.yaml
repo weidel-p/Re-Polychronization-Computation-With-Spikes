@@ -10,7 +10,7 @@ simulation-params:
 network-params:
     connectivity: 
         type: reproduce
-        from-file: data/original_model/bitwise_reproduction/0/connectivity.json
+        from-file: data/original_model/bitwise_reproduction/{rep}/connectivity.json
 
     plasticity:
         synapse-model: stdp_izh_bitwise_correct_synapse
@@ -21,5 +21,5 @@ network-params:
 
     initial-state:
         type: reproduce
-        from-file: data/original_model/bitwise_reproduction/0/vuinit.dat
+        from-file: data/original_model/bitwise_reproduction/{rep}/vuinit.dat
 
