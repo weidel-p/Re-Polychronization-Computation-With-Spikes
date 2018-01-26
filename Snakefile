@@ -35,7 +35,7 @@ LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)   ]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file)]
 
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
