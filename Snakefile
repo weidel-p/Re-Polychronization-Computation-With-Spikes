@@ -43,7 +43,7 @@ repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
 low_NUM_REP=range(1)
 low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) ]
 
-high_NUM_REP=range(19)
+high_NUM_REP=range(20)
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
 NUM_REP=high_NUM_REP
 
