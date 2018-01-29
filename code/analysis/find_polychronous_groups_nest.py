@@ -24,6 +24,7 @@ parser.add_argument('-c', '--config', type=str)
 parser.add_argument('-o', '--output', type=str)
 parser.add_argument('-n', '--num_threads', type=int)
 parser.add_argument('-i', '--connectivity', type=str)
+parser.add_argument('-s', '--statistics', type=str)
 
 args = parser.parse_args()
 
@@ -35,7 +36,7 @@ in_fn = args.connectivity
 max_num_processes = args.num_threads
 sim_resolution = cfg["simulation-params"]["resolution"]
 out_fn = args.output
-
+out_stat_fn = args.statistics
 # load connectivity data
 with open(in_fn, "r+") as f:
     final_stdw = json.load(f)
@@ -289,6 +290,26 @@ pool = Pool(processes=max_num_processes)
 
 for found_groups in pool.imap_unordered(worker, range(1, Ne + 1)):
     json_data += found_groups
+N_list = []
+L_list = []
+T_list = []
+i = 0
+import helper as hf
+for g in enumerate(json_data):
+    times, senders = hf.get_t_s(g)
+
+    N_list.append(int(g["N_fired"]))
+
+    T_list.append(max(times))  # time span
+
+    L_list.append(int(g["L_max"]))  # longest path
+stats=dict(N_fired=N_list,
+     longest_path=L_list,
+     time_span=T_list
+     )
+
 
 with open(out_fn, "w+") as f:
     json.dump(json_data, f)
+with open(out_stat_fn, "w+") as fs:
+    json.dump(stats, fs)
