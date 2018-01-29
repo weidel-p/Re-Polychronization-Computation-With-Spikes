@@ -77,13 +77,14 @@ rule find_groups_nest:
         conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
 
     output:
-        "{folder}/{experiment}/{rep}/groups_nest.json"
+        groups="{folder}/{experiment}/{rep}/groups_nest.json",
+        stats="{folder}/{experiment}/{rep}/stats.json"
     log: 'logs/find_groups_nest_{experiment}_{rep}.log'
 
     shell:
         """
         source {rules.install_nest.output}
-        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n {threads}  -c {input.conf} -o {output} &> {log}
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n {threads}  -c {input.conf} -o {output.groups} -s {output.stats}&> {log}
         """
 
 
