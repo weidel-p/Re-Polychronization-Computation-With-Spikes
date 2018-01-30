@@ -35,7 +35,7 @@ LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file) and ('additive_stdp' not in file) and ('naive' in file)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file) ]
 
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
@@ -53,9 +53,9 @@ include: "nest.rules"
 rule all:
     input:
         polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=range(20)),
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=range(20)),
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=CONFIG_FILES),
         plt_bimodal_gamma_nest=expand('figures/{experiment}/{experiment}_bimodalgamma_groups_nest.eps',experiment=CONFIG_FILES),
 
