@@ -16,8 +16,8 @@ network-params:
     plasticity:
         synapse-model: stdp_synapse
         stdp-type: additive
-        lambda: 0.01
-        alpha: .9
+        lambda: 1.
+        alpha: 1.1
 
 
     stimulus:

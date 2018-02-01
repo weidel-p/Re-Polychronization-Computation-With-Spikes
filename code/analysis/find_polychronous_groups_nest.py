@@ -295,7 +295,7 @@ L_list = []
 T_list = []
 i = 0
 import helper as hf
-for g in enumerate(json_data):
+for i,g in enumerate(json_data):
     times, senders = hf.get_t_s(g)
 
     N_list.append(int(g["N_fired"]))
