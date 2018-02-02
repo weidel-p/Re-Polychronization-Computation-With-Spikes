@@ -104,8 +104,8 @@ def convert_line(line):
     )
     return group
 
-
 def get_t_s(group):
+    #print(group)
     times = []
     senders = []
     for i in group['fired']:

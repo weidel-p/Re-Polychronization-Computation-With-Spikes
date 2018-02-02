@@ -10,6 +10,7 @@ import argparse
 import helper
 
 
+
 global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
 global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
 global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
@@ -75,7 +76,7 @@ def create_network():
     global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
 
     nest.ResetKernel()
-    #nest.sr("M_ERROR setverbosity")
+    nest.sr("M_ERROR setverbosity")
     nest.SetKernelStatus({'resolution': sim_resolution})
 
     # build all neurons but only selected connections exc_conns, inh_conns
@@ -220,28 +221,51 @@ def worker(pivot_neuron):
         # find the links and determine the layers
         N_fired = len(group)
         L_max = 0
-        links = []
+        links = np.array([])
         json_group = None
 
         # drop huge groups for computational reasons
+
         if N_fired > 1000:
             continue
 
+        exc_is_in_group = np.in1d(exc_pre, group) & np.in1d(exc_post, group)
+        inh_is_in_group = np.in1d(inh_pre, group) & np.in1d(inh_post, group)
+
+        group_exc_pre = exc_pre[exc_is_in_group]
+        group_exc_post = exc_post[exc_is_in_group]
+        group_exc_delay = exc_delay[exc_is_in_group]
+        group_inh_pre = inh_pre[inh_is_in_group]
+        group_inh_post = inh_post[inh_is_in_group]
+        group_inh_delay = inh_delay[inh_is_in_group]
+
+
+
         for i in range(3, N_fired):
+            #i is index of Nth neuron in group
+            # group[i] is index of neuron
+
             for j in range(i):
+                # loop thorugh all neurons that fired before this one becuase they are candidates for linked neurons
                 if group[j] <= Ne:
-                    delays = exc_delay[np.where(np.all([exc_pre == group[j], exc_post == group[i]], axis=0))[0]]
+                    delays = group_exc_delay[np.where(np.all([group_exc_pre == group[j], group_exc_post == group[i]], axis=0))[0]]
                 else:
-                    delays = inh_delay[np.where(np.all([inh_pre == group[j], inh_post == group[i]], axis=0))[0]]
+                    delays = group_inh_delay[np.where(np.all([group_inh_pre == group[j], group_inh_post == group[i]], axis=0))[0]]
+
                 for d in delays:
                     layer = 2
-                    if links:
+                    if links.size > 0:
                         idxs = np.where(np.array(links)[:, 1] == group[j])[0]
                         if idxs.size:
                             layer = int(np.max(np.array(links)[idxs, 3]) + 1)
                             if layer > L_max:
                                 L_max = layer
-                    links.append([group[j], group[i], d, layer])
+
+                        links = np.append(links, [[group[j], group[i], d, layer]],axis=0)
+                    else:
+                        links=np.array([ [group[j], group[i], d, layer] ])
+
+
 
         discard = 0
         used = np.zeros(3)
@@ -276,11 +300,10 @@ def worker(pivot_neuron):
                 json_links.append(json_link)
             json_group["links"] = json_links
 
-            print("group found", pivot_neuron, json_group["N_fired"], json_group["L_max"])
+            #print("group found", pivot_neuron, json_group["N_fired"], json_group["L_max"])
 
         if not json_group == None:
             local_json_data.append(json_group)
-
     return local_json_data
 
 
@@ -294,19 +317,17 @@ N_list = []
 L_list = []
 T_list = []
 i = 0
-import helper as hf
-for i,g in enumerate(json_data):
-    times, senders = hf.get_t_s(g)
-
+for i, g in enumerate(json_data):
+    times, senders = helper.get_t_s(g)
     N_list.append(int(g["N_fired"]))
-
     T_list.append(max(times))  # time span
-
     L_list.append(int(g["L_max"]))  # longest path
-stats=dict(N_fired=N_list,
-     longest_path=L_list,
-     time_span=T_list
-     )
+
+
+stats = dict(N_fired = N_list,
+            longest_path = L_list,
+            time_span = T_list
+            )
 
 
 with open(out_fn, "w+") as f:
