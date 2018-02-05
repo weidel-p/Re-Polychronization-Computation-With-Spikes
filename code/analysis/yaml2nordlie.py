@@ -92,3 +92,5 @@ for fn in fns:
                 table += end_section()
 
         table += end_table("Parameter for experiment " + fn, fn)
+
+    print table

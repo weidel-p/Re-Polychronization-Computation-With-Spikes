@@ -1,4 +1,6 @@
 import os,glob,sys
+import numpy as np
+
 sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handle this
 
 import socket
@@ -47,17 +49,20 @@ high_NUM_REP=range(20)
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
 NUM_REP=high_NUM_REP
 
+RANGE_PROB_EX_EX = np.round(np.linspace(0, 1, 20), 2)
+
 include: "Izhikevic.rules"
 include: "nest.rules"
 
 rule all:
     input:
-        polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=CONFIG_FILES),
-        plt_bimodal_gamma_nest=expand('figures/{experiment}/{experiment}_bimodalgamma_groups_nest.eps',experiment=CONFIG_FILES),
+        rand_conn = expand("data/NEST_model/bitwise_reproduction/0/groups_random_conn_{prob}.json", prob=RANGE_PROB_EX_EX)
+        #polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
+        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=CONFIG_FILES),
+        #plt_bimodal_gamma_nest=expand('figures/{experiment}/{experiment}_bimodalgamma_groups_nest.eps',experiment=CONFIG_FILES),
 
 
 
@@ -106,7 +111,6 @@ rule all:
 
 
 
-
 rule clean:
     shell:
         """
@@ -126,6 +130,14 @@ rule compile_find_polychronous_groups:
 	    'g++ -o {output} {input} -ljsoncpp'
 
 
+rule compile_find_polychronous_groups_random:
+	output:
+	    expand('{folder}/find_polychronous_groups_random_weight_dist',folder=ANA_DIR)
+	input:
+	    expand('{folder}/find_polychronous_groups_random_weight_dist.cpp',folder=ANA_DIR)
+	shell:
+	    'g++ -o {output} {input} -ljsoncpp'
+
 
 rule find_groups:
     output:
@@ -136,6 +148,17 @@ rule find_groups:
     log: 'logs/find_groups_{experiment}_{rep}.log'
     shell:
         '{input.program} {input.connectivity} {output} &>{log}'
+
+rule find_groups_random:
+    output:
+        "data/NEST_model/bitwise_reproduction/0/groups_random_conn_{prob}.json",
+    input:
+        connectivity="data/NEST_model/bitwise_reproduction/0/connectivity.json",
+        program=rules.compile_find_polychronous_groups_random.output,
+#    log: 'logs/find_groups_{experiment}_{rep}.log'
+    shell:
+        '{input.program} {input.connectivity} {output} {wildcards.prob} 1.0 ' #&>{log}'
+
 
 rule plot_test_statistical_reproduction:
     input:
