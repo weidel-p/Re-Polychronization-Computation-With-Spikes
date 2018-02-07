@@ -22,6 +22,7 @@ network-params:
         W_init: 6
         LTP:  0.10
         LTD: -0.12
+
     stimulus:
         type: generate
         distribution: original
