@@ -18,6 +18,8 @@ network-params:
         tau_syn_update_interval: 10000.
         constant_additive_value: 0.01
         reset_weight_change_after_update: False
+        Wmax: 10
+        W_init: 6
 
     stimulus:
         type: generate

@@ -113,22 +113,25 @@ def set_stimulus(neurons, conf, sim_time):
         stim_t = stimulus[:, 1] - 1
         del stimulus
         set_stimulus_times(stim_t, stim_id)
+        print('reproduce',conf)
         # first neuron gets current manually rest via spike generator
 
     elif conf["type"] == "generate":
 
         if conf["distribution"] == "poisson":
+            print('generate poisson', conf)
 
             random_input = nest.Create('poisson_generator')
             nest.SetStatus(random_input, params={'rate': conf["rate"]})
             nest.Connect(random_input, neurons, 'all_to_all', {'weight': conf["weight"]})
-
         elif conf["distribution"] == "original":
+            print('generate original', conf)
 
             stim_id, stim_t = np.random.choice(1000, int(sim_time)), np.array(
                 np.linspace(0, int(sim_time), int(sim_time) + 1))
             stim_t = stim_t[:-1]
             set_stimulus_times(stim_t, stim_id)
+
         else:
             pass
 
@@ -186,11 +189,17 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'a': 0.02,
                                          'd': 8.0,
                                          'tau_minus': 20.})
-
-nest.CopyModel("static_synapse", "II", {'weight': -5.0, 'delay': 1.0})
+if cfg["simulation-params"]["resolution"]==1.0:
+    inh_weight=-5.
+else:
+    inh_weight=-50.
+nest.CopyModel("static_synapse", "II", {'weight': inh_weight, 'delay': 1.0})
 if cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_izh_synapse':
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
-        'weight': 6.,
+        'weight': cfg["network-params"]["plasticity"]['W_init'],
+        'Wmax': cfg["network-params"]["plasticity"]['Wmax'],
+        'LTP': cfg["network-params"]["plasticity"]['LTP'],
+        'LTD': cfg["network-params"]["plasticity"]['LTD'],
         "tau_syn_update_interval": cfg["network-params"]["plasticity"]["tau_syn_update_interval"],
         "constant_additive_value": cfg["network-params"]["plasticity"]["constant_additive_value"],
         "reset_weight_change_after_update": cfg["network-params"]["plasticity"]["reset_weight_change_after_update"]
@@ -209,13 +218,13 @@ elif cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_synapse':
         pass
 
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
-        'weight': 6.,
+        'weight': cfg["network-params"]["plasticity"]['W_init'],
         'tau_plus': 20.0,
         'lambda': cfg["network-params"]["plasticity"]['lambda'],
         'alpha': cfg["network-params"]["plasticity"]['alpha'],
         'mu_plus': mu_plus,
         'mu_minus': mu_minus,
-        'Wmax': 10.
+        'Wmax': cfg["network-params"]["plasticity"]['Wmax']
     })
 
 else:
