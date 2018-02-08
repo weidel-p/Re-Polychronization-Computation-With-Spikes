@@ -36,6 +36,7 @@ cfg = helper.parse_config(args.config)
 in_fn = args.connectivity
 max_num_processes = args.num_threads
 sim_resolution = cfg["simulation-params"]["resolution"]
+Wmax=cfg["network-params"]["plasticity"]["Wmax"]
 out_fn = args.output
 out_stat_fn = args.statistics
 # load connectivity data
@@ -45,8 +46,8 @@ with open(in_fn, "r+") as f:
 
 # and select the relevant connections
 # only strong exc. and all inh connections
-exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > 9.5])
-inh_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] == -5])
+exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > Wmax*0.95])
+inh_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] == -.5*Wmax])
 
 # dissamble connecitons into components
 exc_pre = np.array([int(c['pre']) for c in exc_conns])
