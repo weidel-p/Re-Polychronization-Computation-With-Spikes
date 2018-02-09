@@ -86,13 +86,16 @@ def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k'):
     ax01.set_yticks([250, 500, 750])
 
 
-def plot_weights(weights, ax, c='b', bins=40, normed=False, histtype='stepfilled', xlim=[0., 10.], ylim=[150., 50000], scale='log', linestyle='-', alpha=0.5):
-    ax.hist(weights, bins=bins, normed=normed, histtype=histtype, color=c, linestyle=linestyle, alpha=alpha)
-    ax.set_ylim(ylim)
+def plot_weights(weights, ax, c='b', bins=40, normed=False, xlim=[0., 10.], ylim=[150., 50000], scale='log', linestyle='-', alpha=0.5):
+    print(np.min(weights),np.max(weights))
+    if np.max(weights)>10:
+        xlim=[0,100]
+    ax.hist(weights, bins=np.arange(xlim[0],xlim[1]+xlim[1]*1./bins,xlim[1]*1./bins), normed=normed, color=c, linestyle=linestyle, alpha=alpha)
+    #ax.set_ylim(ylim)
     ax.set_xlim(xlim)
     ax.set_xlabel('Synaptic weight [mV]')
     ax.set_ylabel('Frequency')
-    ax.set_yscale(scale)
+    #ax.set_yscale(scale)
 
 
 def plot_psd(times, senders, ax, NFFT=512, noverlap=256, xlim=[0., 150.], ylim=[1e-3, 1e2], scale='log', incolor='C0', excolor='C1', linewidth=2):

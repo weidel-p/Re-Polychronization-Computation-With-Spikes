@@ -10,7 +10,7 @@ simulation-params:
 network-params:
     connectivity:
         type: generate
-        delay-distribution: uniform-non-random
+        delay-distribution: uniform-random
         delay-range: [1, 21] # excluding right boundary
 
     plasticity:

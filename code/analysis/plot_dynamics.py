@@ -21,8 +21,8 @@ parser.add_argument('-fn', '--filename', type=str)
 
 args = parser.parse_args()
 
-incolor = 'b'
-excolor = 'k'
+incolor = 'C1'
+excolor = 'C2'
 
 
 spikefile = args.spikefile

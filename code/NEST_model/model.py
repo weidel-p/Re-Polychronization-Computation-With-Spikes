@@ -36,7 +36,8 @@ def write_weights(neuron, fname):
         json.dump(json_data, f)
 
 
-def connect_network(ex_neuron, inh_neuron, conf):
+def connect_network(ex_neuron, inh_neuron, cfg):
+    conf=cfg["network-params"]["connectivity"]
     if conf["type"] == "reproduce":
         file = helper.load_json(conf["from-file"].format(rep=args.repetition))
 
@@ -81,11 +82,12 @@ def connect_network(ex_neuron, inh_neuron, conf):
         elif conf["delay-distribution"] == "uniform-random":
 
             for n in ex_neuron:
-                delay_list = np.random.randint(int(conf["delay-range"][0]), int(conf["delay-range"][1]), 100).astype(
+                delay_list = np.random.uniform(int(conf["delay-range"][0]), int(conf["delay-range"][1]-1), 100).astype(
                     float)
-
+                delay_list=np.around(delay_list,decimals=int(-np.log10(cfg["simulation-params"]["resolution"])))
                 nest.SetStatus(nest.GetConnections(
                     source=[n], target=ex_neuron + inh_neuron), 'delay', delay_list)
+                print(delay_list,np.min(delay_list),np.max(delay_list))
     else:
         pass
 
@@ -263,7 +265,7 @@ nest.Connect(mm, neurons, 'all_to_all')
 
 set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
 
-connect_network(ex_neuron, inh_neuron, cfg["network-params"]["connectivity"])
+connect_network(ex_neuron, inh_neuron,cfg )
 
 set_stimulus(neurons, cfg["network-params"]["stimulus"], cfg["simulation-params"]["sim-time"])
 

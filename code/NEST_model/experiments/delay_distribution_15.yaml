@@ -26,6 +26,7 @@ network-params:
     stimulus:
         type: generate
         distribution: original
+
     initial-state:
         type: generate
         distribution: uniform

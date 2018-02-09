@@ -151,6 +151,7 @@ def read_spikefile(filename):
             times = spikes[:, 0]
             senders = spikes[:, 1]
     else:
+
         spikes = np.loadtxt(filename)
         times = spikes[:, 1]
         senders = spikes[:, 0]
