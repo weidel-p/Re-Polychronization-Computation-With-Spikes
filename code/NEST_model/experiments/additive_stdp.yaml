@@ -17,9 +17,9 @@ network-params:
         synapse-model: stdp_synapse
         stdp-type: additive
         lambda: .1
-        alpha: 1.3
-        Wmax: 10
-        W_init: 6
+        alpha: 1.4
+        Wmax: 10.
+        W_init: 6.
 
     stimulus:
         type: generate
