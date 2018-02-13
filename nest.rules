@@ -10,7 +10,7 @@ rule install_nest:
         mkdir -p bld
         mkdir -p instl
         cd bld
-        cmake -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python3=ON {params.nest_dir} -Dwith-mpi=ON
+        cmake3 -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python3=ON {params.nest_dir} -Dwith-mpi=ON
         make -j8
         make install
         """
