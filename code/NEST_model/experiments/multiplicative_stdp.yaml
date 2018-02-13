@@ -16,8 +16,8 @@ network-params:
     plasticity:
         synapse-model: stdp_synapse
         stdp-type: multiplicative
-        lambda: .1
-        alpha: 1.4
+        lambda: .01 # in units of Wmax
+        alpha: 1.2
         Wmax: 10.
         W_init: 6.
     stimulus:

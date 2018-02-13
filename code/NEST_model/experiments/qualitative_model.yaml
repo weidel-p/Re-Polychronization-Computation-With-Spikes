@@ -20,8 +20,8 @@ network-params:
         reset_weight_change_after_update: False
         Wmax: 10.
         W_init: 6.
-        LTP: 1.0
-        LTD: -1.2
+        LTP: 0.1
+        LTD: -0.12
 
 
 

@@ -27,6 +27,7 @@ def parse_config(config_file):
         cfg = yaml.load(ymlfile)
     base = os.path.basename(config_file)
     base_and_extless = os.path.splitext(base)[0]
+    print config_file, cfg
     cfg['simulation-params']['data-prefix'] = base_and_extless
 
     return cfg
