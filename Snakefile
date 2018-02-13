@@ -49,14 +49,21 @@ high_NUM_REP=range(20)
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
 NUM_REP=high_NUM_REP
 
-RANGE_PROB_EX_EX = np.round(np.linspace(0, 1, 20), 2)
+RANGE_PROB_EX_EX = np.round(np.arange(0, 1.01, 0.05), 2)
+RANGE_PROB_EX_IN = np.round(np.arange(0, 1.01, 0.05), 2)
 
 include: "Izhikevic.rules"
 include: "nest.rules"
 
+wildcard_constraints: 
+    prob=".\.[0-9]+",
+    probEI=".\.[0-9]+",
+
+
+
 rule all:
     input:
-        rand_conn = expand("data/NEST_model/bitwise_reproduction/0/groups_random_conn_{prob}.json", prob=RANGE_PROB_EX_EX)
+        rand_conn = expand("data/NEST_model/bitwise_reproduction/0/groups_random_conn_{prob}_{probEI}.json", prob=RANGE_PROB_EX_EX, probEI=RANGE_PROB_EX_IN)
         #polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
         #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         #polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
@@ -151,13 +158,13 @@ rule find_groups:
 
 rule find_groups_random:
     output:
-        "data/NEST_model/bitwise_reproduction/0/groups_random_conn_{prob}.json",
+        "data/NEST_model/bitwise_reproduction/0/groups_random_conn_{prob}_{probEI}.json",
     input:
         connectivity="data/NEST_model/bitwise_reproduction/0/connectivity.json",
         program=rules.compile_find_polychronous_groups_random.output,
 #    log: 'logs/find_groups_{experiment}_{rep}.log'
     shell:
-        '{input.program} {input.connectivity} {output} {wildcards.prob} 1.0 ' #&>{log}'
+        '{input.program} {input.connectivity} {output} {wildcards.prob} {wildcards.probEI} ' #&>{log}'
 
 
 rule plot_test_statistical_reproduction:
