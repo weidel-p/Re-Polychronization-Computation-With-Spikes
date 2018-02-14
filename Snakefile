@@ -55,6 +55,8 @@ rule all:
     input:
         stdp_windows_plot = expand("{folder}/stdp_windows.pdf",
                             folder=FIG_DIR),
+        stdp_simulation_plot = expand("{folder}/stdp_simulation.pdf",
+                            folder=FIG_DIR),
         stdp_windows = expand("{folder}/{experiment}/stdp_window.json",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES),
         #polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
@@ -269,6 +271,17 @@ rule plot_stdp_window:
         program='{folder}/plot_stdp_window.py'.format(folder=ANA_DIR),
     output:
         plot="{folder}/stdp_windows.pdf".format(folder=FIG_DIR),
+    shell:
+        """
+        python {input.program} -i {input.weights} -o {output.plot}
+        """
+
+rule plot_stdp_simulation:
+    input:
+        weights=expand('{folder}/{{experiment}}/stdp_simulation.json'.format(folder=NEST_DATA_DIR), experiment=CONFIG_FILES),
+        program='{folder}/plot_stdp_simulation.py'.format(folder=ANA_DIR),
+    output:
+        plot="{folder}/stdp_simulation.pdf".format(folder=FIG_DIR),
     shell:
         """
         python {input.program} -i {input.weights} -o {output.plot}
