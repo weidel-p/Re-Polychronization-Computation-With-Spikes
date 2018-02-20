@@ -8,20 +8,28 @@ simulation-params:
     rec_spikes: 10000. # (ms)
 # Network Parameter
 network-params:
-    connectivity: 
-        type: reproduce
-        from-file: data/original_model/bitwise_reproduction/{rep}/connectivity.json
+    connectivity:
+        type: generate
+        delay-distribution: uniform-non-random
+        delay-range: [1, 21] # excluding right boundary
 
     plasticity:
-        synapse-model: stdp_izh_bitwise_correct_synapse
-
+        synapse-model: stdp_izh_synapse
+        tau_syn_update_interval: 2000.
+        constant_additive_value: 0.01
+        reset_weight_change_after_update: False
+        Wmax: 10.
+        W_init: 6.
+        LTP: 0.10
+        LTD: -0.12
     stimulus:
-        type: reproduce
-        from-file: data/original_model/bitwise_reproduction/{rep}/stim.dat
+        type: generate
+        distribution: original
 
     initial-state:
         type: generate
         distribution: uniform
         V_m-range: [-65, -55] # excluding right boundary
+
 
 

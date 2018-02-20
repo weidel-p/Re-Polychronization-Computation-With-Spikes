@@ -1,8 +1,8 @@
 # Simulation Parameter
 simulation-params:
     resolution: 1. # (ms)
-    synapse-update-interval: 1000
-    sim-time: 180000. # (ms) 5 hours: 5 * 60 * 60 * 1000
+    synapse-update-interval: 100
+    sim-time: 18000000. # (ms) 5 hours: 5 * 60 * 60 * 1000
     data-path: data/NEST_model/
     rec_mem: 0. # (ms)
     rec_spikes: 10000. # (ms)
@@ -14,17 +14,18 @@ network-params:
         delay-range: [1, 21] # excluding right boundary
 
     plasticity:
-        synapse-model: stdp_synapse
-        stdp-type: multiplicative
-        lambda: .01 # in units of Wmax
-        alpha: 1.2
+        synapse-model: stdp_izh_synapse
+        tau_syn_update_interval: 10000.
+        constant_additive_value: 0.01
+        reset_weight_change_after_update: False
         Wmax: 10.
         W_init: 6.
+        LTP: 0.1
+        LTD: -0.12
+
     stimulus:
         type: generate
-        distribution: poisson
-        rate: 30. # (spikes/sec) per neuron
-        weight: 10. # (mV)
+        distribution: original
 
     initial-state:
         type: generate
