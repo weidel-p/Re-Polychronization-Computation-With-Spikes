@@ -36,7 +36,7 @@ CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
 #CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file) and (('resolution' in file ) or ('delay' in file))]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file) ]
 
 repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
 repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
@@ -53,19 +53,19 @@ include: "nest.rules"
 
 rule all:
     input:
-        stdp_windows_plot = expand("{folder}/stdp_windows.pdf",
-                            folder=FIG_DIR),
-        stdp_windows = expand("{folder}/{experiment}/stdp_window.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES),
-        #polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
-        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=CONFIG_FILES),
+        polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=CONFIG_FILES),
         #plt_bimodal_gamma_nest=expand('figures/{experiment}/{experiment}_bimodalgamma_groups_nest.eps',experiment=CONFIG_FILES),
-        #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
-        #                    folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
+        plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
+                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
         #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
+        #stdp_windows_plot = expand("{folder}/stdp_windows.pdf",
+        #                    folder=FIG_DIR),
+        #stdp_windows = expand("{folder}/{experiment}/stdp_window.json",
+        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES),
 
 
         #nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
