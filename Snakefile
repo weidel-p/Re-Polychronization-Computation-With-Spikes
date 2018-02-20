@@ -34,80 +34,25 @@ FIG_DIR='figures'
 LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
-#CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('statistical' in file)]
-#CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file) and (('resolution' in file ) or ('delay' in file))]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('polychrony' not in file) ]
-
-repro_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file)]
-repro_CONFIG_FILES=[file.split('_')[0] for file in repro_CONFIG_FILES]
-#repetition is used to set seed to get statistics for the experiemnts
-low_NUM_REP=range(1)
-low_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' not in file) ]
-
-high_NUM_REP=range(10)
-high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('reproduction' in file) and ('polychrony' not in file) ]
-NUM_REP=high_NUM_REP
+high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative' in file)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file)]
+CONFIG_FILES_group_finder_nest=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file) or ('resolution' in file) or ('qualitative' in file)]
+NUM_REP=range(10)
+high_NUM_REP=range(100)
 
 include: "Izhikevic.rules"
 include: "nest.rules"
 
 rule all:
     input:
-        polytest_full_data=expand("{folder}/{experiment}/{rep}/groups.json",
+        group_finder_orig=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        group_finder_orig_high=expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
         polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        plt_bimodal_gamma=expand('figures/{experiment}/{experiment}_bimodalgamma_groups.eps',experiment=CONFIG_FILES),
-        #plt_bimodal_gamma_nest=expand('figures/{experiment}/{experiment}_bimodalgamma_groups_nest.eps',experiment=CONFIG_FILES),
-        plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
-                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP,plot=PLOT_FILES),
-        #plt_bitwise=expand('figures/bitwise_reproduction_{rep}.eps',rep=low_NUM_REP),
-        #stdp_windows_plot = expand("{folder}/stdp_windows.pdf",
-        #                    folder=FIG_DIR),
-        #stdp_windows = expand("{folder}/{experiment}/stdp_window.json",
-        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES),
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES_group_finder_nest,rep=NUM_REP),
 
 
-        #nest_groups_repro=expand("{folder}/{experiment}/{rep}/groups.json",
-        #                    folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-
-        #nest_groups_repro_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-        #                    folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-
-        #nest_connectivity_repro=expand("{folder}/{experiment}/{rep}/connectivity.json",
-        #                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-
-        #plt_statistical=expand('figures/bitwise_{experiment}_{rep}.eps',
-        #                    experiment=repro_CONFIG_FILES,rep=low_NUM_REP),
-
-
-
-
-
-
-        #nest_groups_exp=expand("{folder}/{experiment}/{rep}/groups.json",
-        #                    folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
-        #nest_connectivity_exp=expand("{folder}/{experiment}/{rep}/connectivity.json",
-        #                            folder=NEST_DATA_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP),
-
-
-        #nest_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",
-        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #nest_membrane=expand("{folder}/{experiment}/{rep}/membrane_potential-1002.dat",
-        #                    folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #plot_combined=expand('{folder}/{experiment}/{experiment}_combined_groups.png',
-        #                        folder=FIG_DIR,experiment=CONFIG_FILES),
-      
-        #plot_files=expand('{folder}/{experiment}/{rep}/{plot}',
-        #                    folder=FIG_DIR,experiment=low_CONFIG_FILES,rep=low_NUM_REP,plot=PLOT_FILES),
-
-
-        #original_groups=expand("{folder}/bitwise_reproduction/{rep}/groups.json",
-        #                        folder=IZHI_DATA_DIR,rep=NUM_REP),
-        #original_weights=expand("{folder}/bitwise_reproduction/{rep}/connectivity.json",
-        #                    folder=IZHI_DATA_DIR,rep=NUM_REP),
-        #original_code=expand("{folder}/{rep}/poly_spnet_bitwise_reproduction",
-        #                    folder=IZHI_EXEC_DIR,rep=NUM_REP),
 
 
 
