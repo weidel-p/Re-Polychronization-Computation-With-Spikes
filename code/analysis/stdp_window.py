@@ -4,10 +4,12 @@ import sys
 import helper
 import json
 import argparse
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', type=str)
 parser.add_argument('-o', '--output', type=str)
+parser.add_argument('-p', '--output_sim', type=str)
 
 args = parser.parse_args()
 
@@ -20,7 +22,8 @@ def init(cfg):
     nest.ResetKernel()
     nest.set_verbosity("M_FATAL")
     
-    seed = [np.random.randint(0, 9999999)]
+    seed = [int(time.time() * 10000)]
+    print seed
     
     nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                           'print_time': False,
@@ -99,6 +102,29 @@ def stim(dt, cfg):
     return(nest.GetStatus(nest.GetConnections(pre, post), 'weight')[0] - 1)
     
 
+def simulate(cfg):
+    init(cfg)
+
+    pre = nest.Create("izhikevich")
+    post = nest.Create("izhikevich")
+    
+    nest.Connect(pre, post, 'all_to_all', {'model': 'EX', 'weight': 1., 'delay': 1.})
+    
+    pg_pre = nest.Create("poisson_generator", 1, {"rate": 3.})
+    pg_post = nest.Create("poisson_generator", 1, {"rate": 3.})
+ 
+    nest.Connect(pg_pre, pre, 'all_to_all', {'model': 'static_synapse', 'weight': 20.})
+    nest.Connect(pg_post, post, 'all_to_all', {'model': 'static_synapse', 'weight': 20.})
+    
+    ws = []
+
+    for t in range(1000):
+        nest.Simulate(1010)
+
+        ws.append(nest.GetStatus(nest.GetConnections(pre, post), 'weight')[0])
+
+    return ws
+
 dts = np.arange(-50, 50, 1.)
 dws = []
 
@@ -107,5 +133,13 @@ for dt in dts:
 
 with open(args.output, 'w+') as f:
     json.dump({'dt': dts.tolist(), 'dw': dws, 'label': cfg['simulation-params']['data-prefix']}, f)
+
+wss = []
+for i in range(100):
+    wss.append(simulate(cfg))
+
+
+with open(args.output_sim, 'w+') as f:
+    json.dump({'w': wss, 'label': cfg['simulation-params']['data-prefix']}, f)
 
 
