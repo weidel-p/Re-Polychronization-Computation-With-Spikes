@@ -46,9 +46,13 @@ with open(in_fn, "r+") as f:
 
 # and select the relevant connections
 # only strong exc. and all inh connections
+if sim_resolution==0.1:
+    Winh=-35.
+else:
+    Winh=-0.5
 exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > Wmax*0.95])
-inh_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] == -.5*Wmax])
-
+inh_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] == Winh])
+print(exc_conns)
 # dissamble connecitons into components
 exc_pre = np.array([int(c['pre']) for c in exc_conns])
 exc_post = np.array([int(c['post']) for c in exc_conns])
