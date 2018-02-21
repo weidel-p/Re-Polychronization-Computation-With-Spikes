@@ -35,7 +35,7 @@ LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative' in file)]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file) and ('resolution' not in file)]
 CONFIG_FILES_group_finder_nest=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file) or ('resolution' in file) or ('qualitative' in file)]
 NUM_REP=range(10)
 high_NUM_REP=range(100)
@@ -51,8 +51,8 @@ rule all:
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
         polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES_group_finder_nest,rep=NUM_REP),
-
-
+	spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+	high_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP)
 
 
 
