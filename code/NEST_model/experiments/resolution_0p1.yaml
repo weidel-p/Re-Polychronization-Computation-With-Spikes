@@ -18,7 +18,7 @@ network-params:
         tau_syn_update_interval: 10000.
         constant_additive_value: .1
         reset_weight_change_after_update: False
-        Wmax: 100.
+        Wmax: 85.
         W_init: 50.
         LTP: 1.0
         LTD: -1.2
