@@ -194,7 +194,7 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
 if cfg["simulation-params"]["resolution"]==1.0:
     inh_weight=-5.
 else:
-    inh_weight=-50.
+    inh_weight=-35.
 nest.CopyModel("static_synapse", "II", {'weight': inh_weight, 'delay': 1.0})
 if cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_izh_synapse':
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
