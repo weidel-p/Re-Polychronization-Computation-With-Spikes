@@ -35,8 +35,8 @@ LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative' in file)]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file) and ('resolution' not in file)]
-CONFIG_FILES_group_finder_nest=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file) or ('resolution' in file) or ('qualitative' in file)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file) and ('resolution' not in file) and ('synapse_update_interval_10s' not in file)]
+CONFIG_FILES_group_finder_nest=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)]
 NUM_REP=range(10)
 high_NUM_REP=range(100)
 
@@ -49,10 +49,14 @@ rule all:
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         group_finder_orig_high=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        stats_orig_high=expand("{folder}/{experiment}/{rep}/stats_orig.json",
+                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        stats_orig=expand("{folder}/{experiment}/{rep}/stats_orig.json",
+                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES_group_finder_nest,rep=NUM_REP),
-	spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-	high_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP)
+	    spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+	    high_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP)
 
 
 
@@ -87,6 +91,18 @@ rule find_groups:
     log: 'logs/find_groups_{experiment}_{rep}.log'
     shell:
         '{input.program} {input.connectivity} {output} &>{log}'
+
+rule calc_stats:
+    output:
+        "{folder}/{experiment}/{rep}/stats_orig.json"
+    input:
+        groups="{folder}/{experiment}/{rep}/groups.json",
+    log: 'logs/calculate_stats_{experiment}_{rep}.log'
+    shell:
+        'python {ANA_DIR} {{input.groups}} {output} &>{log}'
+
+
+
 
 rule plot_test_statistical_reproduction:
     input:
