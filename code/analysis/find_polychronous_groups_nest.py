@@ -36,7 +36,10 @@ cfg = helper.parse_config(args.config)
 in_fn = args.connectivity
 max_num_processes = args.num_threads
 sim_resolution = cfg["simulation-params"]["resolution"]
-Wmax=cfg["network-params"]["plasticity"]["Wmax"]
+try:
+    Wmax=cfg["network-params"]["plasticity"]["Wmax"]
+except:
+    Wmax=10.
 out_fn = args.output
 out_stat_fn = args.statistics
 # load connectivity data
