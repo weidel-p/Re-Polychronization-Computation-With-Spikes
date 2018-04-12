@@ -52,7 +52,7 @@ with open(in_fn, "r+") as f:
 if sim_resolution==0.1:
     Winh=-35.
 else:
-    Winh=-0.5
+    Winh=-5.
 exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > Wmax*0.95])
 inh_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] == Winh])
 print(exc_conns)
