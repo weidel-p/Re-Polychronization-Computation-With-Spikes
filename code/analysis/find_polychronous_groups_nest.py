@@ -9,8 +9,6 @@ import copy
 import argparse
 import helper
 
-
-
 global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
 global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
 global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
@@ -19,55 +17,48 @@ global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
 
 
 
-
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--config', type=str)
-parser.add_argument('-o', '--output', type=str)
-parser.add_argument('-n', '--num_threads', type=int)
-parser.add_argument('-i', '--connectivity', type=str)
-parser.add_argument('-s', '--statistics', type=str)
+parser.add_argument('-c', '--config', type=str)        # Experiment file defining the network structure and dynamics
+parser.add_argument('-o', '--output', type=str)        # output groups file
+parser.add_argument('-n', '--num_threads', type=int)   # Number of threads
+parser.add_argument('-i', '--connectivity', type=str)  # Connectivity file the group finding is based on
+parser.add_argument('-s', '--statistics', type=str)    # group statistics write out in a separate file so they have to be computet every time
 
 args = parser.parse_args()
 
+# load config file
 cfg = helper.parse_config(args.config)
-
 
 
 in_fn = args.connectivity
 max_num_processes = args.num_threads
 sim_resolution = cfg["simulation-params"]["resolution"]
-try:
-    Wmax=cfg["network-params"]["plasticity"]["Wmax"]
-except:
-    Wmax=10.
+
+Wmax = cfg["network-params"]["plasticity"]["Wmax"]
+Winh = cfg["network-params"]["plasticity"]["W_inh"]
+
 out_fn = args.output
 out_stat_fn = args.statistics
 # load connectivity data
 with open(in_fn, "r+") as f:
     final_stdw = json.load(f)
 
-
 # and select the relevant connections
 # only strong exc. and all inh connections
-if sim_resolution==0.1:
-    Winh=-35.
-else:
-    Winh=-5.
-exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > Wmax*0.95])
+exc_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] > Wmax * 0.95])
 inh_conns = np.array([final_stdw[i] for i in range(len(final_stdw)) if final_stdw[i]['weight'] == Winh])
-print(exc_conns)
-# dissamble connecitons into components
+
+# dissamble connections into components
 exc_pre = np.array([int(c['pre']) for c in exc_conns])
 exc_post = np.array([int(c['post']) for c in exc_conns])
 exc_weight = np.array([float(c['weight']) for c in exc_conns])
 exc_delay = np.array([float(c['delay']) for c in exc_conns])
-min_delay, max_delay = np.min(exc_delay),np.max(exc_delay)
+min_delay, max_delay = np.min(exc_delay), np.max(exc_delay)
 
 inh_pre = np.array([int(c['pre']) for c in inh_conns])
 inh_post = np.array([int(c['post']) for c in inh_conns])
 inh_weight = np.array([float(c['weight']) for c in inh_conns])
 inh_delay = np.array([float(c['delay']) for c in inh_conns])
-
 
 t_sim = 1000.0  # simulate only the first second
 
@@ -78,7 +69,6 @@ M = 100  # number of outgoing connections per neuron
 
 
 def create_network():
-
     global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
     global exc_conns, exc_pre, exc_post, exc_weight, exc_delay
     global inh_conns, inh_pre, inh_post, inh_weight, inh_delay
@@ -91,17 +81,17 @@ def create_network():
 
     # set default values of izhikevich neuron model
     # that excitatory and inhibitory neurons have in common
-    nest.SetDefaults('izhikevich', {'b':                       0.2,
+    nest.SetDefaults('izhikevich', {'b': 0.2,
                                     'c': -65.0,
                                     'V_m': -70.0,
                                     'U_m': -70.0 * 0.2,
-                                    'V_th':                   30.0,
+                                    'V_th': 30.0,
                                     'consistent_integration': False})
 
     # create excitatory and inhibitory neurons and set the parameters
     # that excitatory and inhibitory neurons do not have in common
     exc_neurons = nest.Create('izhikevich', Ne, {'a': 0.02, 'd': 8.0})
-    inh_neurons = nest.Create('izhikevich', Ni, {'a': 0.1,  'd': 2.0})
+    inh_neurons = nest.Create('izhikevich', Ni, {'a': 0.1, 'd': 2.0})
 
     # create list with global ids of all neurons
     all_neurons = exc_neurons + inh_neurons
@@ -129,7 +119,6 @@ def create_network():
 # for every excitatory neuron and each possible triplet of excitatory presynaptic neurons
 # define the connections that are initially activated and trigger the simulation
 def worker(pivot_neuron):
-
     import nest
 
     global t_sim, N, Ne, Ni, M, min_delay, max_delay, sim_resolution
@@ -181,15 +170,15 @@ def worker(pivot_neuron):
             sorted_t_fired = np.array(t_fired)[order].tolist()
             sorted_stim_delay = np.array(group_delays)[order].tolist()
 
-            nest.SetStatus(exc_neurons + inh_neurons, {'b':                       0.2,
+            nest.SetStatus(exc_neurons + inh_neurons, {'b': 0.2,
                                                        'c': -65.0,
                                                        'V_m': -70.0,
                                                        'U_m': -70.0 * 0.2,
-                                                       'V_th':                   30.0,
+                                                       'V_th': 30.0,
                                                        'consistent_integration': False})
 
             nest.SetStatus(exc_neurons, {'a': 0.02, 'd': 8.0})
-            nest.SetStatus(inh_neurons, {'a': 0.1,  'd': 2.0})
+            nest.SetStatus(inh_neurons, {'a': 0.1, 'd': 2.0})
 
         stim_target_gids = np.array(stim_target_gids)
         stim_times = np.array(stim_times)
@@ -216,8 +205,9 @@ def worker(pivot_neuron):
             nest.SetStatus([sgs[t_stim]], {"spike_times": [t_stim]})
             idxs = np.where(stim_times == t_stim)[0]
             if idxs.size:
-                nest.Connect(np.array(len(idxs) * [sgs[t_stim]], np.int64), stim_target_gids[idxs], {'rule': 'one_to_one'}, syn_spec={
-                             'model': 'static_synapse', "weight": stim_weights[idxs], "delay": len(idxs) * [min_delay]})
+                nest.Connect(np.array(len(idxs) * [sgs[t_stim]], np.int64), stim_target_gids[idxs],
+                             {'rule': 'one_to_one'}, syn_spec={
+                        'model': 'static_synapse', "weight": stim_weights[idxs], "delay": len(idxs) * [min_delay]})
 
         # simulate for sim_time in steps of rec_time
         nest.Simulate(t_sim)
@@ -247,18 +237,18 @@ def worker(pivot_neuron):
         group_inh_post = inh_post[inh_is_in_group]
         group_inh_delay = inh_delay[inh_is_in_group]
 
-
-
         for i in range(3, N_fired):
-            #i is index of Nth neuron in group
+            # i is index of Nth neuron in group
             # group[i] is index of neuron
 
             for j in range(i):
                 # loop thorugh all neurons that fired before this one becuase they are candidates for linked neurons
                 if group[j] <= Ne:
-                    delays = group_exc_delay[np.where(np.all([group_exc_pre == group[j], group_exc_post == group[i]], axis=0))[0]]
+                    delays = group_exc_delay[
+                        np.where(np.all([group_exc_pre == group[j], group_exc_post == group[i]], axis=0))[0]]
                 else:
-                    delays = group_inh_delay[np.where(np.all([group_inh_pre == group[j], group_inh_post == group[i]], axis=0))[0]]
+                    delays = group_inh_delay[
+                        np.where(np.all([group_inh_pre == group[j], group_inh_post == group[i]], axis=0))[0]]
 
                 for d in delays:
                     layer = 2
@@ -269,11 +259,9 @@ def worker(pivot_neuron):
                             if layer > L_max:
                                 L_max = layer
 
-                        links = np.append(links, [[group[j], group[i], d, layer]],axis=0)
+                        links = np.append(links, [[group[j], group[i], d, layer]], axis=0)
                     else:
-                        links=np.array([ [group[j], group[i], d, layer] ])
-
-
+                        links = np.array([[group[j], group[i], d, layer]])
 
         discard = 0
         used = np.zeros(3)
@@ -308,7 +296,7 @@ def worker(pivot_neuron):
                 json_links.append(json_link)
             json_group["links"] = json_links
 
-            #print("group found", pivot_neuron, json_group["N_fired"], json_group["L_max"])
+            # print("group found", pivot_neuron, json_group["N_fired"], json_group["L_max"])
 
         if not json_group == None:
             local_json_data.append(json_group)
@@ -331,12 +319,10 @@ for i, g in enumerate(json_data):
     T_list.append(max(times))  # time span
     L_list.append(int(g["L_max"]))  # longest path
 
-
-stats = dict(N_fired = N_list,
-            longest_path = L_list,
-            time_span = T_list
-            )
-
+stats = dict(N_fired=N_list,
+             longest_path=L_list,
+             time_span=T_list
+             )
 
 with open(out_fn, "w+") as f:
     json.dump(json_data, f)
