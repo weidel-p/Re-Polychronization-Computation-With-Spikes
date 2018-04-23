@@ -3,7 +3,7 @@ sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handl
 
 import socket
 if "cluster" in socket.gethostname():
-    shell.prefix('module load autotools; module load mpi/openmpi/1.10.0;source activate poly-python3;')
+    shell.prefix('module load autotools; module load mpi/openmpi/1.10.0;')
     NUM_THREADS=1
 else:
     NUM_THREADS=1
@@ -37,8 +37,8 @@ CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative' in file)]
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file) and ('resolution' not in file) and ('synapse_update_interval_10s' not in file)]
 CONFIG_FILES_group_finder_nest=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)]
-NUM_REP=range(10)
-high_NUM_REP=range(100)
+NUM_REP=range(3)
+high_NUM_REP=range(3)
 
 include: "Izhikevic.rules"
 include: "nest.rules"
