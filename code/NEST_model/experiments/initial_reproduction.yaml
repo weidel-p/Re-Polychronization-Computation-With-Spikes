@@ -14,6 +14,11 @@ network-params:
 
     plasticity:
         synapse-model: stdp_izh_naive_synapse
+        Wmax: 10.
+        W_inh: -5.
+        W_init: 6.
+        LTP: 0.1
+        LTD: -0.12
 
     stimulus:
         type: reproduce

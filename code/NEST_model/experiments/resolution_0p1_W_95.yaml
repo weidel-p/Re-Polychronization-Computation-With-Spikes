@@ -1,8 +1,8 @@
-# Simulation Parameter
+resolution_0p1_W_90.yaml# Simulation Parameter
 simulation-params:
     resolution: 0.1 # (ms)
     synapse-update-interval: 1000
-    sim-time: 18000000. # (ms) 5 hours: 5 * 60 * 60 * 1000
+    sim-time: 10000. # (ms) 5 hours: 5 * 60 * 60 * 1000
     data-path: data/NEST_model/
     rec_mem: 1000. # (ms)
     rec_spikes: 10000. # (ms)
@@ -18,7 +18,8 @@ network-params:
         tau_syn_update_interval: 10000.
         constant_additive_value: .1
         reset_weight_change_after_update: False
-        Wmax: 85.
+        Wmax: 95.
+        W_inh: -35.
         W_init: 50.
         LTP: 1.0
         LTD: -1.2

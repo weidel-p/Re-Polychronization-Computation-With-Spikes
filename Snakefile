@@ -49,15 +49,19 @@ rule all:
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
         group_finder_orig_high=expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
         stats_orig_high=expand("{folder}/{experiment}/{rep}/stats_orig.json",
                             folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
         stats_orig=expand("{folder}/{experiment}/{rep}/stats_orig.json",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+
         polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
                             folder=NEST_DATA_DIR,experiment=CONFIG_FILES_group_finder_nest,rep=NUM_REP),
 	    spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-	    high_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP)
-
+	    high_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        plots=expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
+                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        #weight=expand('{folder}/{experiment}/{experiment}_bimodalgamma_weight_delay.pdf',experiment=CONFIG_FILES,folder=FIG_DIR),
 
 
 
@@ -99,7 +103,7 @@ rule calc_stats:
         groups="{folder}/{experiment}/{rep}/groups.json",
     log: 'logs/calculate_stats_{experiment}_{rep}.log'
     shell:
-        'python {ANA_DIR} {{input.groups}} {output} &>{log}'
+        'python {ANA_DIR} -g {{input.groups}} {{output}} &>{{log}}'
 
 
 
@@ -158,35 +162,13 @@ rule plot_combined_groups:
 
 rule plot_bimodal_gamma:
     output:
-        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png)}}',folder=FIG_DIR),
-        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
+        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png|pdf)}}',folder=FIG_DIR),
+        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.{{ext,(eps|png|pdf)}}',folder=FIG_DIR),
 
     input:
         connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
         spikes=expand('{folder}/{{experiment}}/{rep}/spikes-1001.gdf',folder=NEST_DATA_DIR,rep=NUM_REP),
         groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
-
-    priority: 2
-    run:
-        shell("""
-        python3 code/analysis/plot_bimodal_gamma.py \
-        -cl {input.connectivity}\
-        -sl {input.spikes}\
-        -gl {input.groups}\
-        --group_plot {output.groups}\
-        --gamma_plot {output.weight}\
-
-        """)
-
-rule plot_bimodal_gamma_nest:
-    output:
-        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png)}}',folder=FIG_DIR),
-        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups_nest.{{ext,(eps|png)}}',folder=FIG_DIR),
-
-    input:
-        connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
-        spikes=expand('{folder}/{{experiment}}/{rep}/spikes-1001.gdf',folder=NEST_DATA_DIR,rep=NUM_REP),
-        groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json',folder=NEST_DATA_DIR,rep=NUM_REP),
 
     priority: 2
     run:
@@ -211,7 +193,8 @@ rule test_weights_and_delay:
 
 rule plot_dynamics:
     output:
-        file=expand('{folder}/{{experiment}}/{{rep}}/dynamic_measures.{{ext,(eps|png)}}',folder=FIG_DIR),
+        file=expand('{folder}/{{experiment}}/{{rep}}/plot_dynamics_{{experiment}}.{{ext,(eps|png|pdf)}}',folder=FIG_DIR),
+
     input:
         connectivity=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         spikes=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
