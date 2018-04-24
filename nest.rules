@@ -41,7 +41,7 @@ rule run_nest_model:
     shell:
         """
         source {{input.nest}}
-        python3 {folder}/model.py -c {{input.conf}} -r {{wildcards.rep}} -n {{threads}} &>{{log}}
+        python3 {folder}/model.py -c {{input.conf}} -r {{wildcards.rep}} -n {{threads}} &>{{log}} 
         """.format(folder=NEST_CODE_DIR)
 
 

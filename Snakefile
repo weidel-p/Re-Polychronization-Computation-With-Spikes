@@ -103,7 +103,7 @@ rule calc_stats:
         groups="{folder}/{experiment}/{rep}/groups.json",
     log: 'logs/calculate_stats_{experiment}_{rep}.log'
     shell:
-        'python {ANA_DIR} -g {{input.groups}} {{output}} &>{{log}}'
+        'python {ANA_DIR}/gather_stats.py -g {{input.groups}} -o {{output}} &>{{log}}'.format(ANA_DIR=ANA_DIR)
 
 
 
