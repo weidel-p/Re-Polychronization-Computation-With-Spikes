@@ -16,9 +16,17 @@ def escape(s):
     return s
 
 
-def begin_table():
-    return """\\begin{table*}
-              \\setlength{\\columnwidthleft}{0.2\\textwidth}
+def begin_table(experiment):
+    experiment = experiment.split('.')[0]
+    return """\\newpage
+              \\pagebreak
+              
+              \\begin{minipage}{\\linewidth}
+              \\centering
+              \\includegraphics[width=\\textwidth]{figures/dynamic_plot_"""+experiment+""".pdf}
+              \\vspace{1em}
+
+              \\setlength{\\columnwidthleft}{0.4\\textwidth}
               \\setlength{\\columnwidthmiddle}{0.18\\textwidth}
               """
 
@@ -40,14 +48,12 @@ def end_section():
            """
 
 
-def end_table(caption, label):
-    return """\caption{
-                """ + escape(caption) + """.
-                \label{tab:nordlie-""" + escape(label).replace("\\_", "-") + """}
-              }
-              \end{table*}
-              """
-
+def end_table(caption):
+    return """\\vspace{1em}
+              """+caption+"""
+              \\end{minipage}
+           """
+   
 
 labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]
 folder = "../NEST_model/experiments"
@@ -60,7 +66,7 @@ for fn in fns:
 
         sections = cfg.keys()
 
-        table = begin_table()
+        table = begin_table(fn)
 
         labelcounter = 0
 
@@ -91,4 +97,9 @@ for fn in fns:
 
                 table += end_section()
 
-        table += end_table("Parameter for experiment " + fn, fn)
+        table += end_table("Parameters for experiment " + fn.split('.')[0].replace('_', ' '))
+
+    with open("nordlie.tex", "a+") as f:
+        f.writelines(table)
+        f.flush()
+

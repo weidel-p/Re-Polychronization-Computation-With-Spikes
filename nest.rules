@@ -90,17 +90,16 @@ rule find_groups_nest:
 rule compare_STDP:
     output:
         weights="{folder}/{{experiment}}/stdp_window.json".format(folder=NEST_DATA_DIR),
-
+        sim="{folder}/{{experiment}}/stdp_simulation.json".format(folder=NEST_DATA_DIR),
     input:
         model='{folder}/stdp_window.py'.format(folder=ANA_DIR),
         conf='{folder}/experiments/{{experiment}}.yaml'.format(folder=NEST_CODE_DIR),
         nest=rules.install_nest.output
     threads: NUM_THREADS
     log: 'logs/nest_{experiment}.log'
-    #benchmark: "benchmarks/nest_{{experiment}}_{threads}.log".format(threads=NUM_THREADS)
     shell:
         """
         source {input.nest}
-        python {input.model} -c {input.conf} -o {output.weights} &>{log}
+        python {input.model} -c {input.conf} -o {output.weights} -p {output.sim} &>{log}
         """
 

@@ -93,9 +93,14 @@ def stim(dt, cfg):
     
     sg_pre = nest.Create("spike_generator", 1, {"spike_times": [500., 900.]})
     sg_post = nest.Create("spike_generator", 1, {"spike_times": [500. + dt]})
+
+    sd = nest.Create("spike_detector", 1, {"to_file": True})
  
     nest.Connect(sg_pre, pre, 'all_to_all', {'model': 'static_synapse', 'weight': 20.})
     nest.Connect(sg_post, post, 'all_to_all', {'model': 'static_synapse', 'weight': 20.})
+
+    nest.Connect(pre, sd)
+    nest.Connect(post, sd)
 
     nest.Simulate(1010)
 
@@ -118,7 +123,7 @@ def simulate(cfg):
     
     ws = []
 
-    for t in range(1000):
+    for t in range(100):
         nest.Simulate(1010)
 
         ws.append(nest.GetStatus(nest.GetConnections(pre, post), 'weight')[0])
