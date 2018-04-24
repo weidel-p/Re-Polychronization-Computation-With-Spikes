@@ -1,4 +1,4 @@
-resolution_0p1_W_90.yaml# Simulation Parameter
+# Simulation Parameter
 simulation-params:
     resolution: 0.1 # (ms)
     synapse-update-interval: 1000
@@ -21,8 +21,8 @@ network-params:
         Wmax: 95.
         W_inh: -35.
         W_init: 50.
-        LTP: 1.0
-        LTD: -1.2
+        LTP: 0.95
+        LTD: -1.14
 
     stimulus:
         type: generate

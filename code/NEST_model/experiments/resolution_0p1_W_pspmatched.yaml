@@ -21,8 +21,8 @@ network-params:
         Wmax: 85.
         W_inh: -35.
         W_init: 50.
-        LTP: 1.0
-        LTD: -1.2
+        LTP: 0.85
+        LTD: -1.02
 
     stimulus:
         type: generate
