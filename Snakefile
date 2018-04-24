@@ -35,14 +35,15 @@ LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative' in file)]
-CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' not in file) and ('qualitative' not in file) and ('resolution' not in file) and ('synapse_update_interval_10s' not in file)]
+CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 
-CONFIG_FILES_group_finder_nest=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)]
+CONFIG_FILES_group_finder_orig = [file[:-5] for file in os.listdir(CONFIG_DIR) if not ('delay' in file) and not ('resolution' in file)]
+CONFIG_FILES_group_finder_nest = [file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)  or ('resolution' in file) or ('bitwise' in file)]
 
 EXPERIMENTS_FOR_STDP_WINDOW = [file[:-5] for file in os.listdir(CONFIG_DIR)]
 
-NUM_REP=range(3)
-high_NUM_REP=range(3)
+NUM_REP=range(2)
+high_NUM_REP=range(2)
 
 
 include: "Izhikevic.rules"
@@ -50,23 +51,26 @@ include: "nest.rules"
 
 rule all:
     input:
-        group_finder_orig=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        group_finder_orig_high=expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+        group_finder_orig = expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP),
 
-        stats_orig_high=expand("{folder}/{experiment}/{rep}/stats_orig.json",
-                            folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-        stats_orig=expand("{folder}/{experiment}/{rep}/stats_orig.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+        group_finder_orig_high = expand("{folder}/{experiment}/{rep}/groups.json",
+                            folder=NEST_DATA_DIR, experiment=high_CONFIG_FILES, rep=high_NUM_REP),
 
-        polytest_data_full_nest=expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR,experiment=CONFIG_FILES_group_finder_nest,rep=NUM_REP),
-	    spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-	    high_spikes=expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
-        plots=expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
+        stats_orig_high = expand("{folder}/{experiment}/{rep}/stats_orig.json",
+                            folder=NEST_DATA_DIR, experiment=high_CONFIG_FILES, rep=high_NUM_REP),
+
+        stats_orig = expand("{folder}/{experiment}/{rep}/stats_orig.json",
+                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP),
+
+        group_finder_nest = expand("{folder}/{experiment}/{rep}/groups_nest.json",
+                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_nest, rep=NUM_REP),
+
+	spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+	high_spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+
+        plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
                             folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-        #weight=expand('{folder}/{experiment}/{experiment}_bimodalgamma_weight_delay.pdf',experiment=CONFIG_FILES,folder=FIG_DIR),
 
 
 
