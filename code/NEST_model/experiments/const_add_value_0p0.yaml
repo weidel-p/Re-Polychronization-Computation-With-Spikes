@@ -19,6 +19,7 @@ network-params:
         constant_additive_value: 0.0
         reset_weight_change_after_update: False
         Wmax: 10.
+        W_inh: -5.
         W_init: 6.
         LTP: 0.1
         LTD: -0.12
