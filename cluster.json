@@ -8,7 +8,7 @@
 
     },
       "find_groups_nest": {
-        "time": "24:00:00",
+        "time": "72:00:00",
         "n":48,
         "N": 1,
         "name"      : "{wildcards}.{rule}"
