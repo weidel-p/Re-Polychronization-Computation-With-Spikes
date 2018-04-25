@@ -42,8 +42,8 @@ CONFIG_FILES_group_finder_nest = [file[:-5] for file in os.listdir(CONFIG_DIR) i
 
 EXPERIMENTS_FOR_STDP_WINDOW = [file[:-5] for file in os.listdir(CONFIG_DIR)]
 
-NUM_REP=range(2)
-high_NUM_REP=range(2)
+NUM_REP=range(10)
+high_NUM_REP=range(100)
 
 
 include: "Izhikevic.rules"
