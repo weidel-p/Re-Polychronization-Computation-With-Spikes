@@ -1,10 +1,10 @@
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import sys
 import helper
 import json
 import argparse
-import matplotlib
-matplotlib.use('Agg')
 import pylab as plt
 import seaborn as sns 
 
