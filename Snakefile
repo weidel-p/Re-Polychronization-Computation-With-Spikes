@@ -66,11 +66,13 @@ rule all:
         group_finder_nest = expand("{folder}/{experiment}/{rep}/groups_nest.json",
                             folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_nest, rep=NUM_REP),
 
-	spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
-	high_spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
+	    spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+	    high_spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
 
         plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
                             folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+
+        stdp_plot = "figures/stdp_windows.pdf",
 
 
 

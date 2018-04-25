@@ -3,7 +3,18 @@ import sys
 import helper
 import json
 import argparse
+import matplotlib
+matplotlib.use('Agg')
 import pylab as plt
+import seaborn as sns 
+
+matplotlib.rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+
+sns.set_context('paper', font_scale=3.0,
+                rc={"lines.linewidth": 1.5})
+sns.set_style('whitegrid', {"axes.linewidth": 1.5})
+
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', nargs='+', type=str)
@@ -21,9 +32,9 @@ for i in args.input:
 
 plt.axhline(0, color='k', linestyle='--')
 plt.axvline(0, color='k', linestyle='--')
-plt.legend()
-plt.xlabel("dt")
-plt.ylabel("dw/w")
+plt.legend(loc=2, prop={'size': 12})
+plt.xlabel(r"$\Delta t$")
+plt.ylabel(r"$\frac{\Delta w}{w}$")
 plt.savefig(args.output)
 
 
