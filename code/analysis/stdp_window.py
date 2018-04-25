@@ -23,7 +23,6 @@ def init(cfg):
     nest.set_verbosity("M_FATAL")
     
     seed = [int(time.time() * 10000)]
-    print seed
     
     nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
                           'print_time': False,
