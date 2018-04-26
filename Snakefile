@@ -1,4 +1,6 @@
 import os,glob,sys
+import numpy as np
+
 sys.path.insert(0, 'code/NEST_model/') #ugly but not sure how to otherwise handle this
 
 import socket
@@ -39,11 +41,14 @@ CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 
 CONFIG_FILES_group_finder_orig = [file[:-5] for file in os.listdir(CONFIG_DIR) if not ('delay' in file) and not ('resolution' in file)]
 CONFIG_FILES_group_finder_nest = [file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)  or ('resolution' in file) or ('bitwise' in file)]
+CONFIG_FILES_group_finder_nest_random = [file[:-5] for file in os.listdir(CONFIG_DIR) if ('resolution' in file)]
 
 EXPERIMENTS_FOR_STDP_WINDOW = [file[:-5] for file in os.listdir(CONFIG_DIR)]
 
 NUM_REP=range(10)
 high_NUM_REP=range(100)
+
+RANDOM_RATIOS = np.round(np.linspace(0.1, 0.4, 4), 4)
 
 
 include: "Izhikevic.rules"
@@ -51,6 +56,9 @@ include: "nest.rules"
 
 rule all:
     input:
+        group_finder_nest_random = expand("{folder}/{experiment}/random/{random_ratio}/groups_nest.json",
+                                           folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_nest_random, random_ratio=RANDOM_RATIOS),
+
         group_finder_orig = expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP),
 
