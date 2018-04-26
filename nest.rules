@@ -83,7 +83,7 @@ rule find_groups_nest_random:
     shell:
         """
         source {rules.install_nest.output}
-        python2 code/analysis/find_polychronous_groups_nest_random.py -i {input.connectivity} -n 48  -c {input.conf} -o {output.groups} -s {output.stats} -r {wildcards.random_ratio}
+        python code/analysis/find_polychronous_groups_nest_random.py -i {input.connectivity} -n 48  -c {input.conf} -o {output.groups} -s {output.stats} -r {wildcards.random_ratio}
         """
 
 
