@@ -6,6 +6,8 @@ simulation-params:
     data-path: data/NEST_model/
     rec_mem: 0. # (ms)
     rec_spikes: 10000. # (ms)
+    neuron-integration-steps: 1
+
 # Network Parameter
 network-params:
     connectivity: 
