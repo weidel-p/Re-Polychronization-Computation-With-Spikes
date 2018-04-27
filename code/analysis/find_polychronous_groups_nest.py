@@ -89,7 +89,8 @@ def create_network():
                                     'V_m': -70.0,
                                     'U_m': -70.0 * 0.2,
                                     'V_th': 30.0,
-                                    'consistent_integration': False})
+                                    'consistent_integration': False,
+                                    'integration_steps': cfg['simulation-params']['neuron-integration-steps']})
 
     # create excitatory and inhibitory neurons and set the parameters
     # that excitatory and inhibitory neurons do not have in common
@@ -201,7 +202,10 @@ def worker(pivot_neuron):
                                                        'V_m': -70.0,
                                                        'U_m': -70.0 * 0.2,
                                                        'V_th': 30.0,
-                                                       'consistent_integration': False})
+                                                       'consistent_integration': False,
+                                                       'integration_steps': cfg['simulation-params'][
+                                                           'neuron-integration-steps']
+                                                       })
 
             nest.SetStatus(exc_neurons, {'a': 0.02, 'd': 8.0})
             nest.SetStatus(inh_neurons, {'a': 0.1, 'd': 2.0})
