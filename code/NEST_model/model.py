@@ -184,7 +184,7 @@ nest.CopyModel(neuron_model, 'inh_Izhi', {'consistent_integration': False,
                                           'a': 0.1,
                                           'd': 2.0,
                                           'tau_minus': 20.,
-                                          'integration_steps':cfg['simulation_params']['neuron-integration-steps'],
+                                          'integration_steps':cfg['simulation-params']['neuron-integration-steps'],
 })
 nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'U_m': -0.2 * 65.0,
@@ -193,7 +193,7 @@ nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                          'a': 0.02,
                                          'd': 8.0,
                                          'tau_minus': 20.,
-                                         'integration_steps':cfg['simulation_params']['neuron-integration-steps'],
+                                         'integration_steps':cfg['simulation-params']['neuron-integration-steps'],
                                                                                     })
 
 
