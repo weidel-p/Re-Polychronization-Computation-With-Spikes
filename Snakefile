@@ -48,7 +48,7 @@ EXPERIMENTS_FOR_STDP_WINDOW = [file[:-5] for file in os.listdir(CONFIG_DIR)]
 NUM_REP=range(10)
 high_NUM_REP=range(100)
 
-RANDOM_RATIOS = np.round(np.linspace(0.1, 0.4, 4), 4)
+RANDOM_RATIOS = np.round(np.linspace(0.1, 0.7, 7), 4)
 
 
 include: "Izhikevic.rules"
@@ -56,9 +56,6 @@ include: "nest.rules"
 
 rule all:
     input:
-        group_finder_nest_random = expand("{folder}/{experiment}/random/{random_ratio}/groups_nest.json",
-                                           folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_nest_random, random_ratio=RANDOM_RATIOS),
-
         group_finder_orig = expand("{folder}/{experiment}/{rep}/groups.json",
                             folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP),
 
@@ -79,6 +76,8 @@ rule all:
 
         plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
                             folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+
+        random_conn = expand('figures/{experiment}/random_groups.pdf', experiment=CONFIG_FILES_group_finder_nest_random),
 
         stdp_plot = "figures/stdp_windows.pdf",
 
@@ -236,4 +235,18 @@ rule plot_stdp_window:
         """
         python {input.program} -i {input.weights} -o {output.plot}
         """
+
+rule plot_random_groups:
+    input:
+        conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+    params:
+        random_ratios=expand('{r}', r=RANDOM_RATIOS),
+    output:
+        fn = 'figures/{experiment}/random_groups.pdf',
+    shell:
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {params.random_ratios} -c {input.conf} -o {output.fn}'
+
 
