@@ -80,6 +80,7 @@ rule all:
         random_conn = expand('figures/{experiment}/random_groups.pdf', experiment=CONFIG_FILES_group_finder_nest_random),
 
         stdp_plot = "figures/stdp_windows.pdf",
+        neuron_dynamics = "figures/neuron_dynamics.pdf",
 
 
 
@@ -234,6 +235,16 @@ rule plot_stdp_window:
     shell:
         """
         python {input.program} -i {input.weights} -o {output.plot}
+        """
+
+rule plot_neuron_dyn:
+    input:
+        program='{folder}/plot_neuron_dynamics.py'.format(folder=ANA_DIR),
+    output:
+        plot="{folder}/neuron_dynamics.pdf".format(folder=FIG_DIR),
+    shell:
+        """
+        python {input.program} -o {output.plot}
         """
 
 rule plot_random_groups:
