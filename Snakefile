@@ -41,14 +41,15 @@ CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 
 CONFIG_FILES_group_finder_orig = [file[:-5] for file in os.listdir(CONFIG_DIR) if not ('delay' in file) and not ('resolution' in file)]
 CONFIG_FILES_group_finder_nest = [file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)  or ('resolution' in file) or ('bitwise' in file)]
-CONFIG_FILES_group_finder_nest_random = [file[:-5] for file in os.listdir(CONFIG_DIR) if ('resolution' in file)]
 
 EXPERIMENTS_FOR_STDP_WINDOW = [file[:-5] for file in os.listdir(CONFIG_DIR)]
 
 NUM_REP=range(10)
 high_NUM_REP=range(100)
 
-RANDOM_RATIOS = np.round(np.linspace(0.1, 0.7, 7), 4)
+#RANDOM_RATIOS = np.round(np.linspace(0.1, 0.7, 7), 4)
+RANDOM_RATIOS = [0.1, 0.2, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55]
+
 
 
 include: "Izhikevic.rules"
@@ -77,10 +78,11 @@ rule all:
         plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
                             folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 
-        random_conn = expand('figures/{experiment}/random_groups.pdf', experiment=CONFIG_FILES_group_finder_nest_random),
 
         stdp_plot = "figures/stdp_windows.pdf",
         neuron_dynamics = "figures/neuron_dynamics.pdf",
+        rand_bitwise = "figures/bitwise_reproduction/neuron_dynamics.pdf",
+        rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
 
 
 
@@ -104,7 +106,6 @@ rule compile_find_polychronous_groups:
 	    'g++ -o {output} {input} -ljsoncpp'
 
 
-
 rule find_groups:
     output:
         "{folder}/{experiment}/{rep}/groups.json"
@@ -114,6 +115,18 @@ rule find_groups:
     log: 'logs/find_groups_{experiment}_{rep}.log'
     shell:
         '{input.program} {input.connectivity} {output} &>{log}'
+
+
+
+rule find_groups_random:
+    output:
+        "{folder}/{experiment}/random/{r}/groups_random.json"
+    input:
+        connectivity="{folder}/{experiment}/random/{r}/connectivity_random.json",
+        program=rules.compile_find_polychronous_groups.output,
+    shell:
+        '{input.program} {input.connectivity} {output}'
+
 
 rule calc_stats:
     output:
@@ -247,16 +260,41 @@ rule plot_neuron_dyn:
         python {input.program} -o {output.plot}
         """
 
+rule randomize_conn:
+    input:
+        conf = '{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+        conns = 'data/NEST_model/{experiment}/0/connectivity.json',
+    output:
+        fn = 'data/NEST_model/{experiment}/random/{r}/connectivity_random.json',
+    shell:
+        'python code/analysis/randomize_conn.py -i {input.conns} -c {input.conf} -r {wildcards.r} -o {output.fn}'
+    
+
 rule plot_random_groups:
     input:
         conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
-        groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
-        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        groups=expand('{folder}/{{experiment}}/{rep}/groups.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
     params:
         random_ratios=expand('{r}', r=RANDOM_RATIOS),
     output:
         fn = 'figures/{experiment}/random_groups.pdf',
+    shell:
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {params.random_ratios} -c {input.conf} -o {output.fn}'
+
+
+
+rule plot_random_groups_nest:
+    input:
+        conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+    params:
+        random_ratios=expand('{r}', r=RANDOM_RATIOS),
+    output:
+        fn = 'figures/{experiment}/random_groups_nest.pdf',
     shell:
         'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {params.random_ratios} -c {input.conf} -o {output.fn}'
 
