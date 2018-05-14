@@ -81,7 +81,7 @@ rule all:
 
         stdp_plot = "figures/stdp_windows.pdf",
         neuron_dynamics = "figures/neuron_dynamics.pdf",
-        rand_bitwise = "figures/bitwise_reproduction/neuron_dynamics.pdf",
+        rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
         rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
 
 
