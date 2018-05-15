@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-o', '--out', type=str)        # Experiment file defining the network structure and dynamics
 parser.add_argument('-i', '--connectivity', type=str)  # Connectivity file the group finding is based on
 parser.add_argument('-r', '--random', type=float)      # ratio of strong synapses 
-parser.add_argument('-c', '--config', type=str)      # ratio of strong synapses 
+parser.add_argument('-c', '--config', type=str)      # config file for the network/resolution etc.
 
 args = parser.parse_args()
 
