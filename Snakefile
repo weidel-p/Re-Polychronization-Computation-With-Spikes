@@ -274,14 +274,13 @@ rule plot_random_groups:
     input:
         conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
         groups=expand('{folder}/{{experiment}}/{rep}/groups.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
-    params:
-        random_ratios=expand('{r}', r=RANDOM_RATIOS),
     output:
         fn = 'figures/{experiment}/random_groups.pdf',
     shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {params.random_ratios} -c {input.conf} -o {output.fn}'
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn}'
 
 
 
@@ -289,13 +288,12 @@ rule plot_random_groups_nest:
     input:
         conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
         groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
-    params:
-        random_ratios=expand('{r}', r=RANDOM_RATIOS),
     output:
         fn = 'figures/{experiment}/random_groups_nest.pdf',
     shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {params.random_ratios} -c {input.conf} -o {output.fn}'
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn}'
 
 

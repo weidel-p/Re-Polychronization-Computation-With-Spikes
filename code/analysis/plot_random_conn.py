@@ -14,7 +14,7 @@ plt.rcParams['font.weight'] = 'bold'
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input_izh', nargs='+', type=str)
 parser.add_argument('-g', '--groups_izh', nargs='+', type=str)
-parser.add_argument('-r', '--random_ratios', nargs='+', type=float)
+parser.add_argument('-r', '--conn_rand', nargs='+', type=str)
 parser.add_argument('-k', '--groups_rand', nargs='+', type=str)
 parser.add_argument('-o', '--output', type=str)
 parser.add_argument('-c', '--config', type=str)        # Experiment file defining the network structure and dynamics
@@ -30,7 +30,7 @@ ratios_izh = []
 num_groups_izh = []
 
 
-def analizeForRatio(conn_fn, group_fn, Wmax):
+def analyzeForRatio(conn_fn, group_fn, Wmax):
     # calculate ratio of strong synapses
     # and number of groups
 
@@ -41,7 +41,7 @@ def analizeForRatio(conn_fn, group_fn, Wmax):
     with open(group_fn, "r+") as f:
         groups = json.load(f)
 
-    exc_weights = np.array([c['weight'] for c in conns if c['weight'] > 0])
+    exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0])
     ratio_strong = len(np.where(exc_weights > Wmax * 0.95)[0]) / float(len(exc_weights))
 
     return([ratio_strong, len(groups)])
@@ -51,25 +51,32 @@ def analizeForRatio(conn_fn, group_fn, Wmax):
 # for all experiments
 for i, in_fn in enumerate(args.input_izh): 
 
-    ratio_strong, num_groups = analizeForRatio(in_fn, args.groups_izh[i], Wmax)
+    try:
+        ratio_strong, num_groups = analyzeForRatio(in_fn, args.groups_izh[i], Wmax)
 
-    ratios_izh.append(ratio_strong)
-    num_groups_izh.append(num_groups)
+        ratios_izh.append(ratio_strong)
+        num_groups_izh.append(num_groups)
+
+    except:
+        pass
 
 
 
 ratios_rand = []
 num_groups_rand = []
 
-# for all random experiments
-for i, ratio in enumerate(args.random_ratios): 
 
-    with open(args.groups_rand[i], "r+") as f:
-        groups = json.load(f)
+# for all experiments
+for i, c_rand_fn in enumerate(args.conn_rand): 
 
+    try:
+        ratio_strong, num_groups = analyzeForRatio(c_rand_fn, args.groups_rand[i], Wmax)
+    
+        num_groups_rand.append(num_groups)
+        ratios_rand.append(ratio_strong)
 
-    ratios_rand.append(ratio)
-    num_groups_rand.append(len(groups))
+    except:
+        pass
 
 
 
