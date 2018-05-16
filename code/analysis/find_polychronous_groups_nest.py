@@ -148,8 +148,8 @@ def worker(pivot_neuron):
         # we reset and re-create the network after 100 triplets
 
         if stim_triplet_id % 100 == 0:
-            print("progress", pivot_neuron, stim_triplet_id, float(stim_triplet_id) /
-                  len(list(itertools.combinations(inc_exc_conns, 3))))
+            #print("progress", pivot_neuron, stim_triplet_id, float(stim_triplet_id) /
+            #      len(list(itertools.combinations(inc_exc_conns, 3))))
             # reset and recreate network and reset spike generators
             exc_neurons, inh_neurons, sd = create_network()
             sgs = None
@@ -163,6 +163,8 @@ def worker(pivot_neuron):
         group_delays = []
 
         # calculate the maximal delay between the anchor neurons
+        # This is done because in the original group finder only post synaptic neurons
+        # after the mother neuron receive the synaptic events from the anchor neurons
         max_delay_triplet = np.max(np.array([c['delay'] for c in stim_triplet]))
 
         # determine the initially activated neurons 
@@ -173,7 +175,7 @@ def worker(pivot_neuron):
             # having a delay larger than the delay to the mother neuron
             stim_conns = exc_conns[np.where(np.all([exc_pre == st['pre'], exc_delay >= st['delay']], axis=0))[0]]
 
-            # disassable these connections to their components
+            # disassemble these connections to their components
             stim_pre = np.array([int(c['pre']) for c in stim_conns])
             stim_post = np.array([int(c['post']) for c in stim_conns])
             stim_weight = np.array([float(c['weight']) for c in stim_conns])
@@ -222,7 +224,10 @@ def worker(pivot_neuron):
         # at this point we created the network and determined the neurons and timepoints when to activate them
         # next, start the simulation and activate the neurons at the calculated times
 
-        #### FIND GROUPS ###
+
+        ######################
+        #    FIND GROUPS     #
+        ######################
 
         nest.ResetNetwork()
         nest.SetKernelStatus({"time": 0.0})
@@ -281,7 +286,7 @@ def worker(pivot_neuron):
             # i is index of Nth neuron in group
             # group[i] is index of neuron
 
-            # loop thorugh all neurons that fired before this one becuase they are candidates for linked neurons
+            # loop through all neurons that fired before this one because they are candidates for linked neurons
             for j in range(i):
 
                 # calculate the delay from neuron j to neuron i
@@ -292,7 +297,7 @@ def worker(pivot_neuron):
                     delays = group_inh_delay[
                         np.where(np.all([group_inh_pre == group[j], group_inh_post == group[i]], axis=0))[0]]
 
-                # there should only be one delay, except there are multapses in the network 
+                # there should only be one delay, except there are multapses in the network which we exclude
                 # interate over all found connections between j to j
                 for d in delays:
                     # anchor neurons have layer = 1, all others have minimum layer = 2 
@@ -318,7 +323,8 @@ def worker(pivot_neuron):
 
         
         # viability test as in the original algorithm
-        # a group is only then considered if all anchor neurons project to active, excitatory neurons in the group except the mother neuron 
+        # a group is only then considered if all anchor neurons project to at least one
+        # active, excitatory neurons in the group except the mother neuron
         discard = 0
         used = np.zeros(3)
         for i in range(len(used)):
@@ -329,9 +335,11 @@ def worker(pivot_neuron):
                 discard = 1
 
         # consider only groups with a maximal layer larger than 7
+        #
         # as the calculation of layers is slightly different than in the original algorithm
         # we find more groups
-
+        # We believe that in the original code the last spike is sometimes not recorded
+        # therefore the threshold of 7 layers is not crossed so the group in the original one is not counted
         if L_max >= 7 and discard == 0:
             # save group in JSON format
             json_group = {}
@@ -370,9 +378,12 @@ json_data = []
 # parallelize the algorithm
 pool = Pool(processes=max_num_processes)
 
-# execute the algorithm for each excitatory neuron
+# execute the algorithm for each excitatory neuron as mother neuron
 for found_groups in pool.imap_unordered(worker, range(1, Ne + 1)):
     json_data += found_groups
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    print('!!!!!!!',len(json_data),' groups found so far !!!!!!!!!!')
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
 # calculate statistics about the groups for later use
 N_list = []
