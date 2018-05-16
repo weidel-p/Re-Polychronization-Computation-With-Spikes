@@ -114,7 +114,7 @@ rule find_groups:
         program=rules.compile_find_polychronous_groups.output,
     log: 'logs/find_groups_{experiment}_{rep}.log'
     shell:
-        '{input.program} {input.connectivity} {output} &>{log}'
+        '{input.program} {input.connectivity} {output} &>{log} || true'
 
 
 
@@ -125,7 +125,7 @@ rule find_groups_random:
         connectivity="{folder}/{experiment}/random/{r}/connectivity_random.json",
         program=rules.compile_find_polychronous_groups.output,
     shell:
-        '{input.program} {input.connectivity} {output}'
+        '{input.program} {input.connectivity} {output} || true'
 
 
 rule calc_stats:

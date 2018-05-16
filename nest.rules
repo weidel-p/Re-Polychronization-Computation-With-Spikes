@@ -98,7 +98,7 @@ rule find_groups_nest_random:
     shell:
         """
         source {rules.install_nest.output}
-        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48 -c {input.conf} -o {output.groups} -s {output.stats}
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48 -c {input.conf} -o {output.groups} -s {output.stats} || true
         """
 
 rule find_groups_nest:
@@ -115,7 +115,7 @@ rule find_groups_nest:
     shell:
         """
         source {rules.install_nest.output}
-        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48  -c {input.conf} -o {output.groups} -s {output.stats}||true
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48  -c {input.conf} -o {output.groups} -s {output.stats} || true
         """
 
 rule compare_STDP:
