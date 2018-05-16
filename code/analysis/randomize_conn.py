@@ -25,8 +25,8 @@ with open(args.connectivity, "r+") as f:
 
 conns = copy.deepcopy(conns_)
 
-# and select the relevant connections
-exc_conns = np.array([conns[i] for i in range(len(conns)) if conns[i]['weight'] >= 0.])
+# and select the relevant connections (EE)
+exc_conns = np.array([conns[i] for i in range(len(conns)) if conns[i]['weight'] >= 0. and conns[i]['post'] <= 800])
 
 # set all exc_conns to 0 
 for c in exc_conns:

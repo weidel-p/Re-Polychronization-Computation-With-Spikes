@@ -41,7 +41,7 @@ def analyzeForRatio(conn_fn, group_fn, Wmax):
     with open(group_fn, "r+") as f:
         groups = json.load(f)
 
-    exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0])
+    exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0 and c['post'] <= 800])
     ratio_strong = len(np.where(exc_weights > Wmax * 0.95)[0]) / float(len(exc_weights))
 
     return([ratio_strong, len(groups)])
@@ -58,6 +58,7 @@ for i, in_fn in enumerate(args.input_izh):
         num_groups_izh.append(num_groups)
 
     except:
+        print("no data available")
         pass
 
 
@@ -76,6 +77,8 @@ for i, c_rand_fn in enumerate(args.conn_rand):
         ratios_rand.append(ratio_strong)
 
     except:
+        
+        print("no data available random", c_rand_fn, args.groups_rand[i])
         pass
 
 
