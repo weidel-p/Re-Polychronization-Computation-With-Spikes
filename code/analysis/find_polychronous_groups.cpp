@@ -324,9 +324,9 @@ void all_polychronous(char *argv[]) {                                           
   for (i = 0; i < polylenmax; i++)
     N_postspikes[i] = 0;
 
-  fpoly = fopen(argv[2], "w");
   for (i = 0; i < Ne; i++)
     polychronous(i);
+  fpoly = fopen(argv[2], "w");
 
   // std::cout << writer.write(json_data).c_str() << std::endl;
   fprintf(fpoly, writer.write(json_data).c_str());
@@ -410,6 +410,20 @@ int main(int argc, char *argv[]) {                                              
     delays_length[source][delay]++;
   }
   fp_in.close();
+
+
+  //This eusures a file is created even when the job fails ( which sometimes happens)
+  //mainly needed to keep snakemake happy because it works based on output/input files
+   Json::Value json_error;
+   json_error["Failed"] = 1;
+
+    Json::Value json_fail(Json::arrayValue);
+    json_fail.append(json_error);                                                       // here our part ends
+
+
+  fpoly = fopen(argv[2], "w");
+  fprintf(fpoly, writer.write(json_fail).c_str());
+  fclose(fpoly);
 
   all_polychronous(argv);
 }
