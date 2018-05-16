@@ -378,9 +378,19 @@ json_data = []
 # parallelize the algorithm
 pool = Pool(processes=max_num_processes)
 
+# This eusures a file is created even when the job fails(which sometimes happens)
+# mainly needed to keep snakemake happy because it works based on output / input files
+
+with open(out_fn, "w+") as f:
+    json.dump({'Failed':1}, f)
+with open(out_stat_fn, "w+") as f:
+    json.dump({'Failed':1}, f)
+
+
 # execute the algorithm for each excitatory neuron as mother neuron
 for found_groups in pool.imap_unordered(worker, range(1, Ne + 1)):
     json_data += found_groups
+
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     print('!!!!!!!',len(json_data),' groups found so far !!!!!!!!!!')
     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')

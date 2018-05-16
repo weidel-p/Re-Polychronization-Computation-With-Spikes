@@ -36,7 +36,7 @@ FIG_DIR='figures'
 LOG_DIR='logs'
 CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 
-high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative' in file)]
+high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative_model.yaml' == file)]
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 
 CONFIG_FILES_group_finder_orig = [file[:-5] for file in os.listdir(CONFIG_DIR) if not ('delay' in file) and not ('resolution' in file)]
