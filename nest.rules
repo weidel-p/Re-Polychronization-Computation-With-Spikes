@@ -134,3 +134,18 @@ rule compare_STDP:
         python {input.model} -c {input.conf} -o {output.weights} -p {output.sim} &>{log}
         """
 
+
+rule plot_neuron_dyn:
+    input:
+        program='{folder}/plot_neuron_dynamics.py'.format(folder=ANA_DIR),
+        nest=rules.install_nest.output
+    output:
+        plot="{folder}/neuron_dynamics.pdf".format(folder=FIG_DIR),
+    shell:
+        """
+        source {input.nest}
+        python {input.program} -o {output.plot}
+        """
+
+
+

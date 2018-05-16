@@ -250,16 +250,6 @@ rule plot_stdp_window:
         python {input.program} -i {input.weights} -o {output.plot}
         """
 
-rule plot_neuron_dyn:
-    input:
-        program='{folder}/plot_neuron_dynamics.py'.format(folder=ANA_DIR),
-    output:
-        plot="{folder}/neuron_dynamics.pdf".format(folder=FIG_DIR),
-    shell:
-        """
-        python {input.program} -o {output.plot}
-        """
-
 rule randomize_conn:
     input:
         conf = '{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
