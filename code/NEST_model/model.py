@@ -154,7 +154,7 @@ def connect_network(ex_neuron, inh_neuron, cfg):
         pass
 
 
-def set_stimulus(neurons, conf, sim_time):
+def set_stimulus(neurons, conf, sim_time,Wmax):
     """
 
     Args:
@@ -177,10 +177,10 @@ def set_stimulus(neurons, conf, sim_time):
     Returns:
 
     """
-    def set_stimulus_times(stim_t, stim_id):
+    def set_stimulus_times(stim_t, stim_id,Wmax):
         #First ms must be set individually
         # otherwise stimulus spike must have occured at -1ms
-        nest.SetStatus([neurons[stim_id[0] - 1]], 'I', 20.)
+        nest.SetStatus([neurons[stim_id[0] - 1]], 'I', 2*Wmax)
         stim_id = stim_id[stim_t > 0]
         stim_t = stim_t[stim_t > 0]
 
@@ -188,7 +188,7 @@ def set_stimulus(neurons, conf, sim_time):
         random_input = nest.Create('spike_generator', len(neurons))
         nest.Connect(random_input, neurons, 'one_to_one')
         #20 mv are able to make a neuron spike
-        nest.SetStatus(nest.GetConnections(random_input), 'weight', 20.)
+        nest.SetStatus(nest.GetConnections(random_input), 'weight', 2*Wmax)
 
         #set spike times
         for i in np.unique(stim_id):
@@ -208,7 +208,7 @@ def set_stimulus(neurons, conf, sim_time):
         del stimulus
 
         # first neuron gets current manually rest via spike generator
-        set_stimulus_times(stim_t, stim_id)
+        set_stimulus_times(stim_t, stim_id,Wmax)
         print('reproduce',conf)
 
     elif conf["type"] == "generate":
@@ -224,10 +224,10 @@ def set_stimulus(neurons, conf, sim_time):
             # Draw inputs according to original code but with numpy and inject them via spike generators
             print('generate original', conf)
 
-            stim_id, stim_t = np.random.choice(1000, int(sim_time)), np.array(
+            stim_id, stim_t = np.random.choice(N, int(sim_time)), np.array(
                                                                         np.linspace(0, int(sim_time), int(sim_time) + 1))
             stim_t = stim_t[:-1]
-            set_stimulus_times(stim_t, stim_id)
+            set_stimulus_times(stim_t, stim_id,Wmax)
 
         else:
             pass
@@ -287,25 +287,13 @@ nest.SetKernelStatus({'resolution': cfg["simulation-params"]["resolution"],
 neuron_model = 'izhikevich'
 
 #define parameters for Inh neurons
-nest.CopyModel(neuron_model, 'inh_Izhi', {'consistent_integration': False,
-                                          'U_m': -0.2 * 65.0,
-                                          'b': 0.2,
-                                          'c': -65.0,
-                                          'a': 0.1,
-                                          'd': 2.0,
-                                          'tau_minus': 20.,
-                                          'integration_steps':cfg['simulation-params']['neuron-integration-steps'],
-})
+#Parameters defined in params.py
+inh_neuron_model.update({'integration_steps':cfg['simulation-params']['neuron-integration-steps']})
+nest.CopyModel(neuron_model, 'inh_Izhi', inh_neuron_model)
+
 #define parameters for excitatory neurons (regular fast spiking)
-nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
-                                         'U_m': -0.2 * 65.0,
-                                         'b': 0.2,
-                                         'c': -65.0,
-                                         'a': 0.02,
-                                         'd': 8.0,
-                                         'tau_minus': 20.,
-                                         'integration_steps':cfg['simulation-params']['neuron-integration-steps'],
-                                                                                    })
+exc_neuron_model.update({'integration_steps':cfg['simulation-params']['neuron-integration-steps']})
+nest.CopyModel(neuron_model, 'ex_Izhi', exc_neuron_model)
 
 
 #set synapse realted parameters
@@ -335,7 +323,7 @@ elif cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_synapse':
 
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
         'weight': cfg["network-params"]["plasticity"]['W_init'],
-        'tau_plus': 20.0,
+        'tau_plus': tau_plus,
         'lambda': cfg["network-params"]["plasticity"]['lambda'],
         'alpha': cfg["network-params"]["plasticity"]['alpha'],
         'mu_plus': mu_plus,
@@ -345,7 +333,7 @@ elif cfg["network-params"]["plasticity"]["synapse-model"] == 'stdp_synapse':
 
 else:
     nest.CopyModel(cfg["network-params"]["plasticity"]["synapse-model"], "EX", {
-        'weight': 6.,
+        'weight':  cfg["network-params"]["plasticity"]['W_init'],
         'consistent_integration': False,
     })
 
@@ -398,7 +386,7 @@ set_initial_conditions(neurons, cfg["network-params"]["initial-state"])
 connect_network(ex_neuron, inh_neuron,cfg )
 
 #set stimulus according to conf
-set_stimulus(neurons, cfg["network-params"]["stimulus"], cfg["simulation-params"]["sim-time"])
+set_stimulus(neurons, cfg["network-params"]["stimulus"], cfg["simulation-params"]["sim-time"],cfg["network-params"]["plasticity"]['Wmax'])
 
 
 
