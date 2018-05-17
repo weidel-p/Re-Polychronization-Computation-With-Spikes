@@ -39,7 +39,7 @@ CONFIG_DIR=os.path.join(NEST_CODE_DIR,'experiments')
 high_CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR) if ('bitwise' in file) or ('qualitative_model.yaml' == file)]
 CONFIG_FILES=[file[:-5] for file in os.listdir(CONFIG_DIR)]
 
-CONFIG_FILES_group_finder_orig = [file[:-5] for file in os.listdir(CONFIG_DIR) if not ('delay' in file) and not ('resolution' in file)]
+CONFIG_FILES_group_finder_orig = [file[:-5] for file in os.listdir(CONFIG_DIR) if not ('delay' in file) and not ('resolution' in file) and not ('high_res' in file)]
 CONFIG_FILES_group_finder_nest = [file[:-5] for file in os.listdir(CONFIG_DIR) if ('delay' in file)  or ('qualitative' in file)  or ('resolution' in file) or ('bitwise' in file)]
 
 EXPERIMENTS_FOR_STDP_WINDOW = [file[:-5] for file in os.listdir(CONFIG_DIR)]
@@ -75,8 +75,6 @@ rule all:
 	    spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 	    high_spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
 
-        plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
-                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 
 
         stdp_plot = "figures/stdp_windows.pdf",
@@ -84,7 +82,16 @@ rule all:
         rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
         rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
 
+        bimodal_bitwise = "figures/bitwise_reproduction_bimodalgamma.pdf",
+        bimodal_qualitative = "figures/qualitative_model_bimodalgamma.pdf",
 
+        bitwise_original_comp='figures/bitwise_original_6.pdf',
+        bitwise_initial_comp='figures/bitwise_initial_reproduction_5.pdf',
+        bitwise_qualitative_comp='figures/bitwise_qualitative_model_5.pdf',
+
+
+        plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
+                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 
 
 rule clean:
@@ -138,69 +145,38 @@ rule calc_stats:
         'python {ANA_DIR}/gather_stats.py -g {{input.groups}} -o {{output}} &>{{log}}'.format(ANA_DIR=ANA_DIR)
 
 
-
-
-rule plot_test_statistical_reproduction:
+rule plot_bitwise_comp:
+    #comp stands for the experiemtn we want to compare with, i.e. in our case initial and qualitative
     input:
-        stat_con=expand('{folder}/{{experiment}}_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
+        comp_con=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
         bit_con=expand('{folder}/bitwise_reproduction/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-        stat_spk=expand('{folder}/{{experiment}}_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
+        comp_spk=expand('{folder}/{{experiment}}/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
         bit_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_{experiment}_{rep}.{ext,(eps|png)}',
+        'figures/bitwise_{experiment}_{rep}.pdf',
     priority: 9
     shell:
-        'python3 {ANA_DIR}/plot_statistical_reproduction.py -bs {{input.bit_spk}} -ss {{input.stat_spk}} -bw {{input.bit_con}} -sw {{input.stat_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+        'python3 {ANA_DIR}/plot_bitwise_comp.py -bs {{input.bit_spk}} -cs {{input.comp_spk}} -bw {{input.bit_con}} -cw {{input.comp_con}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
-rule plot_test_bitwise_reproduction:
+
+rule plot_bitwise_original:
     input:
         original_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes.dat',folder=IZHI_DATA_DIR),
         nest_mem=expand('{folder}/bitwise_reproduction/{{rep}}/membrane_potential-1002.dat',folder=NEST_DATA_DIR),
         nest_spk=expand('{folder}/bitwise_reproduction/{{rep}}/spikes-1001.gdf',folder=NEST_DATA_DIR),
     output:
-        'figures/bitwise_reproduction_{rep}.{ext,(eps|png)}',
+        'figures/bitwise_original_{rep}.{ext,(eps|png|pdf|jpg)}',
     priority: 10
     shell:
-        'python3 {ANA_DIR}/plot_bitwise_reproduction.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
-
-rule plot_groups:
-    output:
-        plot_7=expand('{folder}/{{experiment}}/{{rep}}/plot_7.{{ext,(eps|png)}}',folder=FIG_DIR),
-        plot_8=expand('{folder}/{{experiment}}/{{rep}}/plot_8.{{ext,(eps|png)}}',folder=FIG_DIR),
-
-    input:
-        groups=expand('{folder}/{{experiment}}/{{rep}}/groups.json',folder=NEST_DATA_DIR),
-    priority: 2
-    run:
-        shell("""
-        python3 code/analysis/plot_group_statistics.py \
-        --groupfile {input.groups}\
-        --outfolder figures/{wildcards.experiment}/{wildcards.rep}\
-        """)
-
-rule plot_combined_groups:
-    output:
-        plot_8=expand('{folder}/{{experiment}}/{{experiment}}_combined_groups.{{ext,(eps|png)}}',folder=FIG_DIR),
-
-    input:
-        groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
-    priority: 2
-    run:
-        shell("""
-        python3 code/analysis/plot_combined_group_statistics.py \
-        -gl {input.groups}\
-        -fn {output.plot_8}\
-        """)
+        'python3 {ANA_DIR}/plot_bitwise_original.py -bs {{input.nest_spk}} -os {{input.original_spk}} -bmem {{input.nest_mem}} -fn {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
 
 rule plot_bimodal_gamma:
     output:
-        weight=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_weight_delay.{{ext,(eps|png|pdf)}}',folder=FIG_DIR),
-        groups=expand('{folder}/{{experiment}}/{{experiment}}_bimodalgamma_groups.{{ext,(eps|png|pdf)}}',folder=FIG_DIR),
-
+        outfile=expand('{folder}/{{experiment}}_bimodalgamma.{{ext,(eps|png|pdf|jpg)}}',folder=FIG_DIR),
     input:
         connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
         spikes=expand('{folder}/{{experiment}}/{rep}/spikes-1001.gdf',folder=NEST_DATA_DIR,rep=NUM_REP),
-        groups=expand('{folder}/{{experiment}}/{rep}/groups.json',folder=NEST_DATA_DIR,rep=NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/stats_orig.json',folder=NEST_DATA_DIR,rep=NUM_REP),
 
     priority: 2
     run:
@@ -209,19 +185,9 @@ rule plot_bimodal_gamma:
         -cl {input.connectivity}\
         -sl {input.spikes}\
         -gl {input.groups}\
-        --group_plot {output.groups}\
-        --gamma_plot {output.weight}\
-
+        --output {output.outfile}
         """)
 
-rule test_weights_and_delay:
-    input:
-        nest=expand('{folder}/{{experiment}}/{{rep}}/connectivity.json',folder=NEST_DATA_DIR),
-    output:
-        weight=expand('{folder}/{{experiment}}/{{rep}}/weight_distribution.{{ext,(eps|png)}}',folder=FIG_DIR),
-    priority: 10
-    shell:
-        'python3 {ANA_DIR}/weight_and_delay_distribution.py -c {{input.nest}} -o {{output.weight}} '.format(ANA_DIR=ANA_DIR)
 
 rule plot_dynamics:
     output:

@@ -9,6 +9,12 @@ import json
 import ijson
 import os
 
+def set_box_color(bp, color):
+    plt.setp(bp['boxes'], color=color)
+    plt.setp(bp['whiskers'], color=color)
+    plt.setp(bp['caps'], color=color)
+    plt.setp(bp['medians'], color=color)
+
 
 def mem_spk_plot(data, times, sender, subplotspec, mem_color, spk_inh_color, spk_exc_color):
     id = data[:, 0]
