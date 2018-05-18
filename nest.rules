@@ -69,23 +69,6 @@ rule run_nest_reproduction:
         """.format(folder=NEST_CODE_DIR)
 
 
-
-#rule find_groups_nest_random:
-#    threads: 48
-#    input:
-#        connectivity="{folder}/{experiment}/0/connectivity.json",
-#        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
-#    output:
-#        groups="{folder}/{experiment}/random/{random_ratio}/groups_nest.json",
-#        stats="{folder}/{experiment}/random/{random_ratio}/stats.json"
-#    log: 'logs/find_groups_nest_random_{experiment}_{random_ratio}.log'
-#
-#    shell:
-#        """
-#        source {rules.install_nest.output}
-#        python code/analysis/find_polychronous_groups_nest_random.py -i {input.connectivity} -n 48  -c {input.conf} -o {output.groups} -s {output.stats} -r {wildcards.random_ratio}
-#        """
-
 rule find_groups_nest_random:
     threads: 48
     input:
@@ -94,6 +77,21 @@ rule find_groups_nest_random:
 
     output:
         groups="{folder}/{experiment}/random/{r}/groups_nest_random.json",
+        stats="{folder}/{experiment}/random/{r}/stats.json"
+    shell:
+        """
+        source {rules.install_nest.output}
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48 -c {input.conf} -o {output.groups} -s {output.stats} || true
+        """
+
+rule find_groups_nest_random_EE:
+    threads: 48
+    input:
+        connectivity="{folder}/{experiment}/random/{r}/connectivity_random_EE.json",
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+
+    output:
+        groups="{folder}/{experiment}/random/{r}/groups_nest_random_EE.json",
         stats="{folder}/{experiment}/random/{r}/stats.json"
     shell:
         """

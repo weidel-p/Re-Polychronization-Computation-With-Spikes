@@ -137,7 +137,7 @@ def simulate(cfg):
 
     return ws
 
-dts = np.arange(-50, 50, 1.)
+dts = np.arange(-20, 20, 1.)
 dws = []
 
 for dt in dts:

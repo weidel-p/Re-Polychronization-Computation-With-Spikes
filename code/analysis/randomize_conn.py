@@ -10,6 +10,7 @@ parser.add_argument('-o', '--out', type=str)        # Experiment file defining t
 parser.add_argument('-i', '--connectivity', type=str)  # Connectivity file the group finding is based on
 parser.add_argument('-r', '--random', type=float)      # ratio of strong synapses 
 parser.add_argument('-c', '--config', type=str)      # config file for the network/resolution etc.
+parser.add_argument('-e', '--EE', type=int)      # EE synapses only 
 
 args = parser.parse_args()
 
@@ -26,7 +27,10 @@ with open(args.connectivity, "r+") as f:
 conns = copy.deepcopy(conns_)
 
 # and select the relevant connections (EE)
-exc_conns = np.array([conns[i] for i in range(len(conns)) if conns[i]['weight'] >= 0. and conns[i]['post'] <= 800])
+if args.EE == 1:
+    exc_conns = np.array([conns[i] for i in range(len(conns)) if conns[i]['weight'] >= 0. and conns[i]['post'] <= 800])
+else:
+    exc_conns = np.array([conns[i] for i in range(len(conns)) if conns[i]['weight'] >= 0.])
 
 # set all exc_conns to 0 
 for c in exc_conns:

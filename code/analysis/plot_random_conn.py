@@ -18,6 +18,7 @@ parser.add_argument('-r', '--conn_rand', nargs='+', type=str)
 parser.add_argument('-k', '--groups_rand', nargs='+', type=str)
 parser.add_argument('-o', '--output', type=str)
 parser.add_argument('-c', '--config', type=str)        # Experiment file defining the network structure and dynamics
+parser.add_argument('-e', '--EE', type=int)      # EE synapses only 
 
 args = parser.parse_args()
 
@@ -30,7 +31,7 @@ ratios_izh = []
 num_groups_izh = []
 
 
-def analyzeForRatio(conn_fn, group_fn, Wmax):
+def analyzeForRatio(conn_fn, group_fn, Wmax, EE):
     # calculate ratio of strong synapses
     # and number of groups
 
@@ -41,7 +42,12 @@ def analyzeForRatio(conn_fn, group_fn, Wmax):
     with open(group_fn, "r+") as f:
         groups = json.load(f)
 
-    exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0 and c['post'] <= 800])
+
+    if EE == 1:
+        exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0 and c['post'] <= 800])
+    else:
+        exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0])
+
     ratio_strong = len(np.where(exc_weights > Wmax * 0.95)[0]) / float(len(exc_weights))
 
     return([ratio_strong, len(groups)])
@@ -52,7 +58,7 @@ def analyzeForRatio(conn_fn, group_fn, Wmax):
 for i, in_fn in enumerate(args.input_izh): 
 
     try:
-        ratio_strong, num_groups = analyzeForRatio(in_fn, args.groups_izh[i], Wmax)
+        ratio_strong, num_groups = analyzeForRatio(in_fn, args.groups_izh[i], Wmax, args.EE)
 
         ratios_izh.append(ratio_strong)
         num_groups_izh.append(num_groups)
@@ -71,7 +77,7 @@ num_groups_rand = []
 for i, c_rand_fn in enumerate(args.conn_rand): 
 
     try:
-        ratio_strong, num_groups = analyzeForRatio(c_rand_fn, args.groups_rand[i], Wmax)
+        ratio_strong, num_groups = analyzeForRatio(c_rand_fn, args.groups_rand[i], Wmax, args.EE)
     
         num_groups_rand.append(num_groups)
         ratios_rand.append(ratio_strong)
