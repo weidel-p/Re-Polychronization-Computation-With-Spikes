@@ -48,7 +48,7 @@ NUM_REP=range(10)
 high_NUM_REP=range(100)
 
 #RANDOM_RATIOS = np.round(np.linspace(0.1, 0.7, 7), 4)
-RANDOM_RATIOS = [0.1, 0.2, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55]
+RANDOM_RATIOS = [0.1, 0.2, 0.3, 0.35, 0.4, 0.45, 0.5]
 
 
 
@@ -80,7 +80,9 @@ rule all:
         stdp_plot = "figures/stdp_windows.pdf",
         neuron_dynamics = "figures/neuron_dynamics.pdf",
         rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
+        rand_bitwise_EE = "figures/bitwise_reproduction/random_groups_EE.pdf",
         rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
+        rand_resolution_EE = "figures/resolution_0p1_W_pspmatched/random_groups_nest_EE.pdf",
 
         bimodal_bitwise = "figures/bitwise_reproduction_bimodalgamma.pdf",
         bimodal_qualitative = "figures/qualitative_model_bimodalgamma.pdf",
@@ -124,12 +126,22 @@ rule find_groups:
         '{input.program} {input.connectivity} {output} &>{log} || true'
 
 
-
 rule find_groups_random:
     output:
         "{folder}/{experiment}/random/{r}/groups_random.json"
     input:
         connectivity="{folder}/{experiment}/random/{r}/connectivity_random.json",
+        program=rules.compile_find_polychronous_groups.output,
+    shell:
+        '{input.program} {input.connectivity} {output} || true'
+
+
+
+rule find_groups_random_EE:
+    output:
+        "{folder}/{experiment}/random/{r}/groups_random_EE.json"
+    input:
+        connectivity="{folder}/{experiment}/random/{r}/connectivity_random_EE.json",
         program=rules.compile_find_polychronous_groups.output,
     shell:
         '{input.program} {input.connectivity} {output} || true'
@@ -223,7 +235,7 @@ rule randomize_conn:
     output:
         fn = 'data/NEST_model/{experiment}/random/{r}/connectivity_random.json',
     shell:
-        'python code/analysis/randomize_conn.py -i {input.conns} -c {input.conf} -r {wildcards.r} -o {output.fn}'
+        'python code/analysis/randomize_conn.py -i {input.conns} -c {input.conf} -r {wildcards.r} -o {output.fn} -e 0'
     
 
 rule plot_random_groups:
@@ -236,7 +248,7 @@ rule plot_random_groups:
     output:
         fn = 'figures/{experiment}/random_groups.pdf',
     shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn}'
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 0'
 
 
 
@@ -250,6 +262,44 @@ rule plot_random_groups_nest:
     output:
         fn = 'figures/{experiment}/random_groups_nest.pdf',
     shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn}'
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 0'
+
+
+rule randomize_conn_EE:
+    input:
+        conf = '{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+        conns = 'data/NEST_model/{experiment}/0/connectivity.json',
+    output:
+        fn = 'data/NEST_model/{experiment}/random/{r}/connectivity_random_EE.json',
+    shell:
+        'python code/analysis/randomize_conn.py -i {input.conns} -c {input.conf} -r {wildcards.r} -o {output.fn} -e 1'
+    
+
+rule plot_random_groups_EE:
+    input:
+        conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/groups.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+    output:
+        fn = 'figures/{experiment}/random_groups_EE.pdf',
+    shell:
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 1'
+
+
+
+rule plot_random_groups_nest_EE:
+    input:
+        conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
+        conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+    output:
+        fn = 'figures/{experiment}/random_groups_nest_EE.pdf',
+    shell:
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 1'
+
 
 
