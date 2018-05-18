@@ -28,7 +28,7 @@ bitwise_mem_pop = np.loadtxt(args.bitwise_mem_pop_file)
 
 
 
-hf.latexify(columns=2)
+phf.latexify(columns=2)
 excolor='C0'
 incolor='C2'
 
