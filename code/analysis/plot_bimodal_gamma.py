@@ -13,7 +13,8 @@ import plot_helper as phf
 import seaborn as sns
 import scipy.stats as stat
 from matplotlib import mlab
-from pandas import pd
+import pandas as pd
+
 matplotlib.rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
 font = {'family': 'serif', 'size': 18}
 plt.rc('font', **font)
