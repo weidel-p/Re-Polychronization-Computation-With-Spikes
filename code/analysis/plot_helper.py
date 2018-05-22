@@ -45,13 +45,7 @@ def latexify(fig_width=None, fig_height=None, columns=1):
         print("WARNING: fig_height too large:" + fig_height +
               "so will reduce to" + MAX_HEIGHT_INCHES + "inches.")
         fig_height = MAX_HEIGHT_INCHES
-
     params = {'backend': 'ps',
-              'text.usetex': True,
-
-
-
-              'text.latex.preamble': [r'\usepackage{gensymb}',r'\let\savedegree\degree',r'\let\degree\relax',r'\usepackage{mathabx}','\let\degree\savedegree'],
               'axes.labelsize': 10,  # fontsize for x and y labels (was 10)
               'axes.titlesize': 10,
               'font.size': 10,  # was 10
@@ -64,6 +58,11 @@ def latexify(fig_width=None, fig_height=None, columns=1):
               'lines.linewidth': 2
               }
 
+    from distutils.spawn import find_executable
+    if find_executable('latex'):
+        params.update({'text.usetex': True,
+              'text.latex.preamble': [r'\usepackage{gensymb}',r'\let\savedegree\degree',r'\let\degree\relax',r'\usepackage{mathabx}','\let\degree\savedegree'],
+              })
     matplotlib.rcParams.update(params)
 
 
