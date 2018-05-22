@@ -9,6 +9,11 @@ import json
 import ijson
 import os
 
+def set_box_color(bp, color):
+    plt.setp(bp['boxes'], color=color)
+    plt.setp(bp['whiskers'], color=color)
+    plt.setp(bp['caps'], color=color)
+    plt.setp(bp['medians'], color=color)
 
 def latexify(fig_width=None, fig_height=None, columns=1):
     """Set up matplotlib's RC params for LaTeX plotting.
@@ -62,12 +67,18 @@ def latexify(fig_width=None, fig_height=None, columns=1):
     matplotlib.rcParams.update(params)
 
 
-def set_box_color(bp, color):
-    plt.setp(bp['boxes'], color=color)
-    plt.setp(bp['whiskers'], color=color)
-    plt.setp(bp['caps'], color=color)
-    plt.setp(bp['medians'], color=color)
-
+def get_rates(times,senders):
+    exc_times, exc_sender, inh_times, inh_sender = hf.split_in_ex(times, senders)
+    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
+    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
+    NFFT=512
+    noverlap=256
+    exc_Pxx, exc_freqs = mlab.psd(exc_rate - np.mean(exc_rate), NFFT=NFFT, Fs=1000. /
+                                      (exc_bins[1] - exc_bins[0]), noverlap=noverlap)
+    idx=np.argmax(exc_Pxx[exc_freqs>20])
+    cut_freqs=exc_freqs[exc_freqs>20]
+    max_freq=cut_freqs[idx]
+    return np.mean(exc_rate),np.mean(inh_rate),max_freq
 
 def mem_spk_plot(data, times, sender, subplotspec, mem_color, spk_inh_color, spk_exc_color):
     id = data[:, 0]
@@ -110,7 +121,7 @@ def mem_spk_plot(data, times, sender, subplotspec, mem_color, spk_inh_color, spk
     return ax0, ax1
 
 
-def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k',bin_ms=5.):
+def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k',bin_ms=1.0,linewidth=1.0):
     exc_times, exc_sender, inh_times, inh_sender = hf.split_in_ex(times, senders)
 
     inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, bin_ms)
@@ -128,34 +139,34 @@ def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k',bin_ms
     # ax01.set_xlabel('Time [s]')
     ax01.set_ylabel('Neuron Id')
 
-    ax02.plot(inh_bins - np.min(times), inh_rate, incolor)
-    ax02.plot(exc_bins - np.min(times), exc_rate, excolor)
+    ax02.plot(inh_bins - np.min(times), inh_rate, incolor,linewidth=linewidth)
+    ax02.plot(exc_bins - np.min(times), exc_rate, excolor,linewidth=linewidth)
     ax02.set_xlabel('Time [s]')
-    ax02.set_ylabel(r'$f_{pop}$ [spk/s]')
+    ax02.set_ylabel(r'$f_\mathsf{pop}$ [spk/s]')
     ax02.set_ylim([0, 100])
 
     ax02.set_yticks([0, 50, 100])
     ax02.set_yticklabels([0, 50, 100])
 
     ax02.set_xlim([np.min(times) - np.min(times), np.max(times) - np.min(times)])
-    xticks = np.linspace(np.min(times) - np.min(times), np.max(times) - np.min(times) + 1, num=5,
+    xticks = np.linspace(np.min(times) - np.min(times), np.max(times) - np.min(times) + 1, num=6,
+
                          endpoint=True)
     ax02.set_xticks(xticks)
-    ax02.set_xticklabels([0, 2.5, 5, 7.5, 10])
+    ax02.set_xticklabels([0, 1,2,3,4,5])
 
     ax01.set_yticks([250, 500, 750])
 
 
 def plot_weights(weights, ax, c='b', bins=40, normed=False, xlim=[0., 10.], ylim=[150., 50000], scale='log', linestyle='-', alpha=0.5):
-    print(np.min(weights),np.max(weights))
     if np.max(weights)>10:
         xlim=[0,100]
     ax.hist(weights, bins=np.arange(xlim[0],xlim[1]+xlim[1]*1./bins,xlim[1]*1./bins), normed=normed, color=c, linestyle=linestyle, alpha=alpha)
-    #ax.set_ylim(ylim)
+    ax.set_ylim(ylim)
     ax.set_xlim(xlim)
     ax.set_xlabel('Synaptic weight [mV]')
     ax.set_ylabel('Frequency')
-    #ax.set_yscale(scale)
+    ax.set_yscale(scale)
 
 
 def plot_psd(times, senders, ax, NFFT=512, noverlap=256, xlim=[0., 150.], ylim=[1e-3, 1e2], scale='log', incolor='C0', excolor='C1', linewidth=2):
