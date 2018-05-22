@@ -110,11 +110,11 @@ def mem_spk_plot(data, times, sender, subplotspec, mem_color, spk_inh_color, spk
     return ax0, ax1
 
 
-def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k'):
+def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k',bin_ms=5.):
     exc_times, exc_sender, inh_times, inh_sender = hf.split_in_ex(times, senders)
 
-    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
-    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
+    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, bin_ms)
+    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, bin_ms)
 
     ax01.plot(exc_times, exc_sender, excolor, marker='.', linestyle='', markersize=1)
     ax01.plot(inh_times, inh_sender, incolor, marker='.', linestyle='', markersize=1)
