@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import json
 import sys
@@ -16,6 +18,8 @@ parser.add_argument('-i', '--input_izh', nargs='+', type=str)
 parser.add_argument('-g', '--groups_izh', nargs='+', type=str)
 parser.add_argument('-r', '--conn_rand', nargs='+', type=str)
 parser.add_argument('-k', '--groups_rand', nargs='+', type=str)
+parser.add_argument('-s', '--conn_rand_EE', nargs='+', type=str)
+parser.add_argument('-t', '--groups_rand_EE', nargs='+', type=str)
 parser.add_argument('-o', '--output', type=str)
 parser.add_argument('-c', '--config', type=str)        # Experiment file defining the network structure and dynamics
 parser.add_argument('-e', '--EE', type=int)      # EE synapses only 
@@ -43,12 +47,14 @@ def analyzeForRatio(conn_fn, group_fn, Wmax, EE):
         groups = json.load(f)
 
 
-    if EE == 1:
+    if EE == 1 and False:
+        print("EE")
         exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0 and c['post'] <= 800])
     else:
         exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0])
 
     ratio_strong = len(np.where(exc_weights > Wmax * 0.95)[0]) / float(len(exc_weights))
+    print(ratio_strong)
 
     return([ratio_strong, len(groups)])
 
@@ -89,11 +95,33 @@ for i, c_rand_fn in enumerate(args.conn_rand):
 
 
 
+ratios_rand_EE = []
+num_groups_rand_EE = []
+
+
+# for all experiments
+for i, c_rand_fn in enumerate(args.conn_rand_EE): 
+
+    try:
+        ratio_strong, num_groups = analyzeForRatio(c_rand_fn, args.groups_rand_EE[i], Wmax, args.EE)
+    
+        num_groups_rand_EE.append(num_groups)
+        ratios_rand_EE.append(ratio_strong)
+
+    except:
+        
+        print("no data available random", c_rand_fn, args.groups_rand[i])
+        pass
+
+
+
 plt.figure(figsize=[16, 10])
-plt.plot(ratios_rand, num_groups_rand, 'gray')
+plt.plot(ratios_rand_EE, num_groups_rand_EE)
+plt.plot(ratios_rand, num_groups_rand)
 plt.plot(ratios_izh, num_groups_izh, 'k*', markersize=30)
 plt.xlabel('ratio strong synapses')
 plt.ylabel('#groups')
+#plt.ylim([0, 10000])
 
 plt.savefig(args.output)
 

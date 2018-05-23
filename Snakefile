@@ -244,12 +244,13 @@ rule plot_random_groups:
         groups=expand('{folder}/{{experiment}}/{rep}/groups.json', folder=NEST_DATA_DIR, rep=NUM_REP),
         conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        conn_rand_EE=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        groups_rand_EE=expand('{folder}/{{experiment}}/random/{rand}/groups_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
     output:
         fn = 'figures/{experiment}/random_groups.pdf',
     shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 0'
-
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -s {input.conn_rand_EE} -t {input.groups_rand_EE} -c {input.conf} -o {output.fn} -e 0'
 
 
 rule plot_random_groups_nest:
@@ -258,11 +259,14 @@ rule plot_random_groups_nest:
         groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
         conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest_random.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        conn_rand_EE=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
+        groups_rand_EE=expand('{folder}/{{experiment}}/random/{rand}/groups_nest_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
         conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
     output:
         fn = 'figures/{experiment}/random_groups_nest.pdf',
     shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 0'
+        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -s {input.conn_rand_EE} -t {input.groups_rand_EE} -c {input.conf} -o {output.fn} -e 0'
+
 
 
 rule randomize_conn_EE:
@@ -274,32 +278,4 @@ rule randomize_conn_EE:
     shell:
         'python code/analysis/randomize_conn.py -i {input.conns} -c {input.conf} -r {wildcards.r} -o {output.fn} -e 1'
     
-
-rule plot_random_groups_EE:
-    input:
-        conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
-        groups=expand('{folder}/{{experiment}}/{rep}/groups.json', folder=NEST_DATA_DIR, rep=NUM_REP),
-        conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
-        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
-        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
-    output:
-        fn = 'figures/{experiment}/random_groups_EE.pdf',
-    shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 1'
-
-
-
-rule plot_random_groups_nest_EE:
-    input:
-        conns=expand('{folder}/{{experiment}}/{rep}/connectivity.json', folder=NEST_DATA_DIR, rep=NUM_REP),
-        groups=expand('{folder}/{{experiment}}/{rep}/groups_nest.json', folder=NEST_DATA_DIR, rep=NUM_REP),
-        conn_rand=expand('{folder}/{{experiment}}/random/{rand}/connectivity_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
-        groups_rand=expand('{folder}/{{experiment}}/random/{rand}/groups_nest_random_EE.json', folder=NEST_DATA_DIR, rand=RANDOM_RATIOS),
-        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
-    output:
-        fn = 'figures/{experiment}/random_groups_nest_EE.pdf',
-    shell:
-        'python code/analysis/plot_random_conn.py -i {input.conns} -g {input.groups} -k {input.groups_rand} -r {input.conn_rand} -c {input.conf} -o {output.fn} -e 1'
-
-
 
