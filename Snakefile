@@ -80,9 +80,7 @@ rule all:
         stdp_plot = "figures/stdp_windows.pdf",
         neuron_dynamics = "figures/neuron_dynamics.pdf",
         rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
-        rand_bitwise_EE = "figures/bitwise_reproduction/random_groups_EE.pdf",
         rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
-        rand_resolution_EE = "figures/resolution_0p1_W_pspmatched/random_groups_nest_EE.pdf",
 
         bimodal_bitwise = "figures/bitwise_reproduction_bimodalgamma.pdf",
         bimodal_qualitative = "figures/qualitative_model_bimodalgamma.pdf",
