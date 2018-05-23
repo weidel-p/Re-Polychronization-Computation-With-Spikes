@@ -78,6 +78,7 @@ rule find_groups_nest_random:
     output:
         groups="{folder}/{experiment}/random/{r}/groups_nest_random.json",
         stats="{folder}/{experiment}/random/{r}/stats.json"
+    priority: 50
     shell:
         """
         source {rules.install_nest.output}
@@ -93,6 +94,7 @@ rule find_groups_nest_random_EE:
     output:
         groups="{folder}/{experiment}/random/{r}/groups_nest_random_EE.json",
         stats="{folder}/{experiment}/random/{r}/stats.json"
+    priority: 50
     shell:
         """
         source {rules.install_nest.output}
@@ -109,6 +111,7 @@ rule find_groups_nest:
         groups="{folder}/{experiment}/{rep}/groups_nest.json",
         stats="{folder}/{experiment}/{rep}/stats.json"
     log: 'logs/find_groups_nest_{experiment}_{rep}.log'
+    priority: 50
 
     shell:
         """

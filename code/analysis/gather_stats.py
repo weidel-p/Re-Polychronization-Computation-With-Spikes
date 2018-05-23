@@ -18,17 +18,25 @@ args = parser.parse_args()
 
 
 
+
 # if os.path.getsize(os.path.join(result_folder,file)) < 422099208 * 1.1:
-N, T, L = phf.return_NTL(args.groupfile)
-print(len(N), np.median(N))
-N_groups = len(N)
-N_fired = np.median(N)
-longest_path = np.median(L)
-time_span = np.median(T)
-stats = dict(N_fired=N,
-             longest_path=L,
-             time_span=T
-             )
-with open(args.outfolder, 'w+') as fs:
-    json.dump(stats, fs)
+
+args = phf.return_NTL(args.groupfile)
+if not args:
+    N, T, L=args
+    print(len(N), np.median(N))
+    N_groups = len(N)
+    N_fired = np.median(N)
+    longest_path = np.median(L)
+    time_span = np.median(T)
+    stats = dict(N_fired=N,
+                 longest_path=L,
+                 time_span=T
+                 )
+    with open(args.outfolder, 'w+') as fs:
+        json.dump(stats, fs)
+
+else:
+    with open(args.outfolder, "w+") as f:
+        json.dump({'Failed': 1}, f)
 

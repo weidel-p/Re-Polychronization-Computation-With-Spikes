@@ -13,7 +13,8 @@ import plot_helper as phf
 import seaborn as sns
 import scipy.stats as stat
 from matplotlib import mlab
-from pandas import pd
+import pandas as pd
+
 matplotlib.rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
 font = {'family': 'serif', 'size': 18}
 plt.rc('font', **font)
@@ -92,7 +93,7 @@ for rep,(spk_fl,grp_stat_fl,con_fl) in enumerate(zip(args.spikelist,args.groupst
         stats = json.load(f)
     reps.append(rep)
     N_grps.append(len(stats['N_fired']))
-df=pd.Dataframe(dict(rep=reps,n_groups=N_grps,spektral_peak=gamma_peak))
+df=pd.DataFrame(dict(reps=reps,n_groups=N_grps,spektral_peak=gamma_peak))
 
 
 phf.latexify(fig_height=2.5, columns=2)
@@ -108,9 +109,9 @@ ax_groups = plt.subplot(gs0[0, 2])
 
 c_high = 'C4'
 c_low = 'C3'
-
-ax_psd.plot(exc_freqs, exc_Pxx_tab[:, df.loc[df['gamma peak']=='low','reps']], color=c_low, linewidth=1.0)
-ax_psd.plot(exc_freqs, exc_Pxx_tab[:, df.loc[df['gamma peak']=='high','reps']], color=c_high, linewidth=1.0)
+print(df.columns)
+ax_psd.plot(exc_freqs, exc_Pxx_tab[:, df.loc[df['spektral_peak']=='low','reps']], color=c_low, linewidth=1.0)
+ax_psd.plot(exc_freqs, exc_Pxx_tab[:, df.loc[df['spektral_peak']=='high','reps']], color=c_high, linewidth=1.0)
 
 ax_psd.set_xlim((0, 100))
 ax_psd.set_yscale('log')

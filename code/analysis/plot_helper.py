@@ -15,6 +15,69 @@ def set_box_color(bp, color):
     plt.setp(bp['caps'], color=color)
     plt.setp(bp['medians'], color=color)
 
+def latexify(fig_width=None, fig_height=None, columns=1):
+    """Set up matplotlib's RC params for LaTeX plotting.
+    Call this before plotting a figure.
+
+    Parameters
+    ----------
+    fig_width : float, optional, inches
+    fig_height : float,  optional, inches
+    columns : {1, 2}
+    """
+
+    # code adapted from http://www.scipy.org/Cookbook/Matplotlib/LaTeX_Examples
+
+    # Width and max height in inches for IEEE journals taken from
+    # computer.org/cms/Computer.org/Journal%20templates/transactions_art_guide.pdf
+
+    assert (columns in [1, 2])
+
+    if fig_width is None:
+        fig_width = 3.39 if columns == 1 else 6.9  # width in inches
+
+    if fig_height is None:
+        golden_mean = (np.sqrt(5) - 1.0) / 2.0  # Aesthetic ratio
+        fig_height = fig_width * golden_mean  # height in inches
+
+    MAX_HEIGHT_INCHES = 8.0
+    if fig_height > MAX_HEIGHT_INCHES:
+        print("WARNING: fig_height too large:" + fig_height +
+              "so will reduce to" + MAX_HEIGHT_INCHES + "inches.")
+        fig_height = MAX_HEIGHT_INCHES
+    params = {'backend': 'ps',
+              'axes.labelsize': 10,  # fontsize for x and y labels (was 10)
+              'axes.titlesize': 10,
+              'font.size': 10,  # was 10
+              'legend.fontsize': 10,  # was 10
+              'xtick.labelsize': 10,
+              'ytick.labelsize': 10,
+              'figure.figsize': [fig_width, fig_height],
+              'font.family': 'sans-serif',
+              'savefig.dpi': 300,
+              'lines.linewidth': 2
+              }
+
+    from distutils.spawn import find_executable
+    if find_executable('latex'):
+        params.update({'text.usetex': True,
+              'text.latex.preamble': [r'\usepackage{gensymb}',r'\let\savedegree\degree',r'\let\degree\relax',r'\usepackage{mathabx}','\let\degree\savedegree'],
+              })
+    matplotlib.rcParams.update(params)
+
+
+def get_rates(times,senders):
+    exc_times, exc_sender, inh_times, inh_sender = hf.split_in_ex(times, senders)
+    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
+    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
+    NFFT=512
+    noverlap=256
+    exc_Pxx, exc_freqs = mlab.psd(exc_rate - np.mean(exc_rate), NFFT=NFFT, Fs=1000. /
+                                      (exc_bins[1] - exc_bins[0]), noverlap=noverlap)
+    idx=np.argmax(exc_Pxx[exc_freqs>20])
+    cut_freqs=exc_freqs[exc_freqs>20]
+    max_freq=cut_freqs[idx]
+    return np.mean(exc_rate),np.mean(inh_rate),max_freq
 
 def mem_spk_plot(data, times, sender, subplotspec, mem_color, spk_inh_color, spk_exc_color):
     id = data[:, 0]
@@ -57,11 +120,11 @@ def mem_spk_plot(data, times, sender, subplotspec, mem_color, spk_inh_color, spk
     return ax0, ax1
 
 
-def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k'):
+def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k',bin_ms=1.0,linewidth=1.0):
     exc_times, exc_sender, inh_times, inh_sender = hf.split_in_ex(times, senders)
 
-    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, 1.)
-    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, 1.)
+    inh_rate, inh_bins = hf.bin_pop_rate(inh_times, inh_sender, bin_ms)
+    exc_rate, exc_bins = hf.bin_pop_rate(exc_times, exc_sender, bin_ms)
 
     ax01.plot(exc_times, exc_sender, excolor, marker='.', linestyle='', markersize=1)
     ax01.plot(inh_times, inh_sender, incolor, marker='.', linestyle='', markersize=1)
@@ -75,34 +138,34 @@ def plot_raster_rate(times, senders, ax01, ax02, incolor='b', excolor='k'):
     # ax01.set_xlabel('Time [s]')
     ax01.set_ylabel('Neuron Id')
 
-    ax02.plot(inh_bins - np.min(times), inh_rate, incolor)
-    ax02.plot(exc_bins - np.min(times), exc_rate, excolor)
+    ax02.plot(inh_bins - np.min(times), inh_rate, incolor,linewidth=linewidth)
+    ax02.plot(exc_bins - np.min(times), exc_rate, excolor,linewidth=linewidth)
     ax02.set_xlabel('Time [s]')
-    ax02.set_ylabel(r'$f_{pop}$ [spk/s]')
+    ax02.set_ylabel(r'$f_\mathsf{pop}$ [spk/s]')
     ax02.set_ylim([0, 100])
 
     ax02.set_yticks([0, 50, 100])
     ax02.set_yticklabels([0, 50, 100])
 
     ax02.set_xlim([np.min(times) - np.min(times), np.max(times) - np.min(times)])
-    xticks = np.linspace(np.min(times) - np.min(times), np.max(times) - np.min(times) + 1, num=5,
+    xticks = np.linspace(np.min(times) - np.min(times), np.max(times) - np.min(times) + 1, num=6,
+
                          endpoint=True)
     ax02.set_xticks(xticks)
-    ax02.set_xticklabels([0, 2.5, 5, 7.5, 10])
+    ax02.set_xticklabels([0, 1,2,3,4,5])
 
     ax01.set_yticks([250, 500, 750])
 
 
 def plot_weights(weights, ax, c='b', bins=40, normed=False, xlim=[0., 10.], ylim=[150., 50000], scale='log', linestyle='-', alpha=0.5):
-    print(np.min(weights),np.max(weights))
     if np.max(weights)>10:
         xlim=[0,100]
     ax.hist(weights, bins=np.arange(xlim[0],xlim[1]+xlim[1]*1./bins,xlim[1]*1./bins), normed=normed, color=c, linestyle=linestyle, alpha=alpha)
-    #ax.set_ylim(ylim)
+    ax.set_ylim(ylim)
     ax.set_xlim(xlim)
     ax.set_xlabel('Synaptic weight [mV]')
     ax.set_ylabel('Frequency')
-    #ax.set_yscale(scale)
+    ax.set_yscale(scale)
 
 
 def plot_psd(times, senders, ax, NFFT=512, noverlap=256, xlim=[0., 150.], ylim=[1e-3, 1e2], scale='log', incolor='C0', excolor='C1', linewidth=2):
@@ -220,7 +283,10 @@ def return_NTL(groupfile):
     L_list = []
     T_list = []
     i = 0
+
     for i, g in enumerate(groups):
+        if g=={'Failed':1}:
+            return False
         times, senders = hf.get_t_s(g)
 
         N_list.append(int(g["N_fired"]))
