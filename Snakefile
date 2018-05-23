@@ -51,26 +51,23 @@ high_NUM_REP=range(100)
 RANDOM_RATIOS = [0.1, 0.2, 0.3, 0.35, 0.4, 0.45, 0.5]
 
 
+group_stat_list_orig=  np.unique(expand("{folder}/{experiment}/{rep}/stats_orig.json",
+                            folder=NEST_DATA_DIR, experiment=high_CONFIG_FILES, rep=high_NUM_REP) \
+                            +expand("{folder}/{experiment}/{rep}/stats_orig.json",
+                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP))
 
+group_stat_list_python=group_finder_nest = expand("{folder}/{experiment}/{rep}/stats.json",
+                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_nest, rep=NUM_REP)
+
+import numpy as np
 include: "Izhikevic.rules"
 include: "nest.rules"
 
 rule all:
     input:
-        group_finder_orig = expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP),
+        stat_files_orig = group_stat_list_orig,
 
-        group_finder_orig_high = expand("{folder}/{experiment}/{rep}/groups.json",
-                            folder=NEST_DATA_DIR, experiment=high_CONFIG_FILES, rep=high_NUM_REP),
-
-        stats_orig_high = expand("{folder}/{experiment}/{rep}/stats_orig.json",
-                            folder=NEST_DATA_DIR, experiment=high_CONFIG_FILES, rep=high_NUM_REP),
-
-        stats_orig = expand("{folder}/{experiment}/{rep}/stats_orig.json",
-                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_orig, rep=NUM_REP),
-
-        group_finder_nest = expand("{folder}/{experiment}/{rep}/groups_nest.json",
-                            folder=NEST_DATA_DIR, experiment=CONFIG_FILES_group_finder_nest, rep=NUM_REP),
+        stat_files_python = group_stat_list_python,
 
 	    spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
 	    high_spikes = expand("{folder}/{experiment}/{rep}/spikes-1001.gdf",folder=NEST_DATA_DIR,experiment=high_CONFIG_FILES,rep=high_NUM_REP),
@@ -79,17 +76,17 @@ rule all:
 
         stdp_plot = "figures/stdp_windows.pdf",
         neuron_dynamics = "figures/neuron_dynamics.pdf",
-        rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
-        rand_bitwise_EE = "figures/bitwise_reproduction/random_groups_EE.pdf",
-        rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
-        rand_resolution_EE = "figures/resolution_0p1_W_pspmatched/random_groups_nest_EE.pdf",
+        #rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
+        #rand_bitwise_EE = "figures/bitwise_reproduction/random_groups_EE.pdf",
+        #rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
+        #rand_resolution_EE = "figures/resolution_0p1_W_pspmatched/random_groups_nest_EE.pdf",
 
         bimodal_bitwise = "figures/bitwise_reproduction_bimodalgamma.pdf",
         bimodal_qualitative = "figures/qualitative_model_bimodalgamma.pdf",
 
-        bitwise_original_comp='figures/bitwise_original_6.pdf',
-        bitwise_initial_comp='figures/bitwise_initial_reproduction_5.pdf',
-        bitwise_qualitative_comp='figures/bitwise_qualitative_model_5.pdf',
+        bitwise_original_comp='figures/bitwise_original_0.pdf',
+        bitwise_initial_comp='figures/bitwise_initial_reproduction_0.pdf',
+        bitwise_qualitative_comp='figures/bitwise_qualitative_model_0.pdf',
 
 
         plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
@@ -157,6 +154,18 @@ rule calc_stats:
         'python {ANA_DIR}/gather_stats.py -g {{input.groups}} -o {{output}} &>{{log}}'.format(ANA_DIR=ANA_DIR)
 
 
+rule plot_group_stats:
+    #comp stands for the experiemtn we want to compare with, i.e. in our case initial and qualitative
+    input:
+        original_stats=group_stat_list_orig,
+        python_stats=group_stat_list_python
+    output:
+        'figures/group_stats.pdf',
+    priority: 9
+    shell:
+        'python3 {ANA_DIR}/plot_group_statistics.py -glo {{input.original_stats}} -glp {{input.python_stats}} --output {{output}}'.format(ANA_DIR=ANA_DIR,fig_dir=FIG_DIR)
+
+
 rule plot_bitwise_comp:
     #comp stands for the experiemtn we want to compare with, i.e. in our case initial and qualitative
     input:
@@ -186,9 +195,9 @@ rule plot_bimodal_gamma:
     output:
         outfile=expand('{folder}/{{experiment}}_bimodalgamma.{{ext,(eps|png|pdf|jpg)}}',folder=FIG_DIR),
     input:
-        connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=NUM_REP),
-        spikes=expand('{folder}/{{experiment}}/{rep}/spikes-1001.gdf',folder=NEST_DATA_DIR,rep=NUM_REP),
-        groups=expand('{folder}/{{experiment}}/{rep}/stats_orig.json',folder=NEST_DATA_DIR,rep=NUM_REP),
+        connectivity=expand('{folder}/{{experiment}}/{rep}/connectivity.json',folder=NEST_DATA_DIR,rep=high_NUM_REP),
+        spikes=expand('{folder}/{{experiment}}/{rep}/spikes-1001.gdf',folder=NEST_DATA_DIR,rep=high_NUM_REP),
+        groups=expand('{folder}/{{experiment}}/{rep}/stats_orig.json',folder=NEST_DATA_DIR,rep=high_NUM_REP),
 
     priority: 2
     run:
