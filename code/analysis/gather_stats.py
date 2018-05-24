@@ -21,9 +21,9 @@ args = parser.parse_args()
 
 # if os.path.getsize(os.path.join(result_folder,file)) < 422099208 * 1.1:
 
-args = phf.return_NTL(args.groupfile)
-if not args:
-    N, T, L=args
+NTL = phf.return_NTL(args.groupfile)
+if NTL:
+    N, T, L=NTL[0],NTL[1],NTL[2]
     print(len(N), np.median(N))
     N_groups = len(N)
     N_fired = np.median(N)

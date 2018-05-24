@@ -285,7 +285,7 @@ def return_NTL(groupfile):
     i = 0
 
     for i, g in enumerate(groups):
-        if g=={'Failed':1}:
+        if 'Failed' in g.keys():
             return False
         times, senders = hf.get_t_s(g)
 

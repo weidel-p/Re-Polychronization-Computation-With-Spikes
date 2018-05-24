@@ -15,17 +15,6 @@ import scipy.stats as stat
 from matplotlib import mlab
 import pandas as pd
 
-matplotlib.rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
-font = {'family': 'serif', 'size': 18}
-plt.rc('font', **font)
-plt.rc('legend', **{'fontsize': 16})
-flatui = [sns.xkcd_rgb["dusty purple"], sns.xkcd_rgb["faded green"]]
-plt.figure()
-current_palette = sns.color_palette(flatui)
-sns.palplot(current_palette)
-sns.set_palette(current_palette)
-plt.savefig('palette.png')
-plt.close()
 
 # sns.set_palette(sns.light_palette("blue"))
 parser = argparse.ArgumentParser()
@@ -37,7 +26,7 @@ parser.add_argument('--output', type=str)
 args = parser.parse_args()
 NFFT=512
 noverlap=256
-bin_ms=5.
+bin_ms=1.
 
 #low_gamma
 table_low=None
@@ -100,7 +89,6 @@ phf.latexify(fig_height=2.5, columns=2)
 fig = plt.figure()
 
 gs0 = gridspec.GridSpec(1, 3)
-gs0.update(left=0.05, right=0.95, top=0.95, bottom=0.15, hspace=0.2, wspace=0.25)
 
 ax_psd = plt.subplot(gs0[0, 0])
 

@@ -6,10 +6,8 @@ import numpy as np
 import pylab as plt
 import seaborn as sns
 import argparse
-
-sns.set_context('paper', font_scale=3.5, rc={"lines.linewidth": 3.5})
-sns.set_style('whitegrid', {"axes.linewidth": 3.5})
-plt.rcParams['font.weight'] = 'bold'
+import plot_helper as phf
+import matplotlib.gridspec as gridspec
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', nargs='+', type=str)
@@ -257,37 +255,41 @@ Us_spike_high_low = ums[mask_low]
 
 times_spike_high_low = times[mask_low]
 
+phf.latexify(columns=2)
 
 
-fig = plt.figure(figsize=[16, 10])
+fig = plt.figure()
+gs0 = gridspec.GridSpec(2, 2)
 
-ax0 = fig.add_subplot(221)
+ax0 = plt.subplot(gs0[0, 0])
+ax1 = plt.subplot(gs0[1, 0])
+ax2 = plt.subplot(gs0[0, 1])
+ax3 = plt.subplot(gs0[1, 1])
+
+
 ax0.plot(times_current_low_low, Vs_current_low_low, label="low low")
 ax0.plot(times_current_low_high, Vs_current_low_high, label="low high")
 ax0.plot(times_current_high_low, Vs_current_high_low, label="high low")
-ax0.set_ylabel("V (mV)")
+ax0.set_ylabel("V [mV]")
 ax0.set_xticks([])
 
-ax1 = fig.add_subplot(223)
 ax1.plot(times_current_low_low, Us_current_low_low, label="low low")
 ax1.plot(times_current_low_high, Us_current_low_high, label="low high")
 ax1.plot(times_current_high_low, Us_current_high_low, label="high low")
-ax1.set_ylabel("U (a.u.)")
-ax1.set_xlabel("time (ms)")
+ax1.set_ylabel("U [a.u.]")
+ax1.set_xlabel("Time [ms]")
 
-
-ax2 = fig.add_subplot(222)
 ax2.plot(times_spike_low_low, Vs_spike_low_low, label="low low")
 ax2.plot(times_spike_low_high, Vs_spike_low_high, label="low high")
 ax2.plot(times_spike_high_low, Vs_spike_high_low, label="high low")
 ax2.set_xticks([])
 
-ax3 = fig.add_subplot(224)
 ax3.plot(times_spike_low_low, Us_spike_low_low, label="low low")
 ax3.plot(times_spike_low_high, Us_spike_low_high, label="low high")
 ax3.plot(times_spike_high_low, Us_spike_high_low, label="high low")
-ax3.set_xlabel("time (ms)")
+ax3.set_xlabel("Time [ms]")
 
+gs0.update(left=0.08, right=0.99, top=0.95, bottom=0.1, hspace=0.2, wspace=0.25)
 
 
 plt.savefig(args.output)
