@@ -76,6 +76,8 @@ rule all:
 
         stdp_plot = "figures/stdp_windows.pdf",
         neuron_dynamics = "figures/neuron_dynamics.pdf",
+        group_statistics = "figures/group_stats.pdf",
+
         rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
         rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
 
@@ -88,7 +90,7 @@ rule all:
 
 
         plots = expand("{folder}/{experiment}/{rep}/plot_dynamics_{experiment}.pdf",
-                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=NUM_REP),
+                            folder=FIG_DIR,experiment=CONFIG_FILES,rep=[0]),
 
 
 rule clean:
