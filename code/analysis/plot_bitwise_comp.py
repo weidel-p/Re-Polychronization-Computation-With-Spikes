@@ -34,7 +34,7 @@ bitwise_weights = hf.read_weightfile(args.bitwise_weightfile)
 bin_ms=5.
 phf.latexify(columns=2)
 excolor='C0'
-incolor='C2'
+incolor='C1'
 
 
 fig = plt.figure()
@@ -98,7 +98,7 @@ axin1.set_yticks([0, 25, 50, 75])
 axin1.set_ylabel('rate distribution')
 
 phf.plot_psd(comp_times, comp_senders, ax2, incolor=None, excolor=excolor)
-phf.plot_psd(bitwise_times, bitwise_senders, ax2, incolor=None, excolor='C1')
+phf.plot_psd(bitwise_times, bitwise_senders, ax2, incolor=None, excolor='C2')
 
 # exc = plt.Line2D((0, 1), (0, 0), color='k', linestyle='-')
 # inh = plt.Line2D((0, 1), (0, 0), color='b', linestyle='-')

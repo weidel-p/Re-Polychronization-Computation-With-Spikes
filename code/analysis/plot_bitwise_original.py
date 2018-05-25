@@ -30,7 +30,7 @@ bitwise_mem_pop = np.loadtxt(args.bitwise_mem_pop_file)
 
 phf.latexify(columns=2)
 excolor='C0'
-incolor='C2'
+incolor='C1'
 
 fig = plt.figure()
 gs0 = gridspec.GridSpec(2, 2)
@@ -47,16 +47,13 @@ senders=bitwise_senders[idxes_subsample&idxes_times]
 times=bitwise_times[idxes_subsample&idxes_times]
 
 phf.plot_raster_rate(times, senders, ax01, ax02, incolor=incolor, excolor=excolor,bin_ms=5.,linewidth=.75)
-print(times)
 ax2 = plt.subplot(gs0[1, 1])
 
 
 ax0, ax1 = phf.mem_spk_plot(bitwise_mem_pop, original_times, original_senders,
                             gs0[1, 0], mem_color='k', spk_exc_color=excolor, spk_inh_color=incolor)
-print(np.min(original_senders),np.min(bitwise_senders))
-print(np.min(original_times),np.min(bitwise_times))
 
-phf.plot_psd(original_times, original_senders, ax2, excolor='C1', incolor=None,linewidth=3)
+phf.plot_psd(original_times, original_senders, ax2, excolor='C2', incolor=None,linewidth=3)
 phf.plot_psd(bitwise_times[bitwise_times>=np.min(original_times)], bitwise_senders[bitwise_times>=np.min(original_times)], ax2, excolor=excolor, incolor=None)
 
 # NEST = plt.Line2D((0, 1), (0, 0), color=excolor, linestyle='-')

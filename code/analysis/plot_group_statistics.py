@@ -122,12 +122,12 @@ ax_nest = plt.subplot(gs0[N_bot:, 0:M - 1])
 ax_orig_broken = fig.add_subplot(gs0[:N_bot, M - 1])  # , sharey=ax_orig)
 ax_nest_broken = fig.add_subplot(gs0[N_bot:, M - 1])  # , sharey=ax_nest)
 
-orig_pal = ['C1', 'C2', 'C0', 'C5', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4']
+orig_pal = ['C2', 'C1', 'C0', 'C5', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4']
 orig_exp_order = ['initial reproduction',
                   'bitwise reproduction',
                   'qualitative model',
                   'poisson stimulus',
-                  #'stdp window match',
+                  'stdp window match',
                   'const add value 0p0',
                   'synapse update interval 0p1s',
                   'synapse update interval 10s',
@@ -139,7 +139,7 @@ orig_names = ['Initial model',
               'Bitwise reproduction',
               'Qualitative model',
               'Poisson stimulus',
-              #'STDP window match',
+              'STDP window match',
               'No additive factor',
               'Buffer length $0.1\;\mathrm{s}$',
               'Buffer length $10\;\mathrm{s}$',
@@ -170,7 +170,7 @@ ax_orig_broken = sns.boxplot(data=df.replace(value=np.nan,to_replace='Failed'),
 
 ax_orig.set_yticklabels(orig_names)
 
-nest_pal = ['C2', 'C0', 'C3', 'C3', 'C3', 'C3','C4', 'C4']
+nest_pal = ['C1', 'C0', 'C3', 'C3', 'C3', 'C3','C4', 'C4']
 nest_exp_order = ['bitwise reproduction',
                   'qualitative model',
                   'delay distribution 20',
@@ -188,7 +188,7 @@ name_order = ['Bitwise reproduction',
               r'Delay $\in \left[1,10\right]\;\mathrm{ms}$',
               r'Delay $\in \left[1,5\right]\;\mathrm{ms}$',
               r'Resolution $0.1\;\mathrm{ms}$',
-              r'spk. del. at 1 ms steps',
+              r'Improved integration',
               ]
 ax_nest = sns.boxplot(data=df.replace(value=np.nan,to_replace='Failed'),
                       y='Experiment',
@@ -263,13 +263,13 @@ ax_nest.set_xlabel('Number of groups (Python)')
 min_line = df.loc[df['Experiment'] == 'bitwise reproduction', 'Number of groups'].quantile(0.25)  # -1.5*iqr
 max_line = df.loc[df['Experiment'] == 'bitwise reproduction', 'Number of groups'].quantile(0.75)  # +1.5*iqr
 min_line
-ax_orig.axvline(min_line, zorder=0, linestyle='--', color='C2')
-ax_orig.axvline(max_line, zorder=0, linestyle='--', color='C2')
+ax_orig.axvline(min_line, zorder=0, linestyle='--', color='C1')
+ax_orig.axvline(max_line, zorder=0, linestyle='--', color='C1')
 min_line = df.loc[df['Experiment'] == 'bitwise reproduction', 'Number of groups (nest)'].quantile(0.25)
 max_line = df.loc[df['Experiment'] == 'bitwise reproduction', 'Number of groups (nest)'].quantile(0.75)
 min_line
-ax_nest.axvline(min_line, zorder=0, linestyle='--', color='C2')
-ax_nest.axvline(max_line, zorder=0, linestyle='--', color='C2')
+ax_nest.axvline(min_line, zorder=0, linestyle='--', color='C1')
+ax_nest.axvline(max_line, zorder=0, linestyle='--', color='C1')
 
 ax_orig.annotate(r'\textbf{A}', xy=(-0.95, 1.05), xycoords='axes fraction',
                  horizontalalignment='left', verticalalignment='top', annotation_clip=False)

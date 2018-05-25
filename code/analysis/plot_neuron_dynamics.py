@@ -290,6 +290,9 @@ ax3.plot(times_spike_high_low, Us_spike_high_low, label="high low")
 ax3.set_xlabel("Time [ms]")
 
 gs0.update(left=0.08, right=0.99, top=0.95, bottom=0.1, hspace=0.2, wspace=0.25)
+for ax, letter in [(ax0, 'A'), (ax1, 'B'), (ax2, 'C'),(ax3,'D')]:
+    ax.annotate(r'\textbf{{{letter}}}'.format(letter=letter), xy=(-0.15, 0.99), xycoords='axes fraction', fontsize=10,
+                horizontalalignment='left', verticalalignment='top', annotation_clip=False)
 
 
 plt.savefig(args.output)

@@ -16,7 +16,6 @@ from matplotlib import mlab
 import pandas as pd
 
 
-# sns.set_palette(sns.light_palette("blue"))
 parser = argparse.ArgumentParser()
 parser.add_argument("-sl", '--spikelist', help="list of spike files", nargs="+")
 parser.add_argument("-gl", '--groupstatlist', help="list of group stat files", nargs="+")
@@ -38,6 +37,9 @@ exc_Pxx_tab = np.zeros((noverlap+1,N))
 reps=[]
 gamma_peak=[]
 N_grps=[]
+
+c_high = 'C5'
+c_low = 'C6'
 for rep,(spk_fl,grp_stat_fl,con_fl) in enumerate(zip(args.spikelist,args.groupstatlist,args.connectivitylist)):
 
     connectivity = pd.read_json(con_fl)
@@ -63,7 +65,7 @@ for rep,(spk_fl,grp_stat_fl,con_fl) in enumerate(zip(args.spikelist,args.groupst
         else:
             table_low = table_low.add(
                 pd.pivot_table(connecitivty_e_e, columns='bin_w', index='delay', values='weight', aggfunc=len))
-        excolor = 'C3'
+        excolor = c_high
         l += 1
         gamma_peak.append('low')
 
@@ -73,7 +75,7 @@ for rep,(spk_fl,grp_stat_fl,con_fl) in enumerate(zip(args.spikelist,args.groupst
         else:
             table_high = table_high.add(
                 pd.pivot_table(connecitivty_e_e, values='weight', columns='bin_w', index='delay', aggfunc=len))
-        excolor = 'C4'
+        excolor = c_low
         h += 1
         gamma_peak.append('high')
 
@@ -95,8 +97,6 @@ ax_psd = plt.subplot(gs0[0, 0])
 ax_weights = plt.subplot(gs0[0, 1])
 ax_groups = plt.subplot(gs0[0, 2])
 
-c_high = 'C4'
-c_low = 'C3'
 print(df.columns)
 ax_psd.plot(exc_freqs, exc_Pxx_tab[:, df.loc[df['spektral_peak']=='low','reps']], color=c_low, linewidth=1.0)
 ax_psd.plot(exc_freqs, exc_Pxx_tab[:, df.loc[df['spektral_peak']=='high','reps']], color=c_high, linewidth=1.0)
@@ -124,8 +124,8 @@ sns.boxplot(x="spektral_peak",
 #                  showfliers=False,whiskerprops={'linewidth':0}, ax=ax_groups)
 
 delays = range(1, 21)
-ax_weights.step(delays, table_low.values[:, 0] / l, color=c_low, linewidth=2., where='mid', alpha=0.5)
-ax_weights.step(delays, table_high.values[:, 0] / h, color=c_high, linewidth=2., where='mid', alpha=0.5)
+ax_weights.step(delays, table_low.values[:, 0] / l, color='C1', linewidth=2., where='mid', alpha=0.9)
+ax_weights.step(delays, table_high.values[:, 0] / h, color='C1', linewidth=2., where='mid', alpha=0.5)
 
 ax_weights.step(delays, table_low.values[:, -1] / l, color=c_low, linewidth=2., where='mid')
 ax_weights.step(delays, table_high.values[:, -1] / h, color=c_high, linewidth=2., where='mid')
