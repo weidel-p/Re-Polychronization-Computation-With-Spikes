@@ -47,14 +47,9 @@ def analyzeForRatio(conn_fn, group_fn, Wmax, EE):
         groups = json.load(f)
 
 
-    if EE == 1 and False:
-        print("EE")
-        exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0 and c['post'] <= 800])
-    else:
-        exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0])
+    exc_weights = np.array([c['weight'] for c in conns if c['weight'] >= 0])
 
     ratio_strong = len(np.where(exc_weights > Wmax * 0.95)[0]) / float(len(exc_weights))
-    print(ratio_strong)
 
     return([ratio_strong, len(groups)])
 
