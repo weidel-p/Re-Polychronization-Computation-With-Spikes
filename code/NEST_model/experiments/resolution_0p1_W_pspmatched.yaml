@@ -25,11 +25,10 @@ network-params:
         LTP: 0.85
         LTD: -1.02
 
+
     stimulus:
         type: generate
-        distribution: poisson
-        rate: 1. # (spikes/sec) per neuron
-        weight: 200. # (mV)
+        distribution: original
 
     initial-state:
         type: generate
