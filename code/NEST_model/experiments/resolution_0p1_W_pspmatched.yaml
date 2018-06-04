@@ -17,7 +17,7 @@ network-params:
     plasticity:
         synapse-model: stdp_izh_synapse
         tau_syn_update_interval: 10000.
-        constant_additive_value: .1
+        constant_additive_value: .085
         reset_weight_change_after_update: False
         Wmax: 85.
         W_inh: -35.
