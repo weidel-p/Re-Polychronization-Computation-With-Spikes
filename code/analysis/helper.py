@@ -113,6 +113,16 @@ def get_t_s(group):
     return np.array(times).astype(float), np.array(senders).astype(float)
 
 
+def get_cvs(times,senders):
+    cvs=[]
+    for sender in np.unique(senders):
+        if sender<800:
+            ISI=np.diff(times[senders==sender])
+            CV2=np.var(ISI)/np.mean(ISI)**2
+            cvs.append(CV2)
+    #print(cvs[:10])
+    return np.median(cvs),np.percentile(cvs,75)-np.percentile(cvs,25)
+
 def format_spiketrains(times, senders):
     '''
 

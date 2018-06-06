@@ -8,10 +8,8 @@ import seaborn as sbn
 import os
 import helper
 import argparse
+import plot_helper as phf
 
-sbn.set_context('paper', font_scale=3.5, rc={"lines.linewidth": 3.5})
-sbn.set_style('whitegrid', {"axes.linewidth": 3.5})
-plt.rcParams['font.weight'] = 'bold'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input_izh', nargs='+', type=str)
@@ -110,14 +108,18 @@ for i, c_rand_fn in enumerate(args.conn_rand_EE):
 
 
 
-plt.figure(figsize=[16, 10])
+
+
+
+phf.latexify(columns=1)
+
 plt.plot(ratios_rand_EE, num_groups_rand_EE)
 plt.plot(ratios_rand, num_groups_rand)
-plt.plot(ratios_izh, num_groups_izh, 'k*', markersize=30)
-plt.xlabel('ratio strong synapses')
-plt.ylabel('#groups')
-#plt.ylim([0, 10000])
-
+plt.plot(ratios_izh, num_groups_izh, 'k.', markersize=5.)
+plt.xlabel(r'Ratio of strong synapses [\%]')
+plt.ylabel('Number of groups')
+plt.xlim([0, 0.6])
+plt.subplots_adjust(right=0.96,top=0.98,left=0.17,bottom=0.21)
 plt.savefig(args.output)
 
 

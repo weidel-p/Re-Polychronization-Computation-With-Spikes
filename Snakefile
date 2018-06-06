@@ -48,7 +48,7 @@ NUM_REP=range(10)
 high_NUM_REP=range(100)
 
 #RANDOM_RATIOS = np.round(np.linspace(0.1, 0.7, 7), 4)
-RANDOM_RATIOS = [0.1, 0.2, 0.3, 0.35, 0.4, 0.45, 0.5]
+RANDOM_RATIOS = [0.1, 0.2, 0.3, 0.35]#, 0.4, 0.45, 0.5]
 
 
 group_stat_list_orig=  np.unique(expand("{folder}/{experiment}/{rep}/stats_orig.json",
@@ -79,7 +79,7 @@ rule all:
         group_statistics = "figures/group_stats.pdf",
 
         rand_bitwise = "figures/bitwise_reproduction/random_groups.pdf",
-        rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
+        #rand_resolution = "figures/resolution_0p1_W_pspmatched/random_groups_nest.pdf",
 
         bimodal_bitwise = "figures/bitwise_reproduction_bimodalgamma.pdf",
         bimodal_qualitative = "figures/qualitative_model_bimodalgamma.pdf",

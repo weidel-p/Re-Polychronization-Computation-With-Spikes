@@ -40,6 +40,8 @@ ngr_o=[]
 ngr_p=[]
 rate_exc=[]
 rate_inh=[]
+cvs_median=[]
+cvs_iqr=[]
 spek_peak=[]
 experiments=[i.split('/')[2] for i in args.groupstatlist_original]+[i.split('/')[2] for i in args.groupstatlist_python]
 
@@ -77,6 +79,7 @@ for experiment in np.unique(experiments):
         senders, times = data[:, 0], data[:, 1]
 
         mean_ex, mean_inh, max_freq = phf.get_rates(times, senders)
+        median_cv, iqr_cv = hf.get_cvs(times, senders)
 
         if max_freq<50:
             spek_peak.append('low')
@@ -89,6 +92,8 @@ for experiment in np.unique(experiments):
         reps.append(repetition)
         rate_exc.append(mean_ex)
         rate_inh.append(mean_inh)
+        cvs_median.append(median_cv)
+        #cvs_iqr.append(iqr_cv)
 
 df=pd.DataFrame({'Number of groups':ngr_o,
                 'Number of groups (nest)':ngr_p,
@@ -96,15 +101,24 @@ df=pd.DataFrame({'Number of groups':ngr_o,
                   'reps':reps,
                  'exc_rate':rate_exc,
                  'inh_rate': rate_inh,
-                 'spektral peak':spek_peak
+                 'spektral peak':spek_peak,
+                 'cvs':cvs_median,
                  })
 def iqr(df):
     return df.quantile(.75)-df.quantile(.25)
 
-df_latex=df.replace(value=np.nan,to_replace='Failed').groupby(['Experiment'])['Number of groups', 'Number of groups (nest)','exc_rate','inh_rate','spektral peak'].agg([np.median,iqr,'min','max','count']) #.agg([np.median,iqr])
+df_latex=df.replace(value=np.nan,to_replace='Failed').groupby(['Experiment'])['Number of groups',
+                                                                              'Number of groups (nest)',
+                                                                              'exc_rate',
+                                                                              'spektral peak',
+                                                                              'cvs'].agg([np.median,iqr,'min','max','count']) #.agg([np.median,iqr])
 print(df_latex.to_latex())
 print(df_latex)
-df_latex_spek=df.replace(value=np.nan,to_replace='Failed').groupby(['Experiment','spektral peak'])['Number of groups', 'Number of groups (nest)','exc_rate','inh_rate','spektral peak'].agg([np.median,iqr,'min','max','count']) #.agg([np.median,iqr])
+df_latex_spek=df.replace(value=np.nan,to_replace='Failed').groupby(['Experiment','spektral peak'])['Number of groups',
+                                                                                                   'Number of groups (nest)',
+                                                                                                   'exc_rate',
+                                                                                                   'spektral peak',
+                                                                                                   'cvs'].agg([np.median,iqr,'min','max','count']) #.agg([np.median,iqr])
 print(df_latex_spek.to_latex())
 print(df_latex_spek)
 

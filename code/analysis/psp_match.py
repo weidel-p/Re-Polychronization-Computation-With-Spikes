@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-def build_model(weight=10.,resolution=1.0):
+def build_model(weight=10.,resolution=1.0,N_steps=1):
     nest.ResetKernel()
     print(resolution)
     nest.SetKernelStatus({'resolution': resolution,
@@ -17,14 +17,16 @@ def build_model(weight=10.,resolution=1.0):
                                               'c': -65.0,
                                               'a': 0.1,
                                               'd': 2.0,
-                                              'tau_minus': 20.})
+                                              'tau_minus': 20.,
+                                              'integration_steps':N_steps})
     nest.CopyModel(neuron_model, 'ex_Izhi', {'consistent_integration': False,
                                              'U_m': -0.2 * 65.0,
                                              'b': 0.2,
                                              'c': -65.0,
                                              'a': 0.02,
                                              'd': 8.0,
-                                             'tau_minus': 20.})
+                                             'tau_minus': 20.,
+                                             'integration_steps':N_steps})
 
     nest.CopyModel("static_synapse", "EX", {'weight': weight, 'delay': 1.0})
 
@@ -107,27 +109,39 @@ def synchrony_influence(weight=10.,resolution=0.1,dt=20):
 #
 #
 ###############################################
-#build_model(weight=10.,resolution=0.1)
-res0p1=build_model(weight=85.,resolution=0.1)
-res1p0=build_model(weight=10.,resolution=1.0)
-res0p1_spike=build_model(weight=300.,resolution=0.1)
-res1p0_spike=build_model(weight=20.,resolution=1.0)
-res0p1_in=build_model(weight=-35.,resolution=0.1)
-res1p0_in=build_model(weight=-5.,resolution=1.0)
 
+
+
+res0p1=build_model(weight=85.,resolution=0.1,N_steps=1)
+res1p0=build_model(weight=10.,resolution=1.0,N_steps=1)
+res1p0_high_res=build_model(weight=10.,resolution=1.0,N_steps=10)
+
+res0p1_spike=build_model(weight=300.,resolution=0.1,N_steps=1)
+res1p0_spike=build_model(weight=20.,resolution=1.0,N_steps=1)
+res1p0_high_res_spike=build_model(weight=20.,resolution=1.0,N_steps=10)
+
+res0p1_in=build_model(weight=-35.,resolution=0.1,N_steps=1)
+res1p0_in=build_model(weight=-5.,resolution=1.0,N_steps=1)
+res1p0_high_res_in=build_model(weight=-5.,resolution=1.0,N_steps=10)
 
 
 
 import matplotlib.pyplot as plt
+
+res0p1=build_model(weight=85.,resolution=0.1,N_steps=1)
+res1p0=build_model(weight=10.,resolution=1.0,N_steps=1)
+res1p0_high_res=build_model(weight=10.,resolution=1.0,N_steps=10)
 plt.plot(res0p1['times'],res0p1['V_m']+70.)
-#plt.plot(res0p1['times'],np.cumsum(res0p1['V_m']+70.))
+plt.plot(res0p1['times'],np.cumsum(res0p1['V_m']+70.),label='0p1 {}'.format(np.cumsum(res0p1['V_m']+70.)[-1]))
 
 plt.plot(res1p0['times'],res1p0['V_m']+70.)
-#plt.plot(res1p0['times'],np.cumsum(res1p0['V_m']+70.))
+plt.plot(res1p0['times'],np.cumsum(res1p0['V_m']+70.),label='1p0 {}'.format(np.cumsum(res1p0['V_m']+70.)[-1]))
 
+plt.plot(res1p0_high_res['times'],res1p0_high_res['V_m']+70.)
+plt.plot(res1p0_high_res['times'],np.cumsum(res1p0_high_res['V_m']+70.),label='1p0_10steps {}'.format(np.cumsum(res1p0_high_res['V_m']+70.)[-1]))
 
 plt.xlim([240,350])
-
+plt.legend()
 plt.savefig('wo_spike.png')
 plt.close()
 
@@ -136,6 +150,9 @@ plt.plot(res0p1_spike['times'],res0p1_spike['V_m'])
 
 plt.plot(res1p0_spike['times'],res1p0_spike['V_m'])
 #plt.plot(res1p0_spike['times'],np.cumsum(res1p0_spike['V_m']+70.))
+plt.plot(res1p0_high_res_spike['times'],res1p0_high_res_spike['V_m']+70.)
+
+
 plt.xlim([240,350])
 plt.savefig('w_spike.png')
 plt.close()
@@ -145,6 +162,9 @@ plt.plot(res0p1_in['times'],np.cumsum(res0p1_in['V_m']+70.))
 
 plt.plot(res1p0_in['times'],res1p0_in['V_m'])
 plt.plot(res1p0_in['times'],np.cumsum(res1p0_in['V_m']+70.))
+
+plt.plot(res1p0_high_res_in['times'],res1p0_high_res_in['V_m'])
+plt.plot(res1p0_high_res_in['times'],np.cumsum(res1p0_high_res_in['V_m']+70.))
 plt.xlim([240,350])
 plt.savefig('inhib.png')
 plt.close()
