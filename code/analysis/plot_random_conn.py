@@ -113,10 +113,11 @@ for i, c_rand_fn in enumerate(args.conn_rand_EE):
 
 phf.latexify(columns=1)
 
+plt.figure(figsize=[6, 4])
 plt.plot(ratios_rand_EE, num_groups_rand_EE)
 plt.plot(ratios_rand, num_groups_rand)
 plt.plot(ratios_izh, num_groups_izh, 'k.', markersize=5.)
-plt.xlabel(r'Ratio of strong synapses [%]')
+plt.xlabel(r'Proportion of strong synapses')
 plt.ylabel('Number of groups')
 plt.xlim([0, 0.6])
 plt.subplots_adjust(right=0.96,top=0.98,left=0.17,bottom=0.21)
