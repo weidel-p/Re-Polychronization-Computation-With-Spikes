@@ -113,7 +113,7 @@ for i, c_rand_fn in enumerate(args.conn_rand_EE):
 
 phf.latexify(columns=1)
 
-plt.figure(figsize=[6, 4])
+plt.figure(figsize=[4, 3])
 plt.plot(ratios_rand_EE, num_groups_rand_EE)
 plt.plot(ratios_rand, num_groups_rand)
 plt.plot(ratios_izh, num_groups_izh, 'k.', markersize=5.)
