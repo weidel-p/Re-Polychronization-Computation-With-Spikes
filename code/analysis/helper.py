@@ -23,43 +23,25 @@ def conn_dist(data, delay_or_weight):
 
 
 def parse_config(config_file):
+    """
+    Parses config file for usage in model.py and find_groups_nest
+    """
     with open(config_file, 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
     base = os.path.basename(config_file)
     base_and_extless = os.path.splitext(base)[0]
-    print base_and_extless
     cfg['simulation-params']['data-prefix'] = base_and_extless
-    print cfg
-
     return cfg
 
 
-def match_pattern(times, senders, t, group, threshold=0.4):
-    count = 1
-    adjusted_time = times - t
-    for i, neuron in enumerate(group['senders']):
-        t_window = adjusted_time - group['times'][i]
-        p0 = abs(t_window) <= 2.
-        target = senders[p0]
-        if neuron in target:
-            count += 1
-    if group['N'] * threshold <= count * 1.0:
-        return True, count * 1.0 / group['N']
-    else:
-        return False, count * 1.0 / group['N']
-
-
-def weight_delay_histograms(weights, delays, bins=(11, 20), range=None):
-    if range is None:
-        range = [[-0.5, 10.5], [0.5, 20.5]]
-    H, xedges, yedges = np.histogram2d(weights, delays, bins=bins,
-                                       range=range)
-    X, Y = np.meshgrid(xedges, yedges)
-
-    return X, Y, H.T
-
 
 def bin_pop_rate(times, senders, binwidth=1.):
+    """
+        times: spike times
+        senders: associated sender
+        binwidth: how many ms to bin in
+    """
+
     t_min = np.min(times)
     t_max = np.max(times)
     N_senders = len(np.unique(senders))
@@ -68,6 +50,11 @@ def bin_pop_rate(times, senders, binwidth=1.):
 
 
 def split_in_ex(times, senders):
+    """
+    Args:  Splits into two arrays at neuron ID 800
+        times: spike times
+        senders: associated sender
+    """
     exc_sender = senders[senders <= 800]
     exc_times = times[senders <= 800]
     inh_sender = senders[senders > 800]
@@ -76,6 +63,12 @@ def split_in_ex(times, senders):
 
 
 def calc_specgram(time, rate, NFFT=1024, noverlap=900):
+    """
+    time bin borders to calculate the frequencies
+    rate envelope
+    NFFT: FFT window in datapoints
+    noverlap: Overlap window in datapoints
+    """
     Pxx, freqs, bins, im = plt.specgram(rate, NFFT=NFFT, Fs=1000. / (time[2] - time[1]), noverlap=noverlap)
     return freqs, Pxx, bins
 
@@ -87,6 +80,9 @@ def load_json(fname):
 
 
 def convert_line(line):
+    """
+    takes a line from a groupfile and converts it to a proper data format
+    """
     split_line = line.split(',')
     N, L = split_line.pop(0).split()  # Number of neurons in group and max Layer in the first line
     fired = []  # save all time/sender pairs of the group, these items are in pairs of two
@@ -106,8 +102,8 @@ def convert_line(line):
     )
     return group
 
-
 def get_t_s(group):
+    #get the firing patern form a group
     times = []
     senders = []
     for i in group['fired']:
@@ -116,6 +112,16 @@ def get_t_s(group):
 
     return np.array(times).astype(float), np.array(senders).astype(float)
 
+
+def get_cvs(times,senders):
+    cvs=[]
+    for sender in np.unique(senders):
+        if sender<800:
+            ISI=np.diff(times[senders==sender])
+            CV2=np.var(ISI)/np.mean(ISI)**2
+            cvs.append(CV2)
+    #print(cvs[:10])
+    return np.median(cvs),np.percentile(cvs,75)-np.percentile(cvs,25)
 
 def format_spiketrains(times, senders):
     '''
@@ -142,6 +148,9 @@ def format_spiketrains(times, senders):
 
 
 def read_spikefile(filename):
+    """
+    read in spike files dependent on the file ending (Izhikevic orders the sender/times differently from nest)
+    """
     if '.dat' in filename:
         if 'bitwise' in filename:
             spikes = np.loadtxt(filename)
@@ -153,6 +162,7 @@ def read_spikefile(filename):
             times = spikes[:, 0]
             senders = spikes[:, 1]
     else:
+
         spikes = np.loadtxt(filename)
         times = spikes[:, 1]
         senders = spikes[:, 0]

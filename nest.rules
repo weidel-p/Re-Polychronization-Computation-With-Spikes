@@ -10,7 +10,7 @@ rule install_nest:
         mkdir -p bld
         mkdir -p instl
         cd bld
-        cmake -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python=ON {params.nest_dir} -Dwith-mpi=ON
+        cmake3 -DCMAKE_INSTALL_PREFIX:PATH={params.nest_dir}/instl -Dwith-python3=ON {params.nest_dir} -Dwith-mpi=ON
         make -j8
         make install
         """
@@ -41,7 +41,7 @@ rule run_nest_model:
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -c {{input.conf}} -r {{wildcards.rep}} -n {{threads}} &>{{log}}
+        python3 {folder}/model.py -c {{input.conf}} -r {{wildcards.rep}} -n {{threads}} &>{{log}} 
         """.format(folder=NEST_CODE_DIR)
 
 
@@ -65,5 +65,88 @@ rule run_nest_reproduction:
     shell:
         """
         source {{input.nest}}
-        python {folder}/model.py -c {{input.conf}}  -r {{wildcards.rep}} -n {{threads}} &>{{log}}
+        python3 {folder}/model.py -c {{input.conf}}  -r {{wildcards.rep}} -n {{threads}} &>{{log}}
         """.format(folder=NEST_CODE_DIR)
+
+
+rule find_groups_nest_random:
+    threads: 48
+    input:
+        connectivity="{folder}/{experiment}/random/{r}/connectivity_random.json",
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+
+    output:
+        groups="{folder}/{experiment}/random/{r}/groups_nest_random.json",
+        stats="{folder}/{experiment}/random/{r}/stats.json"
+    priority: 50
+    shell:
+        """
+        source {rules.install_nest.output}
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48 -c {input.conf} -o {output.groups} -s {output.stats} || true
+        """
+
+rule find_groups_nest_random_EE:
+    threads: 48
+    input:
+        connectivity="{folder}/{experiment}/random/{r}/connectivity_random_EE.json",
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+
+    output:
+        groups="{folder}/{experiment}/random/{r}/groups_nest_random_EE.json",
+        stats="{folder}/{experiment}/random/{r}/stats.json"
+    priority: 50
+    shell:
+        """
+        source {rules.install_nest.output}
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48 -c {input.conf} -o {output.groups} -s {output.stats} || true
+        """
+
+rule find_groups_nest:
+    threads: 48
+    input:
+        connectivity="{folder}/{experiment}/{rep}/connectivity.json",
+        conf='{nest_folder}/experiments/{{experiment}}.yaml'.format(nest_folder=NEST_CODE_DIR),
+
+    output:
+        groups="{folder}/{experiment}/{rep}/groups_nest.json",
+        stats="{folder}/{experiment}/{rep}/stats.json"
+    log: 'logs/find_groups_nest_{experiment}_{rep}.log'
+    priority: 50
+
+    shell:
+        """
+        source {rules.install_nest.output}
+        python3 code/analysis/find_polychronous_groups_nest.py -i {input.connectivity} -n 48  -c {input.conf} -o {output.groups} -s {output.stats} || true
+        """
+
+rule compare_STDP:
+    output:
+        weights="{folder}/{{experiment}}/stdp_window.json".format(folder=NEST_DATA_DIR),
+        sim="{folder}/{{experiment}}/stdp_simulation.json".format(folder=NEST_DATA_DIR),
+    input:
+        model='{folder}/stdp_window.py'.format(folder=ANA_DIR),
+        conf='{folder}/experiments/{{experiment}}.yaml'.format(folder=NEST_CODE_DIR),
+        nest=rules.install_nest.output
+    threads: NUM_THREADS
+    log: 'logs/nest_{experiment}.log'
+    shell:
+        """
+        source {input.nest}
+        python {input.model} -c {input.conf} -o {output.weights} -p {output.sim} &>{log}
+        """
+
+
+rule plot_neuron_dyn:
+    input:
+        program='{folder}/plot_neuron_dynamics.py'.format(folder=ANA_DIR),
+        nest=rules.install_nest.output
+    output:
+        plot="{folder}/neuron_dynamics.pdf".format(folder=FIG_DIR),
+    shell:
+        """
+        source {input.nest}
+        python {input.program} -o {output.plot}
+        """
+
+
+

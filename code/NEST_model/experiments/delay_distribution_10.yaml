@@ -7,29 +7,27 @@ simulation-params:
     rec_mem: 0. # (ms)
     rec_spikes: 10000. # (ms)
     neuron-integration-steps: 1
-
 # Network Parameter
 network-params:
     connectivity:
         type: generate
-        delay-distribution: uniform-non-random
-        delay-range: [1, 21] # excluding right boundary
+        delay-distribution: uniform-random
+        delay-range: [1, 11] # excluding right boundary
 
     plasticity:
-        synapse-model: stdp_synapse
-        stdp-type: multiplicative
-        lambda: .021 # in units of Wmax
-        alpha: 1.0
+        synapse-model: stdp_izh_synapse
+        tau_syn_update_interval: 10000.
+        constant_additive_value: 0.01
+        reset_weight_change_after_update: False
         Wmax: 10.
         W_inh: -5.
         W_init: 6.
+        LTP: 0.1
+        LTD: -0.12
 
     stimulus:
         type: generate
-        distribution: poisson
-        rate: 30. # (spikes/sec) per neuron
-        weight: 10. # (mV)
-
+        distribution: original
     initial-state:
         type: generate
         distribution: uniform
